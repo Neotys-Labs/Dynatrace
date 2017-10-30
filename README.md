@@ -42,7 +42,7 @@ Once installed, how to use in a given NeoLoad project:
 
 ## Parameters for Dynatrace Events
 
-| Name             | Value |
+| Name             | Description |
 | -----            | ----- |
 | Dynatrace_ID     |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
 | Dynatrace_API_KEY| API key of your dynatrace account |
@@ -52,7 +52,7 @@ Once installed, how to use in a given NeoLoad project:
 
 ## Parameters for Dynatrace Monitoring
 
-| Name             | Value |
+| Name             | Description |
 | -----            | ----- |
 | Dynatrace_ID     |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
 | Dynatrace_API_KEY| API key of your dynatrace account |
