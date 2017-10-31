@@ -3,8 +3,6 @@ package com.neotys.dynatrace.DynatraceMonitoring;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

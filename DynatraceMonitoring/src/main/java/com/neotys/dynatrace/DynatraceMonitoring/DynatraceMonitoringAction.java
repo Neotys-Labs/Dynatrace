@@ -75,19 +75,19 @@ public final class DynatraceMonitoringAction implements Action{
 	public String getDescription() {
 		final StringBuilder description = new StringBuilder();
 		// TODO Add description
-		description.append("DynatraceMonitoring Action will retrieve all the counters mesaured by Dynatrace \n")
+		description.append("DynatraceMonitoring Action will retrieve all the counters measured by Dynatrace \n")
 		.append("The parameters are : \n")
 		.append("Dynatrace_ID : Dynatrace id \n")
 		.append("Dynatrace_API_KEY  : Dynatrace API KEY\n")
 		.append("Tags  : Dyntrace Tags, Get All the metrics related to specific tags , format : tag1,tag2\n")
-		.append("NeoLoadAPIHost : IP or Host of the NeoLaod controller\n")
+		.append("NeoLoadAPIHost : IP or Host of the NeoLoad controller\n")
 		.append("NeoLoadAPIport : Port of the NeoLoad DataExchange API\n")
 		.append("NeoLoadKeyAPI : Neoload DataExchange API key\n")
 		.append("HTTP_PROXY_HOST : Optional - Host of the HTTP proxy\n")
 		.append("HTTP_PROXY_PORT : Optional - Port of the HTTP proxy\n")
 		.append("HTTP_PROXY_LOGIN : Optional - Account of the HTTP proxy\n")
 		.append("HTTP_PROXY_PASSWORD :Optional - Password of the HTTP proxy\n")
-		.append("Dynatrace_Managed_Hostname : Optional - Hostname of your managed Dynatrace environement")
+		.append("Dynatrace_Managed_Hostname : Optional - Hostname of your managed Dynatrace environment")
 		.append("NL_Managed_Instance : Optional - Hostname of your managed NeoLoad Instance");
 
 		return description.toString();
