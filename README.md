@@ -2,7 +2,7 @@
 
 ## Overview
 
-This bundle of advanced actions allows you to take advantage of the integration between [NeoLoad](https://www.neotys.com/neoload/overview) and Dynatrace OneAgent to improve the analysis of a load testing test.
+This bundle of advanced actions allows you to integrate [NeoLoad](https://www.neotys.com/neoload/overview) and Dynatrace OneAgent to improve the analysis of a load testing test.
 
 This bundle has the following actions:  
 
