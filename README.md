@@ -28,7 +28,8 @@ This bundle has the following actions:
 
 ## Installation
 
-Read the NeoLoad documentation to see [How to install a custom Advanced Action](https://www.neotys.com/documents/doc/neoload/latest/en/html/#25928.htm)
+1. Download the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest)
+1. Read the NeoLoad documentation to see [How to install a custom Advanced Action](https://www.neotys.com/documents/doc/neoload/latest/en/html/#25928.htm)
 
 ## Set-up
 
