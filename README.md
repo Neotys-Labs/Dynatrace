@@ -53,6 +53,8 @@ Once installed, how to use in a given NeoLoad project:
 
 ## Parameters for Dynatrace Monitoring
 
+Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / REST API.
+
 | Name             | Description |
 | -----            | ----- |
 | Dynatrace_ID     |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
