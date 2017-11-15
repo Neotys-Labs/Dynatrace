@@ -10,9 +10,9 @@ This bundle has the following actions:
   Links a load testing event to all services used by an Application monitored by Dynatrace  
   
 * **DynatraceMonitoring**   
-    * Retrieve Infrastructure and Services metrics from DynaTrace and insert them in NeoLoad External Datas so that
+    * **Dynatrace -> NeoLoad**: Retrieve Infrastructure and Services metrics from DynaTrace and insert them in NeoLoad External Datas so that
       you can correlate NeoLoad and DynaTrace metrics within NeoLoad.
-    * Send the global statistics of the test to Dynatrace OneAgent so that it can be used as custom metrics 
+    * **NeoLoad -> Dynatrace**: Send the global statistics of the test to Dynatrace OneAgent so that it can be used as custom metrics 
       in Dynatrace dashboards.
       
      
