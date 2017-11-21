@@ -36,7 +36,7 @@
 
 		<artifactId>neotys-rest-api-dataexchange-client-olingo</artifactId>
 
-		<version>1.0.3</version>
+		<version>1.0.4</version>
 
 		
 	</dependency>
@@ -199,6 +199,8 @@
         <repository>
             <id>neotys-apis-releases</id>
             <url>http://maven.neotys.com/content/groups/public</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
     </repositories>
 </project>

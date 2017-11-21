@@ -169,7 +169,7 @@ public class NeoLoadStatAggregator extends TimerTask{
 			{
 				for(String[] metric : data)
 					CreateNLTimeSeries(metric[1],metric[0],NLTYPE,metric[2],NLStat);
-			
+
 				TimeSeriesConfigured=true;
 			}
 		}		

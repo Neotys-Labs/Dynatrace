@@ -10,26 +10,57 @@ import io.swagger.client.model.TestStatistics;
 public class NLGlobalStat {
 
 	private float LastRequestCountPerSecond=0;
+	private boolean LastRequestCountPerSecond_data=false;
+
 	private float LastTransactionDurationAverage=0;
+	private boolean LastTransactionDurationAverage_data=false;
 	private int   LastVirtualUserCount=0;
+	private boolean LastVirtualUserCount_data=false;
 	private long TotalGlobalCountFailure=0;
+	private boolean TotalGlobalCountFailure_data=false;
 	private float TotalGlobalDownloadedBytes=0;
+	private boolean TotalGlobalDownloadedBytes_data=false;
 	private float TotalGlobalDownloadedBytesPerSecond=0;
+	private boolean TotalGlobalDownloadedBytesPerSecond_data=false;
 	private long TotalIterationCountFailure=0;
+	private boolean TotalIterationCountFailure_data=false;
+
 	private long TotalIterationCountSuccess=0;
+	private boolean TotalIterationCountSuccess_data=false;
 	private long TotalRequestCountFailure=0;
+	private boolean TotalRequestCountFailure_data=false;
 	private float TotalRequestCountPerSecond=0;
+	private boolean TotalRequestCountPerSecond_data=false;
 	private long TotalRequestCountSuccess=0;
+	private boolean TotalRequestCountSuccess_data=false;
+
 	private long TotalTransactionCountFailure=0;
+	private boolean TotalTransactionCountFailure_data;
+
 	private long TotalTransactionCountSuccess=0;
+	private boolean TotalTransactionCountSuccess_data=false;
+
 	private float TotalTransactionCountPerSecond=0;
+	private boolean TotalTransactionCountPerSecond_data=false;
+
 	private float LastRequestDurationAverage=0;
+	private boolean LastRequestDurationAverage_data=false;
+
 	private float TotalRequestCountSuccessPerSecond=0;
+	private boolean TotalRequestCountSuccessPerSecond_data=false;
+
 	private float TotalRequestCountFailurePerSecond=0;	
+	private boolean TotalRequestCountFailurePerSecond_data=false;
 	private float TotalTransactionFailurePerSecond=0;
+	private boolean TotalTransactionFailurePerSecond_data=false;
+
 	private float TotalTransactionSuccessPerSecond=0;
+	private boolean TotalTransactionSuccessPerSecond_data=false;
+
 	private float TotalDownloadedBytesPerSecond=0;
-	private float FailureRate=0;	
+	private boolean TotalDownloadedBytesPerSecond_data=false;
+	private float FailureRate=0;
+	private boolean FailureRate_data=false;
 
 	private static final String LastRequestDurationAverage_MetricName="Request duration";
 	private static final String LastRequestDurationAverage_Component="Request.duration";
@@ -135,7 +166,7 @@ public class NLGlobalStat {
 	
 	
 	private static final String FailureRate_MetricName="Failure Rate";
-	private static final String FailureRate_Component="Failure Rate";
+	private static final String FailureRate_Component="Failure.Rate";
 	private static final String FailureRate_Unit="percentage";
 	private  boolean  FailureRate_status=false;
 	
@@ -144,8 +175,13 @@ public class NLGlobalStat {
 		return FailureRate;
 	}
 
-	public void setFailureRate(float failureRate) {
-		FailureRate = failureRate*100;
+	public void setFailureRate(Float failureRate) {
+		if(failureRate!=null) {
+			FailureRate = failureRate * 100;
+			FailureRate_data=true;
+		}
+		else
+			FailureRate_data=false;
 	}
 
 	public boolean isFailureRate_status() {
@@ -160,9 +196,14 @@ public class NLGlobalStat {
 		return TotalDownloadedBytesPerSecond;
 	}
 
-	public void setTotalDownloadedBytesPerSecond(float totalDownloadedBytesPerSecond) {
-		TotalDownloadedBytesPerSecond = totalDownloadedBytesPerSecond;
-	}
+	public void setTotalDownloadedBytesPerSecond(Float totalDownloadedBytesPerSecond) {
+		if(totalDownloadedBytesPerSecond!=null) {
+			TotalDownloadedBytesPerSecond = totalDownloadedBytesPerSecond;
+			TotalDownloadedBytesPerSecond_data=true;
+		}
+		else
+			TotalDownloadedBytesPerSecond_data=false;
+		}
 
 	public boolean isTotalDownloadedBytesPerSecond_status() {
 		return TotalDownloadedBytesPerSecond_status;
@@ -177,16 +218,26 @@ public class NLGlobalStat {
 		return TotalTransactionFailurePerSecond;
 	}
 
-	public void setTotalTransactionFailurePerSecond(float totalTransactionFailurePerSecond) {
-		TotalTransactionFailurePerSecond = totalTransactionFailurePerSecond;
+	public void setTotalTransactionFailurePerSecond(Float totalTransactionFailurePerSecond) {
+		if(totalTransactionFailurePerSecond!=null) {
+			TotalTransactionFailurePerSecond = totalTransactionFailurePerSecond;
+			TotalTransactionFailurePerSecond_data=true;
+		}
+		else
+			TotalTransactionFailurePerSecond_data=false;
 	}
 
 	public float getTotalTransactionSuccessPerSecond() {
 		return TotalTransactionSuccessPerSecond;
 	}
 
-	public void setTotalTransactionSuccessPerSecond(float totalTransactionSuccessPerSecond) {
-		TotalTransactionSuccessPerSecond = totalTransactionSuccessPerSecond;
+	public void setTotalTransactionSuccessPerSecond(Float totalTransactionSuccessPerSecond) {
+		if(totalTransactionSuccessPerSecond!=null) {
+			TotalTransactionSuccessPerSecond = totalTransactionSuccessPerSecond;
+			TotalTransactionSuccessPerSecond_data=true;
+		}
+		else
+			TotalTransactionSuccessPerSecond_data=false;
 	}
 
 	public boolean isTotalTransactionCountFailurePerSecond_status() {
@@ -253,7 +304,12 @@ public class NLGlobalStat {
 	}
 
 	public void setTotalRequestCountSuccessPerSecond(Float totalRequestCountSuccessPerSecond) {
-		TotalRequestCountSuccessPerSecond = totalRequestCountSuccessPerSecond;
+		if(totalRequestCountSuccessPerSecond!=null) {
+			TotalRequestCountSuccessPerSecond = totalRequestCountSuccessPerSecond;
+			TotalRequestCountSuccessPerSecond_data=true;
+		}
+		else
+			TotalRequestCountSuccessPerSecond_data=false;
 	}
 
 	public float getTotalRequestCountFailurePerSecond() {
@@ -261,7 +317,12 @@ public class NLGlobalStat {
 	}
 
 	public void setTotalRequestCountFailurePerSecond(Float float1) {
-		TotalRequestCountFailurePerSecond = float1;
+		if(float1!=null) {
+			TotalRequestCountFailurePerSecond = float1;
+			TotalRequestCountFailurePerSecond_data=true;
+		}
+		else
+			TotalRequestCountFailurePerSecond_data=false;
 	}
 
 
@@ -415,8 +476,13 @@ public class NLGlobalStat {
 		return LastRequestDurationAverage;
 	}
 
-	public void setLastRequestDurationAverage(float lastRequestDurationAverage) {
-		LastRequestDurationAverage = lastRequestDurationAverage/1000;
+	public void setLastRequestDurationAverage(Float lastRequestDurationAverage) {
+		if(lastRequestDurationAverage!=null) {
+			LastRequestDurationAverage = lastRequestDurationAverage / 1000;
+			LastRequestDurationAverage_data=true;
+		}
+		else
+			LastRequestDurationAverage_data=false;
 	}
 	
 	private long lasduration=0;
@@ -658,6 +724,7 @@ public class NLGlobalStat {
 	
 	public void UpdateStat(TestStatistics response)
 	{
+
 		setLastRequestCountPerSecond(response.getLastRequestCountPerSecond());
 		setLastTransactionDurationAverage(response.getLastTransactionDurationAverage());
 		setLastVirtualUserCount(response.getLastVirtualUserCount());
@@ -817,8 +884,13 @@ public class NLGlobalStat {
 		return result;
 		
 	}
-	public void setLastRequestCountPerSecond(float lastRequestCountPerSecond) {
-		LastRequestCountPerSecond = lastRequestCountPerSecond;
+	public void setLastRequestCountPerSecond(Float lastRequestCountPerSecond) {
+		if(lastRequestCountPerSecond!=null) {
+			LastRequestCountPerSecond = lastRequestCountPerSecond;
+			LastRequestCountPerSecond_data=true;
+		}
+		else
+			LastRequestCountPerSecond_data=false;
 	}
 
 
@@ -841,8 +913,14 @@ public class NLGlobalStat {
 	}
 
 
-	public void setLastTransactionDurationAverage(float lastTransactionDurationAverage) {
-		LastTransactionDurationAverage = lastTransactionDurationAverage/1000;
+	public void setLastTransactionDurationAverage(Float lastTransactionDurationAverage) {
+		if(lastTransactionDurationAverage!=null) {
+			LastTransactionDurationAverage = lastTransactionDurationAverage / 1000;
+			LastTransactionDurationAverage_data=true;
+		}
+		else
+			LastTransactionDurationAverage_data=false;
+
 	}
 
 
@@ -863,8 +941,13 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setLastVirtualUserCount(int lastVirtualUserCount) {
-		LastVirtualUserCount = lastVirtualUserCount;
+	public void setLastVirtualUserCount(Integer lastVirtualUserCount) {
+		if(lastVirtualUserCount!=null) {
+			LastVirtualUserCount = lastVirtualUserCount;
+			LastVirtualUserCount_data=true;
+		}
+		else
+			LastVirtualUserCount_data=false;
 	}
 
 
@@ -884,37 +967,71 @@ public class NLGlobalStat {
 		
 	}
 
-	public void setTotalGlobalCountFailure(long totalGlobalCountFailure) {
-		if(TotalGlobalCountFailure==0)
-			TotalGlobalCountFailure = totalGlobalCountFailure;
+	public void setTotalGlobalCountFailure(Long totalGlobalCountFailure) {
+		if(totalGlobalCountFailure!=null) {
+			if (TotalGlobalCountFailure == 0)
+				TotalGlobalCountFailure = totalGlobalCountFailure;
+			else
+				TotalGlobalCountFailure = totalGlobalCountFailure - TotalGlobalCountFailure;
+
+			TotalGlobalCountFailure_data=true;
+		}
 		else
-			TotalGlobalCountFailure = totalGlobalCountFailure -TotalGlobalCountFailure;
+			TotalGlobalCountFailure_data=false;
 	}
 
 	public List<String[]> GetNLData()
 	{
 		List<String[]> result = new ArrayList<String[]>();
-		result.add(GetRequestCountData());
-		result.add(GetTotalGlobalCountFailureData());
-		result.add(GetTotalGlobalDownloadedBytesData());		
-		result.add(GetTotalGlobalDownloadedBytesPerSecondData());
-		result.add(GetTotalIterationCountFailureData());
-		result.add(GetTotalIterationCountSuccessData());
-		result.add(GetTotalRequestCountFailureData());
-		result.add(GetTotalRequestCountPerSecondData());
-		result.add(GetTotalRequestCountSuccessData());
-		result.add(GetTransactionCountFailureData());
-		result.add(GetTransactionCountPefSecondData());
-		result.add(GetTransactionCountSucessData());
-		result.add(GetTransactionDuractionData());
-		result.add(GetVirtualUserCountData());
-		result.add(GetLastRequestDuration());
-		result.add(GetTotalDownloadedBytesPerSecondData());
-		result.add(GetTotalRequestCountFailuerPerSecond());
-		result.add(GetTotalRequestCountSucessPerSecond());
-		result.add(GetTotalTransactionFailurePerSecond());
-		result.add(GetTotalTransactionFailurePerSecond());
-		result.add(GetFailureRateData());
+		if(LastRequestCountPerSecond_data)
+			result.add(GetRequestCountData());
+		if(TotalGlobalCountFailure_data)
+			result.add(GetTotalGlobalCountFailureData());
+		if(TotalGlobalDownloadedBytes_data)
+			result.add(GetTotalGlobalDownloadedBytesData());
+		if(TotalGlobalDownloadedBytesPerSecond_data)
+			result.add(GetTotalGlobalDownloadedBytesPerSecondData());
+		if(TotalIterationCountFailure_data)
+			result.add(GetTotalIterationCountFailureData());
+		if(TotalIterationCountSuccess_data)
+			result.add(GetTotalIterationCountSuccessData());
+
+		if(TotalRequestCountFailure_data)
+			result.add(GetTotalRequestCountFailureData());
+
+		if(TotalRequestCountPerSecond_data)
+			result.add(GetTotalRequestCountPerSecondData());
+
+		if(TotalRequestCountSuccess_data)
+			result.add(GetTotalRequestCountSuccessData());
+
+		if(TotalTransactionCountFailure_data)
+			result.add(GetTransactionCountFailureData());
+
+		if(TotalTransactionCountPerSecond_data)
+			result.add(GetTransactionCountPefSecondData());
+		if(TotalTransactionCountSuccess_data)
+			result.add(GetTransactionCountSucessData());
+
+		if(LastTransactionDurationAverage_data)
+			result.add(GetTransactionDuractionData());
+
+		if(LastVirtualUserCount_data)
+			result.add(GetVirtualUserCountData());
+
+		if(LastRequestDurationAverage_data)
+			result.add(GetLastRequestDuration());
+		if(TotalDownloadedBytesPerSecond_data)
+			result.add(GetTotalDownloadedBytesPerSecondData());
+		if(TotalRequestCountFailurePerSecond_data)
+			result.add(GetTotalRequestCountFailuerPerSecond());
+		if(TotalRequestCountSuccessPerSecond_data)
+			result.add(GetTotalRequestCountSucessPerSecond());
+		if(TotalTransactionCountFailure_data)
+			result.add(GetTotalTransactionFailurePerSecond());
+
+		if(FailureRate_data)
+			result.add(GetFailureRateData());
 		
 		return result;
 	}
@@ -938,11 +1055,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalGlobalDownloadedBytes(float totalGlobalDownloadedBytes) {
-		if(TotalGlobalDownloadedBytes==0)
-			TotalGlobalDownloadedBytes = totalGlobalDownloadedBytes;
+	public void setTotalGlobalDownloadedBytes(Long totalGlobalDownloadedBytes) {
+		if(totalGlobalDownloadedBytes!=null) {
+			if (TotalGlobalDownloadedBytes == 0)
+				TotalGlobalDownloadedBytes = totalGlobalDownloadedBytes;
+			else
+				TotalGlobalDownloadedBytes = totalGlobalDownloadedBytes - TotalGlobalDownloadedBytes;
+
+			TotalGlobalDownloadedBytes_data=true;
+		}
 		else
-			TotalGlobalDownloadedBytes = totalGlobalDownloadedBytes-TotalGlobalDownloadedBytes;
+			TotalGlobalDownloadedBytes_data=false;
 	}
 
 
@@ -966,12 +1089,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalGlobalDownloadedBytesPerSecond(float totalGlobalDownloadedBytesPerSecond) {
-		if(TotalGlobalDownloadedBytesPerSecond==0)
-			TotalGlobalDownloadedBytesPerSecond = totalGlobalDownloadedBytesPerSecond;
+	public void setTotalGlobalDownloadedBytesPerSecond(Float totalGlobalDownloadedBytesPerSecond) {
+		if(totalGlobalDownloadedBytesPerSecond!=null) {
+			if (TotalGlobalDownloadedBytesPerSecond == 0)
+				TotalGlobalDownloadedBytesPerSecond = totalGlobalDownloadedBytesPerSecond;
+			else
+				TotalGlobalDownloadedBytesPerSecond = totalGlobalDownloadedBytesPerSecond - TotalGlobalDownloadedBytesPerSecond;
+
+			TotalGlobalDownloadedBytesPerSecond_data=true;
+		}
 		else
-			TotalGlobalDownloadedBytesPerSecond = totalGlobalDownloadedBytesPerSecond-TotalGlobalDownloadedBytesPerSecond;
-			
+			TotalGlobalDownloadedBytesPerSecond_data=false;
 	}
 
 
@@ -993,11 +1121,18 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalIterationCountFailure(long totalIterationCountFailure) {
-		if(TotalIterationCountFailure==0)
-			TotalIterationCountFailure = totalIterationCountFailure;
+	public void setTotalIterationCountFailure(Long totalIterationCountFailure) {
+		if(totalIterationCountFailure!=null)
+		{
+			if (TotalIterationCountFailure == 0)
+				TotalIterationCountFailure = totalIterationCountFailure;
+			else
+				TotalIterationCountFailure = totalIterationCountFailure - TotalIterationCountFailure;
+
+			TotalIterationCountFailure_data=true;
+		}
 		else
-			TotalIterationCountFailure = totalIterationCountFailure-TotalIterationCountFailure;
+			TotalIterationCountFailure_data=false;
 	}
 
 
@@ -1018,11 +1153,17 @@ public class NLGlobalStat {
 		
 	}
 
-	public void setTotalIterationCountSuccess(long totalIterationCountSuccess) {
-		if(TotalIterationCountSuccess==0)
-			TotalIterationCountSuccess = totalIterationCountSuccess;
+	public void setTotalIterationCountSuccess(Long totalIterationCountSuccess) {
+		if(totalIterationCountSuccess !=null) {
+			if (TotalIterationCountSuccess == 0)
+				TotalIterationCountSuccess = totalIterationCountSuccess;
+			else
+				TotalIterationCountSuccess = totalIterationCountSuccess - TotalIterationCountSuccess;
+
+			TotalIterationCountSuccess_data=true;
+		}
 		else
-			TotalIterationCountSuccess = totalIterationCountSuccess-TotalIterationCountSuccess;
+			TotalIterationCountSuccess_data=false;
 	}
 
 
@@ -1044,11 +1185,17 @@ public class NLGlobalStat {
 		
 	}
 
-	public void setTotalRequestCountFailure(long totalRequestCountFailure) {
-		if(TotalRequestCountFailure==0)
-			TotalRequestCountFailure = totalRequestCountFailure;
+	public void setTotalRequestCountFailure(Long totalRequestCountFailure) {
+		if(totalRequestCountFailure!=null) {
+			if (TotalRequestCountFailure == 0)
+				TotalRequestCountFailure = totalRequestCountFailure;
+			else
+				TotalRequestCountFailure = totalRequestCountFailure - TotalRequestCountFailure;
+
+			TotalRequestCountFailure_data=true;
+		}
 		else
-			TotalRequestCountFailure = totalRequestCountFailure-TotalRequestCountFailure;
+			TotalRequestCountFailure_data=false;
 	}
 
 
@@ -1071,10 +1218,16 @@ public class NLGlobalStat {
 		
 	}
 	public void setTotalRequestCountPerSecond(Float totalRequestCountPerSecond) {
-		if(TotalRequestCountPerSecond==0)
-			TotalRequestCountPerSecond = totalRequestCountPerSecond;
+		if(totalRequestCountPerSecond != null) {
+			if (TotalRequestCountPerSecond == 0)
+				TotalRequestCountPerSecond = totalRequestCountPerSecond;
+			else
+				TotalRequestCountPerSecond = totalRequestCountPerSecond - TotalRequestCountPerSecond;
+
+			TotalRequestCountPerSecond_data=true;
+		}
 		else
-			TotalRequestCountPerSecond = totalRequestCountPerSecond-TotalRequestCountPerSecond;
+			TotalRequestCountPerSecond_data=false;
 	}
 
 
@@ -1095,11 +1248,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalRequestCountSuccess(long totalRequestCountSuccess) {
-		if(TotalRequestCountSuccess==0)
-			TotalRequestCountSuccess = totalRequestCountSuccess;
+	public void setTotalRequestCountSuccess(Long totalRequestCountSuccess) {
+		if(totalRequestCountSuccess!=null) {
+			if (TotalRequestCountSuccess == 0)
+				TotalRequestCountSuccess = totalRequestCountSuccess;
+			else
+				TotalRequestCountSuccess = totalRequestCountSuccess - TotalRequestCountSuccess;
+
+			TotalRequestCountSuccess_data=true;
+		}
 		else
-			TotalRequestCountSuccess=totalRequestCountSuccess-TotalRequestCountSuccess;
+			TotalRequestCountSuccess_data=false;
 	}
 
 	
@@ -1122,11 +1281,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalTransactionCountFailure(long totalTransactionCountFailure) {
-		if(TotalTransactionCountFailure==0)
-			TotalTransactionCountFailure = totalTransactionCountFailure;
+	public void setTotalTransactionCountFailure(Long totalTransactionCountFailure) {
+		if(totalTransactionCountFailure!=null) {
+			if (TotalTransactionCountFailure == 0)
+				TotalTransactionCountFailure = totalTransactionCountFailure;
+			else
+				TotalTransactionCountFailure = totalTransactionCountFailure - TotalTransactionCountFailure;
+
+			TotalTransactionCountFailure_data=true;
+		}
 		else
-			TotalTransactionCountFailure = totalTransactionCountFailure-TotalTransactionCountFailure;
+			TotalTransactionCountFailure_data=false;
 	}
 	
 	public long getTotalTransactionCountSucess() {
@@ -1147,11 +1312,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalTransactionCountSucess(long totalTransactionCountFailure) {
-		if(TotalTransactionCountSuccess==0)
-			TotalTransactionCountSuccess = totalTransactionCountFailure;
+	public void setTotalTransactionCountSucess(Long totalTransactionCountFailure) {
+		if(totalTransactionCountFailure!=null) {
+			if (TotalTransactionCountSuccess == 0)
+				TotalTransactionCountSuccess = totalTransactionCountFailure;
+			else
+				TotalTransactionCountSuccess = totalTransactionCountFailure - TotalTransactionCountSuccess;
+
+			TotalTransactionCountSuccess_data=true;
+		}
 		else
-			TotalTransactionCountSuccess = totalTransactionCountFailure-TotalTransactionCountSuccess;
+			TotalTransactionCountSuccess_data=false;
 	}
 
 	public float getTotalTransactionCountPerSecond() {
@@ -1173,11 +1344,17 @@ public class NLGlobalStat {
 		
 	}
 	
-	public void setTotalTransactionCountPerSecond(float totalTransactionCountPerSecond) {
-		if(TotalTransactionCountPerSecond==0)
-			TotalTransactionCountPerSecond = totalTransactionCountPerSecond;
+	public void setTotalTransactionCountPerSecond(Float totalTransactionCountPerSecond) {
+		if(totalTransactionCountPerSecond!=null) {
+			if (TotalTransactionCountPerSecond == 0)
+				TotalTransactionCountPerSecond = totalTransactionCountPerSecond;
+			else
+				TotalTransactionCountPerSecond = totalTransactionCountPerSecond - TotalTransactionCountPerSecond;
+
+			TotalTransactionCountPerSecond_data=true;
+		}
 		else
-			TotalTransactionCountPerSecond = totalTransactionCountPerSecond-TotalTransactionCountPerSecond;
+			TotalTransactionCountPerSecond_data=false;
 	}
 
 
