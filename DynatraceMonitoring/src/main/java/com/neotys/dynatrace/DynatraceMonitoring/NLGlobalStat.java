@@ -177,7 +177,7 @@ public class NLGlobalStat {
 
 	public void setFailureRate(Float failureRate) {
 		if(failureRate!=null) {
-			FailureRate = failureRate * 100;
+			FailureRate = failureRate ;
 			FailureRate_data=true;
 		}
 		else
