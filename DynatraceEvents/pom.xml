@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.neotys.actions</groupId>
             <artifactId>neotys-custom-action-api</artifactId>
-            <version>2.4.0</version>
+            <version>2.5.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -23,11 +23,11 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
-        	<groupId>com.neotys.NewRelic</groupId>
-        	<artifactId>HttpUtils</artifactId>
-        	<version>0.0.1-SNAPSHOT</version>
+            <groupId>com.neotys.NewRelic</groupId>
+            <artifactId>HttpUtils</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -50,7 +50,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
