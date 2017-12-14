@@ -4,27 +4,20 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.TimeZone;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.olingo.odata2.api.exception.ODataException;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.common.base.Strings;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.neotys.NewRelic.HttpUtils.HTTPGenerator;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClientFactory;
@@ -190,7 +183,7 @@ public class DynatraceIntegration {
 			if(Dynatrace_Application_ServiceId ==null)
 				throw new DynatraceException("No Application find in The Dynatrace Account with the name " + Dynatrace_Application_Name); 
 			
-			http.CloseHttpClient();
+			http.closeHttpClient();
 			
 			return Dynatrace_Application_ServiceId;
 			
@@ -256,7 +249,7 @@ public class DynatraceIntegration {
 					
 				}
 				
-				http.CloseHttpClient();
+				http.closeHttpClient();
 				
 				
 				
@@ -310,7 +303,7 @@ public class DynatraceIntegration {
 						
 					}
 					
-					http.CloseHttpClient();
+					http.closeHttpClient();
 					
 					
 					
@@ -542,7 +535,7 @@ public class DynatraceIntegration {
 						}
 					}
 				}
-				http.CloseHttpClient();
+				http.closeHttpClient();
 			return Metrics;
 		}
 		private HashMap<String,String> GetTImeSeriesMetric(String EntityId,List<String> listEntity) throws ClientProtocolException, IOException, NoSuchAlgorithmException
@@ -597,7 +590,7 @@ public class DynatraceIntegration {
 						}
 					
 				}
-				http.CloseHttpClient();
+				http.closeHttpClient();
 			return Metrics;
 			
 		}
@@ -639,14 +632,3 @@ public class DynatraceIntegration {
 			
 		}
 }
-class DynatraceException extends Exception
-{
-      //Parameterless Constructor
-      public DynatraceException() {}
-
-      //Constructor that accepts a message
-      public DynatraceException(String message)
-      {
-         super(message);
-      }
- }

@@ -1,124 +1,83 @@
 package com.neotys.dynatrace.DynatraceEvents;
 
-import java.util.List;
-
 import com.google.common.base.Strings;
-
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.SampleResult;
 
+import java.util.List;
+
 public final class DynatraceEventStopActionEngine implements ActionEngine {
-	private  String Dynatrace_ID;
-	private  String Dynatrace_API_KEY;
-	private  String HTTP_PROXY_HOST;
-	private  String HTTP_PROXY_PORT;
-	private  String HTTP_PROXY_LOGIN;
-	private  String HTTP_PROXY_PASSWORD;
-	private  String Dynatrace_ApplicationName;
-	private String Dynatrace_Managed_Hostname;
-	private  String EventStatus;
-	private static final String START="START";
-	private static final String STOP="STOP";
+	private static final String START = "START";
+	private static final String STOP = "STOP";
+
+	private String dynatraceId;
+	private String dynatraceApiKey;
+	private String httpProxyHost;
+	private String httpProxyPort;
+	private String httpProxyLogin;
+	private String httpProxyPassword;
+	private String dynatraceApplicationName;
+	private String dynatraceManagedHostname;
+	private String eventStatus;
 	private DynatraceEventAPI eventAPI;
-	private String NL_Managed_Instance;
+	private String nlManagedInstance;
+
 	@Override
-	public SampleResult execute(Context context, List<ActionParameter> parameters) {
+	public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
 		final SampleResult sampleResult = new SampleResult();
 		final StringBuilder requestBuilder = new StringBuilder();
 		final StringBuilder responseBuilder = new StringBuilder();
-		for(ActionParameter parameter:parameters) {
-			switch(parameter.getName()) 
-			{
-			case  DynatraceEventAction.EventStatus:
-				EventStatus = parameter.getValue();
-				break;
-			case  DynatraceEventAction.Dynatrace_ID:
-				Dynatrace_ID = parameter.getValue();
-				break;
-			case  DynatraceEventAction.Dynatrace_API_KEY:
-				Dynatrace_API_KEY = parameter.getValue();
-				break;
-			case  DynatraceEventAction.HTTP_PROXY_HOST:
-				HTTP_PROXY_HOST = parameter.getValue();
-				break;
-			case  DynatraceEventAction.HTTP_PROXY_PASSWORD:
-				HTTP_PROXY_PASSWORD = parameter.getValue();
-				break;
-			case  DynatraceEventAction.HTTP_PROXY_LOGIN:
-				HTTP_PROXY_LOGIN = parameter.getValue();
-				break;
-			case  DynatraceEventAction.HTTP_PROXY_PORT:
-				HTTP_PROXY_PORT = parameter.getValue();
-				break;
-			case  DynatraceEventAction.Dynatrace_Managed_Hostname:
-				Dynatrace_Managed_Hostname = parameter.getValue();
-				break;
-			
-			case  DynatraceEventAction.Dynatrace_ApplicationName:
-				Dynatrace_ApplicationName = parameter.getValue();
-				break;
-				
-			case  DynatraceEventAction.NL_Managed_Instance:
-				NL_Managed_Instance = parameter.getValue();
-				break;
-			
-			}
-		}
-		
-		
-		if (Strings.isNullOrEmpty(Dynatrace_API_KEY)) {
+
+		parseParameters(parameters);
+
+		if (Strings.isNullOrEmpty(dynatraceApiKey)) {
 			return getErrorResult(context, sampleResult, "Invalid argument: Dynatrace_API_KEY cannot be null "
-					+ DynatraceEventAction.Dynatrace_API_KEY + ".", null);
+					+ DynatraceEventAction.DYNATRACE_API_KEY + ".", null);
 		}
-		if (Strings.isNullOrEmpty(Dynatrace_ApplicationName)) {
+		if (Strings.isNullOrEmpty(dynatraceApplicationName)) {
 			return getErrorResult(context, sampleResult, "Invalid argument: Dynatrace_ApplicationName cannot be null "
-					+ DynatraceEventAction.Dynatrace_ApplicationName + ".", null);
+					+ DynatraceEventAction.DYNATRACE_APPLICATION_NAME + ".", null);
 		}
-		if (Strings.isNullOrEmpty(Dynatrace_ID)) {
+		if (Strings.isNullOrEmpty(dynatraceId)) {
 			return getErrorResult(context, sampleResult, "Invalid argument: Dynatrace_ID cannot be null "
-					+ DynatraceEventAction.Dynatrace_ID + ".", null);
+					+ DynatraceEventAction.DYNATRACE_ID + ".", null);
 		}
-		if (! Strings.isNullOrEmpty(HTTP_PROXY_HOST) ) {
-			if(Strings.isNullOrEmpty(HTTP_PROXY_PORT))
+		if (!Strings.isNullOrEmpty(httpProxyHost)) {
+			if (Strings.isNullOrEmpty(httpProxyPort))
 				return getErrorResult(context, sampleResult, "Invalid argument: HTTP_PROXY_PORT cannot be null if you specify a Proxy Host"
 						+ DynatraceEventAction.HTTP_PROXY_PORT + ".", null);
 		}
-		if (! Strings.isNullOrEmpty(HTTP_PROXY_PORT) ) {
-			if(Strings.isNullOrEmpty(HTTP_PROXY_HOST))
+		if (!Strings.isNullOrEmpty(httpProxyPort)) {
+			if (Strings.isNullOrEmpty(httpProxyHost))
 				return getErrorResult(context, sampleResult, "Invalid argument: HTTP_PROXY_HOST cannot be null if you specify a Proxy Host"
-						+ DynatraceEventAction.HTTP_PROXY_HOST + ".", null	);
-			
-						
-	
+						+ DynatraceEventAction.HTTP_PROXY_HOST + ".", null);
+
+
 		}
-		if (Strings.isNullOrEmpty(EventStatus)) {
+		if (Strings.isNullOrEmpty(eventStatus)) {
 			return getErrorResult(context, sampleResult, "Invalid argument: EventStatus cannot be null "
-					+ DynatraceEventAction.EventStatus + ".", null);
+					+ DynatraceEventAction.EVENT_SATUS + ".", null);
 		}
-		
-		
+
+
 		sampleResult.sampleStart();
-		try
-		{
-			eventAPI=new DynatraceEventAPI(Dynatrace_API_KEY, Dynatrace_ID, Dynatrace_ApplicationName, context,Dynatrace_Managed_Hostname,NL_Managed_Instance);
-			
-			switch(EventStatus)
-			{
-			case START:
-				eventAPI.SendStartTest();
-				break;
-			case STOP:
-				eventAPI.SendStopTest();				
-				break;
-			default: 
-				return getErrorResult(context, sampleResult, "Invalid argument: EventStatus can be equal to START or STOP "
-						+ DynatraceEventAction.EventStatus + ".", null);
+		try {
+			eventAPI = new DynatraceEventAPI(dynatraceApiKey, dynatraceId, dynatraceApplicationName, context, dynatraceManagedHostname, nlManagedInstance);
+
+			switch (eventStatus) {
+				case START:
+					eventAPI.sendStartTest();
+					break;
+				case STOP:
+					eventAPI.sendStopTest();
+					break;
+				default:
+					return getErrorResult(context, sampleResult, "Invalid argument: EventStatus can be equal to START or STOP "
+							+ DynatraceEventAction.EVENT_SATUS + ".", null);
 			}
-		}
-		catch(Exception e)
-		{
+		} catch (Exception e) {
 			return getErrorResult(context, sampleResult, "Technical Error encouter  :", e);
 		}
 
@@ -129,7 +88,47 @@ public final class DynatraceEventStopActionEngine implements ActionEngine {
 		return sampleResult;
 	}
 
-	private void appendLineToStringBuilder(final StringBuilder sb, final String line){
+	private void parseParameters(final List<ActionParameter> parameters) {
+		for (ActionParameter parameter : parameters) {
+			switch (parameter.getName()) {
+				case DynatraceEventAction.EVENT_SATUS:
+					eventStatus = parameter.getValue();
+					break;
+				case DynatraceEventAction.DYNATRACE_ID:
+					dynatraceId = parameter.getValue();
+					break;
+				case DynatraceEventAction.DYNATRACE_API_KEY:
+					dynatraceApiKey = parameter.getValue();
+					break;
+				case DynatraceEventAction.HTTP_PROXY_HOST:
+					httpProxyHost = parameter.getValue();
+					break;
+				case DynatraceEventAction.HTTP_PROXY_PASSWORD:
+					httpProxyPassword = parameter.getValue();
+					break;
+				case DynatraceEventAction.HTTP_PROXY_LOGIN:
+					httpProxyLogin = parameter.getValue();
+					break;
+				case DynatraceEventAction.HTTP_PROXY_PORT:
+					httpProxyPort = parameter.getValue();
+					break;
+				case DynatraceEventAction.DYNATRACE_MANAGED_HOSTNAME:
+					dynatraceManagedHostname = parameter.getValue();
+					break;
+
+				case DynatraceEventAction.DYNATRACE_APPLICATION_NAME:
+					dynatraceApplicationName = parameter.getValue();
+					break;
+
+				case DynatraceEventAction.NL_MANAGED_INSTANCE:
+					nlManagedInstance = parameter.getValue();
+					break;
+
+			}
+		}
+	}
+
+	private void appendLineToStringBuilder(final StringBuilder sb, final String line) {
 		sb.append(line).append("\n");
 	}
 
@@ -140,9 +139,9 @@ public final class DynatraceEventStopActionEngine implements ActionEngine {
 		result.setError(true);
 		result.setStatusCode("NL-DynatraceEvent_ERROR");
 		result.setResponseContent(errorMessage);
-		if(exception != null){
+		if (exception != null) {
 			context.getLogger().error(errorMessage, exception);
-		} else{
+		} else {
 			context.getLogger().error(errorMessage);
 		}
 		return result;
