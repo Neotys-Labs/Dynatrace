@@ -117,7 +117,7 @@ class DynatraceEventAPI {
 		http = new HTTPGenerator(Url, "GET", headers, Parameters);
 
 
-		jsoobj = http.GetJSONArrayHTTPresponse();
+		jsoobj = http.getJSONArrayHTTPresponse();
 		List<String> applicationEntityid;
 		if (jsoobj != null) {
 			applicationEntityid = new ArrayList<String>();
@@ -210,7 +210,7 @@ class DynatraceEventAPI {
 
 		insightHttp = new HTTPGenerator("POST", url, headers, parameters, jsonString);
 		try {
-			httpcode = insightHttp.GetHttpResponseCodeFromResponse();
+			httpcode = insightHttp.getHttpResponseCodeFromResponse();
 			switch (httpcode) {
 
 				case BAD_REQUEST:

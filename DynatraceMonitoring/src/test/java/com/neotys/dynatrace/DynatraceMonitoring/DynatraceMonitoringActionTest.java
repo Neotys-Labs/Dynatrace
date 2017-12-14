@@ -38,7 +38,7 @@ public void HttpGeneratorTest() throws ClientProtocolException, IOException {
 	Parameters.put("Api-Token", "t3FNohlfQNiuNPm0ILGLU");
 	
 	final HTTPGenerator http = new HTTPGenerator("https://pjk26067.live.dynatrace.com/api/v1/entity/applications", "GET", new HashMap<String,String>(),Parameters);
-	JSONArray jsoobj=http.GetJSONArrayHTTPresponse();
+	JSONArray jsoobj=http.getJSONArrayHTTPresponse();
 	System.out.println("jsoobj: "+ jsoobj);
 
 }

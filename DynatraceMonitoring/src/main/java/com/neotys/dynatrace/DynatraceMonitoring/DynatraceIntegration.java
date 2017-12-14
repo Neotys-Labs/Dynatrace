@@ -129,7 +129,7 @@ public class DynatraceIntegration {
 	 
 	private void configureHttpsfordynatrace() throws NoSuchAlgorithmException
 	{
-		http.SetAllowHostnameSSL();
+		http.setAllowHostnameSSL();
 	}
 	private void CreateEntry(String EntityName,String MetricName,String MetricValueName,double value,String unit,long ValueDate) throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException, ParseException
 	{
@@ -158,7 +158,7 @@ public class DynatraceIntegration {
 				http=new HTTPGenerator(Url, "GET", Header,Parameters );
 			
 			
-			jsoobj=http.GetJSONArrayHTTPresponse();
+			jsoobj=http.getJSONArrayHTTPresponse();
 			if(jsoobj != null)
 			{
 					Dynatrace_Application_ServiceId= new ArrayList<String>();
@@ -232,7 +232,7 @@ public class DynatraceIntegration {
 					http=new HTTPGenerator(Url, "GET", Header,Parameters );
 				
 			
-				jsoobj=http.GetJSONArrayHTTPresponse();
+				jsoobj=http.getJSONArrayHTTPresponse();
 				if(jsoobj != null)
 				{
 						for(int i=0;i<jsoobj.length();i++)
@@ -273,7 +273,7 @@ public class DynatraceIntegration {
 						http=new HTTPGenerator(Url, "GET", Header,Parameters );
 					
 				
-					jsoobj=http.GetJSONArrayHTTPresponse();
+					jsoobj=http.getJSONArrayHTTPresponse();
 					if(jsoobj != null)
 					{
 							Dynatrace_Application_HOstId= new ArrayList<String>();
@@ -494,7 +494,7 @@ public class DynatraceIntegration {
 					http=new HTTPGenerator("POST",Url, Header,Parameters,JsonEntities );
 				
 			
-				jsonApplication=http.GetJSONHTTPresponse();
+				jsonApplication=http.getJsonHttpResponse();
 				if(jsonApplication != null)
 				{
 					if(jsonApplication.has("result"))
@@ -567,7 +567,7 @@ public class DynatraceIntegration {
 					http=new HTTPGenerator("POST",Url, Header,Parameters, JsonEntities);
 				
 			
-				jsoobj=http.GetJSONArrayHTTPresponse();
+				jsoobj=http.getJSONArrayHTTPresponse();
 				if(jsoobj != null)
 				{
 					
