@@ -29,7 +29,7 @@ public class DynatraceIntegration {
 	private DataExchangeAPIClient client;
 	private ContextBuilder Context;
 	private HTTPGenerator http;
-	private static final String DynatraceURL=".live.dynatrace.com/api/v1/";
+	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
 	private static final String DynatraceAPplication="entity/services";
 	private static final String DynatraceAPIProcessGroup="entity/infrastructure/process-groups";
 	private static final String DynatraceHosts="entity/infrastructure/hosts";
@@ -618,7 +618,7 @@ public class DynatraceIntegration {
 			}
 			else
 			{
-				result=DynatraceProtocol+DynatraceID+DynatraceURL;
+				result=DynatraceProtocol+DynatraceID+ DYNATRACE_URL;
 			}
 			return result;
 		}
