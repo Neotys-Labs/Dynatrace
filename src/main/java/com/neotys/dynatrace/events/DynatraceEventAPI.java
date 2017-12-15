@@ -130,6 +130,7 @@ class DynatraceEventAPI {
 	}
 
 	private static String getTestUrlInNlWeb(final Context context) {
+		// TODO get neoload web front URL
 		return context.getWebPlatformApiUrl() + NL_RUL_LAST + context.getTestId();
 	}
 
@@ -159,7 +160,8 @@ class DynatraceEventAPI {
 				+ "\"customProperties\":"
 				+ "{ \"ScriptName\": \"" + context.getProjectName() + "\","
 				+ "\"NeoLoad_TestName\":\"" + context.getTestName() + "\","
-				+ "\"NeoLoad_URL\":\"" + getTestUrlInNlWeb(context) + "\","
+				// TODO get neoload web front URL
+				/*+ "\"NeoLoad_URL\":\"" + getTestUrlInNlWeb(context) + "\","*/
 				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
