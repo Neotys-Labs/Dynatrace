@@ -60,21 +60,6 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 		return sampleResult;
 	}
 
-	/**
-	 * This method allows to easily create an error result and log exception.
-	 */
-	private static SampleResult getErrorResult(final Context context, final SampleResult result, final String errorMessage, final Exception exception) {
-		result.setError(true);
-		result.setStatusCode("NL-DynatraceEvent_ERROR");
-		result.setResponseContent(errorMessage);
-		if (exception != null) {
-			context.getLogger().error(errorMessage, exception);
-		} else {
-			context.getLogger().error(errorMessage);
-		}
-		return result;
-	}
-
 	@Override
 	public void stopExecute() {
 		// nothing to do

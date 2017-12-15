@@ -179,7 +179,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 
 		http = new HTTPGenerator(Url, "GET", Header, Parameters);
 
-		httpcode = http.getHttpResponseCodeFromResponse();
+		httpcode = http.executeAndGetResponseCode();
 		if (httpcode != HTTP_RESPONSE)
 			results = false;
 		else
@@ -214,7 +214,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 		Insight_HTTP = new HTTPGenerator("PUT", URL, head, Parameters, JSON_String);
 
 		try {
-			httpcode = Insight_HTTP.getHttpResponseCodeFromResponse();
+			httpcode = Insight_HTTP.executeAndGetResponseCode();
 			if (httpcode == HTTP_RESPONSE_CREATED || httpcode == HTTP_RESPONSE_ALREADY)
 				//------change the code to give a status if the data has been properly created...---review this pieece of code
 				stat.SetStatus(TimeseriesName);
@@ -310,7 +310,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 			Insight_HTTP = new HTTPGenerator("POST", URL, head, Parameters, JSON_String);
 
 			try {
-				httpcode = Insight_HTTP.getHttpResponseCodeFromResponse();
+				httpcode = Insight_HTTP.executeAndGetResponseCode();
 				switch (httpcode) {
 
 					case BAD_REQUEST:

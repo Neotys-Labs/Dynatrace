@@ -214,7 +214,6 @@ public class HTTPGenerator {
 		if (params != null) {
 			for (Map.Entry<String, String> entry : params.entrySet()) {
 				parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-
 			}
 		}
 
@@ -277,7 +276,7 @@ public class HTTPGenerator {
 
 	}
 
-	public int getHttpResponseCodeFromResponse() throws IOException {
+	public int executeAndGetResponseCode() throws IOException {
 
 		JSONObject json = null;
 		HttpResponse response = null;

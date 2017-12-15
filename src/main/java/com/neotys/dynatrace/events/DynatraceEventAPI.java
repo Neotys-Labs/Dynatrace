@@ -169,7 +169,7 @@ class DynatraceEventAPI {
 
 		final HTTPGenerator insightHttp = new HTTPGenerator("POST", url, headers, parameters, jsonString);
 		try {
-			final int httpCode = insightHttp.getHttpResponseCodeFromResponse();
+			final int httpCode = insightHttp.executeAndGetResponseCode();
 			final String exceptionMessage = getExceptionMessageFromHttpCode(httpCode);
 			if (exceptionMessage != null) {
 				throw new DynatraceException(exceptionMessage);
