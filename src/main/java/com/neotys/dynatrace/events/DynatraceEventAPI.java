@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.DynatraceException;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,11 +17,10 @@ import com.neotys.extensions.action.engine.Context;
 
 class DynatraceEventAPI {
 
-	private static final String DYNATRACE_API_URL = "events";
+	private static final String DYNATRACE_EVENTS_API_URL = "events";
 	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
 	private static final String DynatraceApplication = "entity/services";
-	private static final String NL_URL_START = "https://";
-	private static final String NL_SAAS = "neoload.saas.neotys.com";
+
 	private static final String NL_RUL_LAST = "/#!result/overview/?benchId=";
 	private static final String DYNATRACE_PROTOCOL = "https://";
 	private static final String START_NL_TEST = "Start NeoLoad Test";
@@ -36,160 +36,110 @@ class DynatraceEventAPI {
 	private static final int SERVICE_UNAVAIBLE = 503;
 	private static final int GATEWAY_TIMEOUT = 504;
 
-	private Map<String, String> headers = null;
-	private HTTPGenerator http;
-	private String dynatraceApplicationName;
-	private String componentsName;
+	private final Map<String, String> headers;
 	private final String dynatraceApiKey;
 	private final String dynatraceAccountID;
-	private final String testName;
-	private final String testID;
 	private final List<String> applicationEntityid;
-	private final String nlScenarioName;
-	private final String dynatraceManagedHostname;
-	private final String nlProject;
+	private final Optional<String> dynatraceManagedHostname;
 	private final Context context;
-	private final String nlInstance;
 
-	public DynatraceEventAPI(final String dynatraceAPIKEY,
-							 final String dynatraceID,
-							 final String dynatraceApplicationName,
-							 final Context context,
-							 final String dynatraceManaged,
-							 final String nlManagedInstance) throws DynatraceException, IOException {
+	DynatraceEventAPI(final Context context,
+					  final String dynatraceID,
+					  final String dynatraceAPIKEY,
+					  final Optional<String> dynatraceTags,
+					  final Optional<String> dynatraceManagedHostname) throws DynatraceException, IOException {
 		this.dynatraceAccountID = dynatraceID;
 		this.dynatraceApiKey = dynatraceAPIKEY;
-		this.dynatraceManagedHostname = dynatraceManaged;
-		this.nlInstance = nlManagedInstance;
-		initHttpClient();
-		this.applicationEntityid = getApplicationID(dynatraceApplicationName);
-		this.testName = context.getTestName();
-		this.nlScenarioName = context.getScenarioName();
-		this.testID = context.getTestId();
-		this.nlProject = context.getProjectName();
+		this.dynatraceManagedHostname = dynatraceManagedHostname;
+		this.headers = new HashMap<>();
+		this.applicationEntityid = getApplicationEntityId(dynatraceTags);
 		this.context = context;
 	}
 
-	private void initHttpClient() {
-		headers = new HashMap<>();
-		//	headers.put("X-License-Key", NewRElicLicenseKey);
-		//headers.put("Content-Type", "application/json");
-		//headers.put("Accept","application/json");
-
-	}
-
-	public void addTokenInParameters(final Map<String, String> param) {
+	private void addTokenInParameters(final Map<String, String> param) {
 		param.put("Api-Token", dynatraceApiKey);
 	}
 
-
-	public String getTags(final String applicationName) {
-		StringBuilder result = new StringBuilder();
-		String[] tagstable = null;
-		if (applicationName != null) {
-
-			if (applicationName.contains(",")) {
-				tagstable = applicationName.split(",");
-				for (String tag : tagstable) {
+	private String getTags(final Optional<String> tags) {
+		if (tags.isPresent()) {
+			final StringBuilder result = new StringBuilder();
+			final String tagsAsString = tags.get();
+			if (tagsAsString.contains(",")) {
+				final String[] tagsArray = tagsAsString.split(",");
+				for (String tag : tagsArray) {
 					result.append(tag).append("AND");
 				}
-				result = new StringBuilder(result.substring(0, result.length() - 3));
-			} else
-				result = new StringBuilder(applicationName);
+				return result.substring(0, result.length() - 3);
+			} else {
+				return tagsAsString;
+			}
 		}
-		return result.toString();
-
+		return "";
 	}
 
-	public List<String> getApplicationID(String applicationName) throws DynatraceException, IOException {
-		JSONArray jsoobj;
-		String Url;
-		JSONObject jsonApplication;
-		HashMap<String, String> Parameters;
-		String tags = getTags(applicationName);
-		Url = getApiUrl() + DynatraceApplication;
-		Parameters = new HashMap<String, String>();
-		Parameters.put("tag", tags);
-		addTokenInParameters(Parameters);
+	private List<String> getApplicationEntityId(final Optional<String> tagsParameter) throws DynatraceException, IOException {
+		final String tags = getTags(tagsParameter);
+		final String dynatraceUrl = getDynatraceApiUrl() + DynatraceApplication;
+		final Map<String, String> parameters = new HashMap<>();
+		parameters.put("tag", tags);
+		addTokenInParameters(parameters);
 		//initHttpClient();
 	/*	if(! Strings.isNullOrEmpty(PROXYHOST)&&! Strings.isNullOrEmpty(PROXYPORT))
 			http=new HTTPGenerator(Url, "GET",PROXYHOST,PROXYPORT,PROXYUSER,PROXYPASS, headers,Parameters );
 		else*/
-		http = new HTTPGenerator(Url, "GET", headers, Parameters);
+		final HTTPGenerator http = new HTTPGenerator(dynatraceUrl, "GET", headers, parameters);
 
-
-		jsoobj = http.getJSONArrayHTTPresponse();
+		final JSONArray jsonArrayResponse = http.getJSONArrayHTTPresponse();
 		List<String> applicationEntityid;
-		if (jsoobj != null) {
-			applicationEntityid = new ArrayList<String>();
-			for (int i = 0; i < jsoobj.length(); i++) {
-				jsonApplication = jsoobj.getJSONObject(i);
+		if (jsonArrayResponse != null) {
+			applicationEntityid = new ArrayList<>();
+			for (int i = 0; i < jsonArrayResponse.length(); i++) {
+				final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
 				if (jsonApplication.has("entityId")) {
 					if (jsonApplication.has("displayName")) {
-
 						applicationEntityid.add(jsonApplication.getString("entityId"));
-
 					}
-
 				}
-
 			}
-
-
-		} else
+		} else {
 			applicationEntityid = null;
+		}
 
-		if (applicationEntityid == null)
-			throw new DynatraceException("No Application find in The Dynatrace Account with the name " + dynatraceApplicationName);
+		if (applicationEntityid == null) {
+			throw new DynatraceException("No Application find in The Dynatrace Account with the name " + tagsParameter.or(""));
+		}
 
 		http.closeHttpClient();
 
 		return applicationEntityid;
-
 	}
 
-	public void sendStartTest() throws DynatraceException {
+	void sendStartTest() throws DynatraceException, IOException {
 		long start;
 		start = System.currentTimeMillis() - context.getElapsedTime();
 		sendMetricToEventAPI(START_NL_TEST, start, System.currentTimeMillis());
 	}
 
-	public void sendStopTest() throws DynatraceException {
-		long start;
-		start = System.currentTimeMillis() - context.getElapsedTime();
-		sendMetricToEventAPI(STOP_NL_TEST, start, System.currentTimeMillis());
+	private static String getTestUrlInNlWeb(final Context context) {
+		return context.getWebPlatformApiUrl() + NL_RUL_LAST + context.getTestId();
 	}
 
-	private String getNlUrl() {
-		String result;
-		if (nlInstance != null) {
-			result = NL_URL_START + nlInstance + NL_RUL_LAST;
-		} else {
-			result = NL_URL_START + NL_SAAS + NL_RUL_LAST;
-		}
-		return result;
-	}
-
-	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws DynatraceException {
-		int httpcode;
-		Map<String, String> parameters = new HashMap<>();
-		HTTPGenerator insightHttp;
-		String url = getApiUrl() + DYNATRACE_API_URL;
+	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws DynatraceException, IOException {
+		final String url = getDynatraceApiUrl() + DYNATRACE_EVENTS_API_URL;
+		final Map<String, String> parameters = new HashMap<>();
 		addTokenInParameters(parameters);
-		String exceptionMessage = null;
-		long duration = System.currentTimeMillis();
-		String entities = "";
 
+		final StringBuilder entitiesBuilder = new StringBuilder();
 		for (String service : applicationEntityid) {
-			entities += "\"" + service + "\",";
+			entitiesBuilder.append("\"").append(service).append("\",");
 		}
-		entities = entities.substring(0, entities.length() - 1);
+		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length() - 1);
 
-		String jsonString = "{\"start\":" + startDuration + ","
+		final String jsonString = "{\"start\":" + startDuration + ","
 				+ "\"end\":" + endDuration + ","
 				+ "\"eventType\": \"CUSTOM_ANNOTATION\","
-				+ "\"annotationType\": \"NeoLoad Test" + testName + "\","
-				+ "\"annotationDescription\": \"" + message + " " + testName + "\","
+				+ "\"annotationType\": \"NeoLoad Test" + context.getTestName() + "\","
+				+ "\"annotationDescription\": \"" + message + " " + context.getTestName() + "\","
 				+ "\"attachRules\":"
 				+ "{ \"entityIds\":[" + entities + "] ,"
 				+ "\"tagRule\" : {"
@@ -198,22 +148,19 @@ class DynatraceEventAPI {
 				+ "}},"
 				+ "\"source\":\"NeoLoadWeb\","
 				+ "\"customProperties\":"
-				+ "{ \"ScriptName\": \"" + nlProject + "\","
-				+ "\"NeoLoad_TestName\":\"" + testName + "\","
-				+ "\"NeoLoad_URL\":\"" + NL_URL_START + NL_SAAS + "\","
-//-----------wait for patch on the dynatrace UI to send the exact link
-				//	+ "\"NeoLoad_URL\":\""+getNlUrl()+testID+"\","
-				+ "\"NeoLoad_Scenario\":\"" + nlScenarioName + "\"}"
+				+ "{ \"ScriptName\": \"" + context.getProjectName() + "\","
+				+ "\"NeoLoad_TestName\":\"" + context.getTestName() + "\","
+				+ "\"NeoLoad_URL\":\"" + getTestUrlInNlWeb(context) + "\","
+				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
-		System.out.println(" Payload : " + jsonString);
+		context.getLogger().debug("dynatrace event JSON content : " + jsonString);
 
-
-		insightHttp = new HTTPGenerator("POST", url, headers, parameters, jsonString);
+		final HTTPGenerator insightHttp = new HTTPGenerator("POST", url, headers, parameters, jsonString);
 		try {
-			httpcode = insightHttp.getHttpResponseCodeFromResponse();
-			switch (httpcode) {
-
+			final int httpCode = insightHttp.getHttpResponseCodeFromResponse();
+			final String exceptionMessage;
+			switch (httpCode) {
 				case BAD_REQUEST:
 					exceptionMessage = "The request or headers are in the wrong format, or the URL is incorrect, or the GUID does not meet the validation requirements.";
 					break;
@@ -241,22 +188,20 @@ class DynatraceEventAPI {
 				case GATEWAY_TIMEOUT:
 					exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
 					break;
+				default:
+					exceptionMessage = null;
 
 			}
-			if (exceptionMessage != null)
+			if (exceptionMessage != null) {
 				throw new DynatraceException(exceptionMessage);
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			}
+		} finally {
+			insightHttp.closeHttpClient();
 		}
-		insightHttp.closeHttpClient();
-
 	}
 
-	private String getApiUrl() {
+	private String getDynatraceApiUrl() {
 		String result;
-
 		if (dynatraceManagedHostname != null) {
 			result = DYNATRACE_PROTOCOL + dynatraceManagedHostname + "/api/v1/";
 		} else {
