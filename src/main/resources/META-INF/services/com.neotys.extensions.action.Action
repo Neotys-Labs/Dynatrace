@@ -1,2 +1,2 @@
 com.neotys.dynatrace.events.DynatraceEventAction
-com.neotys.dynatrace.DynatraceMonitoring.DynatraceMonitoringAction
+com.neotys.dynatrace.monitoring.DynatraceMonitoringAction
