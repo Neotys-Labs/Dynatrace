@@ -17,6 +17,14 @@
             <artifactId>neotys-custom-action-api</artifactId>
             <version>2.5.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
+            <!-- already in NeoLoad -->
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

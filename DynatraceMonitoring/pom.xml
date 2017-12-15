@@ -55,6 +55,13 @@
             <artifactId>joda-time</artifactId>
             <version>${jodatime-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
+            <!-- already in NeoLoad -->
+            <scope>provided</scope>
+        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
         <dependency>
