@@ -10,6 +10,8 @@ import io.swagger.client.model.TestStatistics;
 import org.apache.http.client.ClientProtocolException;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimerTask;
@@ -87,7 +89,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 		InitHttpClient();
 	}
 
-	private void SendStatsToDynatrace() throws ApiException, DynatraceStatException, ClientProtocolException, IOException {
+	private void SendStatsToDynatrace() throws ApiException, DynatraceStatException, IOException, URISyntaxException {
 		TestStatistics StatsResult;
 		long utc;
 		long lasduration;
@@ -124,7 +126,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 
 	}
 
-	public long SendData(TestStatistics stat, long LasDuration) throws DynatraceStatException, ClientProtocolException, IOException, ApiException {
+	public long SendData(TestStatistics stat, long LasDuration) throws DynatraceStatException, IOException, ApiException, URISyntaxException {
 		int time = 0;
 		List<String[]> data;
 		long utc;
@@ -164,7 +166,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 		return timeInMillisSinceEpoch123;
 	}
 
-	private boolean IsNlDataExists(String timeseries) throws ClientProtocolException, IOException {
+	private boolean IsNlDataExists(String timeseries) throws IOException, URISyntaxException {
 		boolean results = false;
 		int httpcode;
 		String Url = getAPiUrl() + DynatraceTimeSeries;
@@ -191,7 +193,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 
 
 	///---------to update after the feedback from ANdy
-	private void CreateNLTimeSeries(String TimeseriesName, String DisplayName, String Type, String unit, NLGlobalStat stat) throws DynatraceStatException {
+	private void CreateNLTimeSeries(String TimeseriesName, String DisplayName, String Type, String unit, NLGlobalStat stat) throws DynatraceStatException, MalformedURLException, URISyntaxException {
 		int httpcode;
 		HashMap<String, String> head = null;
 		HashMap<String, String> Parameters = null;
@@ -249,7 +251,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 	}
 
 	///---------to update after the feedback from ANdy
-	private void SendMetricToTimeSeriestAPI(List<String[]> data, String Type) throws DynatraceStatException {
+	private void SendMetricToTimeSeriestAPI(List<String[]> data, String Type) throws DynatraceStatException, MalformedURLException, URISyntaxException {
 		int httpcode;
 		HashMap<String, String> head = null;
 		HashMap<String, String> Parameters = null;
@@ -356,7 +358,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 	public void run() {
 		try {
 			SendStatsToDynatrace();
-		} catch (ApiException | DynatraceStatException | IOException e) {
+		} catch (ApiException | DynatraceStatException | IOException | URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
