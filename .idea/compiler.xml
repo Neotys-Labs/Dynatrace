@@ -6,12 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="DynatraceEvents" />
-        <module name="DynatraceMonitoring" />
-        <module name="HttpUtils" />
+        <module name="Dynatrace" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="Dynatrace" target="1.7" />
       <module name="DynatraceEvents" target="1.7" />
       <module name="DynatraceMonitoring" target="1.7" />
       <module name="HttpUtils" target="1.7" />
