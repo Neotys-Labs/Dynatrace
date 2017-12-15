@@ -1,5 +1,6 @@
 package com.neotys.dynatrace.monitoring;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
@@ -80,7 +81,11 @@ public class DynatraceIntegration {
 		getDynatraceData();
 	}
 
-	private boolean isRelevantDimension(JSONArray array) {
+    public DynatraceIntegration(String dynatraceApiKey, String dynatraceId, Optional<String> dynatraceTags, String dataExchangeApiUrl, Optional<String> proxyName, Optional<String> dynatraceManagedHostname, long startTs) {
+    // TODO Implement
+	}
+
+    private boolean isRelevantDimension(JSONArray array) {
 		boolean result = false;
 		for (String listItem : relevantDimensions) {
 			for (int i = 0; i < array.length(); i++) {

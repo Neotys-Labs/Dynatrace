@@ -3,6 +3,7 @@ package com.neotys.dynatrace.monitoring;
 import java.io.IOException;
 import java.util.Timer;
 
+import com.google.common.base.Optional;
 import org.apache.http.client.ClientProtocolException;
 
 import com.neotys.extensions.action.engine.Context;
@@ -38,8 +39,9 @@ public class DynatracePluginData {
 	private String NL_Managed_Instance;
 	private String 	Dynatrace_Managed_Hostname=null;
 	
-	public DynatracePluginData(String strDynatraceAPIKEY, String neoLoadWEB_APIKEY, String pROXYHOST, String pROXYPASS,
-			String pROXYUSER, String pROXYPORT,Context pContext, String DynatraceID,String pNLHost,String dynatracemanaged,String nlInstance) throws ClientProtocolException, DynatraceStatException, IOException {
+	public DynatracePluginData(String strDynatraceAPIKEY, String neoLoadWEB_APIKEY,
+							   Optional<String> proxyName, Context pContext, String DynatraceID, String pNLHost, Optional<String> dynatracemanaged, Optional<String> nlInstance)
+			throws ClientProtocolException, DynatraceStatException, IOException {
 	
 		DynataceAPIKEY = strDynatraceAPIKEY;
 		Dynatrace_AccountID=DynatraceID;
@@ -48,15 +50,17 @@ public class DynatracePluginData {
 		NeoLoadWEB_API_CLIENT = new ApiClient();
 		NeoLoadWEB_API_CLIENT.setApiKey(neoLoadWEB_APIKEY);
 		NeoLoadWEB_API_CLIENT.setBasePath(NEOLOAD_WEB_BASEURL);
-		Dynatrace_Managed_Hostname=dynatracemanaged;
-		NL_Managed_Instance=nlInstance;
+		//TODO get from param
+//		Dynatrace_Managed_Hostname=dynatracemanaged;
+//		NL_Managed_Instance=nlInstance;
 		InitNLAPi();
 		//-------------------------
 		NLContext = pContext;
-		PROXYHOST = pROXYHOST;
-		PROXYPASS = pROXYPASS;
-		PROXYUSER = pROXYUSER;
-		PROXYPORT = pROXYPORT;
+		//TODO get from context
+//		PROXYHOST = pROXYHOST;
+//		PROXYPASS = pROXYPASS;
+//		PROXYUSER = pROXYUSER;
+//		PROXYPORT = pROXYPORT;
 		NLHost=pNLHost;
 		NLStat=new NLGlobalStat();
 		projectname=GetProjecName();
