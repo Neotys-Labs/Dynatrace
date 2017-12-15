@@ -214,7 +214,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 			pluginData.StopTimer();
 
 		if (dynatrace != null)
-			dynatrace.SetTestToStop();
+			dynatrace.setTestToStop();
 	}
 
 }

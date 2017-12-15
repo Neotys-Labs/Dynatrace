@@ -2,27 +2,27 @@ package com.neotys.dynatrace.DynatraceMonitoring;
 
 public class DynatraceMetric {
 
-	private String Unit;
-	private double Value;
+	private String unit;
+	private double value;
 	private long time;
-	private String MetricName;
-	private String TimeSeries;
-	private String EntityId;
+	private String metricName;
+	private String timeSeries;
+	private String entityId;
 	
 	public String getUnit() {
-		return Unit;
+		return unit;
 	}
 
 	public void setUnit(String unit) {
-		Unit = unit;
+		this.unit = unit;
 	}
 
 	public double getValue() {
-		return Value;
+		return value;
 	}
 
 	public void setValue(double value) {
-		Value = value;
+		this.value = value;
 	}
 
 	public long getTime() {
@@ -34,41 +34,41 @@ public class DynatraceMetric {
 	}
 
 	public String getMetricName() {
-		return MetricName;
+		return metricName;
 	}
 
 	public void setMetricName(String metricName) {
-		MetricName = metricName;
+		this.metricName = metricName;
 	}
 	public String getTimeseries() {
-		return TimeSeries;
+		return timeSeries;
 	}
 
 	public void setTimeSeries(String metricName) {
-		TimeSeries = metricName;
+		timeSeries = metricName;
 	}
 
 	public String getEntityID() {
-		return EntityId;
+		return entityId;
 	}
 
 	public void setEntityId(String metricName) {
-		EntityId = metricName;
+		entityId = metricName;
 	}
 	public DynatraceMetric(String unit, double value, long time, String metricName, String  strTimeSeries, String Entity) {
 		super();
-		Unit = unit;
-		Value = value;
+		this.unit = unit;
+		this.value = value;
 		this.time = time;
-		MetricName = metricName;
-		TimeSeries=strTimeSeries;
-		EntityId=Entity;
+		this.metricName = metricName;
+		timeSeries =strTimeSeries;
+		entityId =Entity;
 	}
 	public DynatraceMetric(String unit, String  strTimeSeries,  String metricName) {
 		super();
-		Unit = unit;
-		MetricName = metricName;
-		TimeSeries=strTimeSeries;
+		this.unit = unit;
+		this.metricName = metricName;
+		timeSeries =strTimeSeries;
 	}
 	
 }
