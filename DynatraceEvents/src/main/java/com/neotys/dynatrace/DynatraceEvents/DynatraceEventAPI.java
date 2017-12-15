@@ -212,9 +212,9 @@ public class DynatraceEventAPI {
 		+ "\"customProperties\":"
 		+ "{ \"ScriptName\": \""+NLProject+"\","
 		+ "\"NeoLoad_TestName\":\""+TestName+"\","
-		+ "\"NeoLoad_URL\":\""+NLURL_START+NLSaas+"\","
+	//	+ "\"NeoLoad_URL\":\""+NLURL_START+NLSaas+"\","
 //-----------wait for patch on the dynatrace UI to send the exact link
-	//	+ "\"NeoLoad_URL\":\""+GetNLURL()+TestID+"\","
+		+ "\"NeoLoad_URL\":\""+GetNLURL()+TestID+"\","
 		+ "\"NeoLoad_Scenario\":\""+NLScenarioName+"\"}"
 			+ "}";
 			  
