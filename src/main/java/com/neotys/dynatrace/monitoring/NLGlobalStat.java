@@ -487,7 +487,7 @@ public class NLGlobalStat {
 	
 	private long lasduration=0;
 
-	public void SetStatus(String MetricName)
+	public void setStatus(String MetricName)
 	{
 		switch(MetricName){
 			case LastRequestCountPerSecond_Component:

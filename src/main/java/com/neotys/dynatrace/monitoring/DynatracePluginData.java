@@ -1,23 +1,18 @@
 package com.neotys.dynatrace.monitoring;
 
-import java.io.IOException;
-import java.util.Timer;
-
 import com.google.common.base.Optional;
-import org.apache.http.client.ClientProtocolException;
-
 import com.neotys.extensions.action.engine.Context;
-
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.ResultsApi;
+
+import java.util.Timer;
 
 public class DynatracePluginData {
     private static final String NEOLOAD_WEB_BASEURL = "https://neoload-api.saas.neotys.com/v1/";
     private static final int MAXDURATION_TIME = 2000;
     private static final String NL_TEST_RUNNING = "RUNNING";
     private static final int TIMER_FREQUENCY = 30000;
-    static final int TIMER_DELAY = 0;
-    private final Optional<String> proxyName;
+    private static final int TIMER_DELAY = 0;
 
     private Context neoLoadContext;
     private ApiClient neoLoadWebApiClient;
@@ -36,11 +31,11 @@ public class DynatracePluginData {
     private String dynatraceApplicationName;
     private Optional<String> nlManagedInstance;
     private Optional<String> dynatraceManagedHostname = null;
+    private final Optional<String> proxyName;
 
     public DynatracePluginData(final String dynataceApiKey, final String neoLoadWebApiKey,
                                final Optional<String> proxyName, final Context context, final String dynatraceId,
-                               final String neoLoadHost, final Optional<String> dynatraceManagedHostname, final Optional<String> nlInstance)
-            throws ClientProtocolException, DynatraceStatException, IOException {
+                               final String neoLoadHost, final Optional<String> dynatraceManagedHostname, final Optional<String> nlInstance) {
 
         this.dynataceApiKey = dynataceApiKey;
         dynatraceAccountId = dynatraceId;
@@ -49,13 +44,12 @@ public class DynatracePluginData {
         neoLoadWebApiClient = new ApiClient();
         neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
         neoLoadWebApiClient.setBasePath(NEOLOAD_WEB_BASEURL);
-        //TODO get from param
         this.dynatraceManagedHostname = dynatraceManagedHostname;
-		nlManagedInstance=nlInstance;
+        nlManagedInstance = nlInstance;
         initNeoLoadApi();
         //-------------------------
         neoLoadContext = context;
-        //TODO get from context
+        //TODO get from context ?
         this.proxyName = proxyName;
         this.neoLoadHost = neoLoadHost;
         neoLoadStat = new NLGlobalStat();
@@ -89,7 +83,7 @@ public class DynatracePluginData {
         timerDynatrace.cancel();
     }
 
-    public void resumeTimer() throws ClientProtocolException, DynatraceStatException, IOException {
+    public void resumeTimer() {
         timerDynatrace = new Timer();
         neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(), testName, neoLoadHost, dynatraceManagedHostname, nlManagedInstance);
         timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
