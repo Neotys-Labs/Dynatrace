@@ -1,11 +1,6 @@
 package com.neotys.dynatrace.monitoring;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.events.DynatraceEventOption;
 import com.neotys.extensions.action.ActionParameter;
@@ -13,6 +8,10 @@ import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Logger;
 import com.neotys.extensions.action.engine.SampleResult;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static com.neotys.action.argument.Arguments.getArgumentLogString;
 import static com.neotys.action.argument.Arguments.parseArguments;
@@ -70,9 +69,9 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
                     return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
                 }
 
-                pluginData.StartTimer();
+                pluginData.startTimer();
             } else {
-                pluginData.ResumeTimer();
+                pluginData.resumeTimer();
             }
 
             long startTs = System.currentTimeMillis() - context.getElapsedTime();
@@ -81,7 +80,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
-            pluginData.StopTimer();
+            pluginData.stopTimer();
 
             //---check if aggregator exists
             // startimer
@@ -98,7 +97,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     public void stopExecute() {
         // TODO add code executed when the test have to stop.
         if (pluginData != null)
-            pluginData.StopTimer();
+            pluginData.stopTimer();
 
         if (dynatrace != null)
             dynatrace.setTestToStop();

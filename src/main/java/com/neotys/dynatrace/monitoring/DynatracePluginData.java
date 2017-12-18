@@ -12,163 +12,108 @@ import io.swagger.client.ApiClient;
 import io.swagger.client.api.ResultsApi;
 
 public class DynatracePluginData {
-	private final String NEOLOAD_WEB_BASEURL="https://neoload-api.saas.neotys.com/v1/";
-	private final int MAXDURATION_TIME=2000;
-	
-	private String DynataceAPIKEY;
-	private ApiClient NeoLoadWEB_API_CLIENT;
-	private String PROXYHOST;
-	private String PROXYPASS;
-	private String PROXYUSER;
-	private String PROXYPORT;
-	private Context NLContext;
-	private ResultsApi NLWEBresult;
-	private String TestID=null;
-	private NeoLoadStatAggregator NLaggregator=null;
-	private static String NL_TEST_RUNNING="RUNNING";
-	private String projectname;
-	private NLGlobalStat NLStat=null;
-	private String Dynatrace_AccountID=null;
+    private static final String NEOLOAD_WEB_BASEURL = "https://neoload-api.saas.neotys.com/v1/";
+    private static final int MAXDURATION_TIME = 2000;
+    private static final String NL_TEST_RUNNING = "RUNNING";
+    private static final int TIMER_FREQUENCY = 30000;
+    static final int TIMER_DELAY = 0;
+    private final Optional<String> proxyName;
 
-	private String TestName=null;
-	private String DynatraceApplicationNAme;
-	static final int TIMERFREQUENCY=30000;
-	static final int TIMERDELAY=0;
-	Timer timerDynatrace= null ;
-	private final String NLHost;
-	private String NL_Managed_Instance;
-	private String 	Dynatrace_Managed_Hostname=null;
-	
-	public DynatracePluginData(String strDynatraceAPIKEY, String neoLoadWEB_APIKEY,
-							   Optional<String> proxyName, Context pContext, String DynatraceID, String pNLHost, Optional<String> dynatracemanaged, Optional<String> nlInstance)
-			throws ClientProtocolException, DynatraceStatException, IOException {
-	
-		DynataceAPIKEY = strDynatraceAPIKEY;
-		Dynatrace_AccountID=DynatraceID;
-		
-		//----define  the NLWEB API-----
-		NeoLoadWEB_API_CLIENT = new ApiClient();
-		NeoLoadWEB_API_CLIENT.setApiKey(neoLoadWEB_APIKEY);
-		NeoLoadWEB_API_CLIENT.setBasePath(NEOLOAD_WEB_BASEURL);
-		//TODO get from param
-//		Dynatrace_Managed_Hostname=dynatracemanaged;
-//		NL_Managed_Instance=nlInstance;
-		InitNLAPi();
-		//-------------------------
-		NLContext = pContext;
-		//TODO get from context
-//		PROXYHOST = pROXYHOST;
-//		PROXYPASS = pROXYPASS;
-//		PROXYUSER = pROXYUSER;
-//		PROXYPORT = pROXYPORT;
-		NLHost=pNLHost;
-		NLStat=new NLGlobalStat();
-		projectname=GetProjecName();
-		TestName=GetTestName();
+    private Context neoLoadContext;
+    private ApiClient neoLoadWebApiClient;
+    private ResultsApi nlwebResult;
+    private NeoLoadStatAggregator neoLoadAggregator = null;
+    private NLGlobalStat neoLoadStat = null;
+    Timer timerDynatrace = null;
 
-		if(TestID==null)
-		{
-			setTestID(GetTestID());
-			NLStat=new NLGlobalStat();
-			if(NLaggregator==null)
-				NLaggregator=new NeoLoadStatAggregator(DynataceAPIKEY, projectname,Dynatrace_AccountID,NLWEBresult,TestID,NLStat,GetTestScenarioName(),TestName,NLHost,Dynatrace_Managed_Hostname,NL_Managed_Instance);
-		}
-	}	
-	
-	private void setTestID(String pTestID)
-	{
-		TestID=pTestID;
-	}
-	
-	public void SetProjectName(String ProjectName)
-	{
-		projectname=ProjectName;
-	}
-	
-	
-	
-	public DynatracePluginData(String strDynatraceAPIKEY, String neoLoadWEB_APIKEY,Context pContext,String DynatraceID,String pNLHost,String dynatracemanaged,String nlInstance) throws ClientProtocolException, DynatraceStatException, IOException {
-		super();
-		DynataceAPIKEY = strDynatraceAPIKEY;
-		Dynatrace_AccountID=DynatraceID;
-		NLContext = pContext;
-		//----define  the NLWEB API-----
-		NeoLoadWEB_API_CLIENT = new ApiClient();
-		NeoLoadWEB_API_CLIENT.setApiKey(neoLoadWEB_APIKEY);
-		NeoLoadWEB_API_CLIENT.setBasePath(NEOLOAD_WEB_BASEURL);
-		NL_Managed_Instance=nlInstance;
-		NLHost=pNLHost;
-		Dynatrace_Managed_Hostname=dynatracemanaged;
-		NLStat=new NLGlobalStat();
-		InitNLAPi();
-		NLStat=new NLGlobalStat();
-		projectname=GetProjecName();
-		TestName=GetTestName();
-		if(TestID==null) {
-			setTestID(GetTestID());
+    private final String neoLoadHost;
 
-			if(NLaggregator==null)
-				NLaggregator=new NeoLoadStatAggregator(DynataceAPIKEY, projectname,Dynatrace_AccountID,NLWEBresult,TestID,NLStat,GetTestScenarioName(),TestName,NLHost,Dynatrace_Managed_Hostname,NL_Managed_Instance);
-		}
-	}
-	
-	public void StartTimer()
-	{
-		timerDynatrace = new Timer();
-		timerDynatrace.scheduleAtFixedRate(NLaggregator,TIMERDELAY,TIMERFREQUENCY);
-	}
+    private String dynataceApiKey;
+    private String testId = null;
+    private String projectname;
+    private String dynatraceAccountId = null;
+    private String testName = null;
+    private String dynatraceApplicationName;
+    private Optional<String> nlManagedInstance;
+    private Optional<String> dynatraceManagedHostname = null;
 
-	public void StopTimer()
-	{
-		timerDynatrace.cancel();
-	}
-	
-	public void ResumeTimer() throws ClientProtocolException, DynatraceStatException, IOException
-	{
-		timerDynatrace = new Timer();
-		NLaggregator=new NeoLoadStatAggregator(DynataceAPIKEY, projectname,Dynatrace_AccountID,NLWEBresult,TestID,NLStat,GetTestScenarioName(),TestName,NLHost,Dynatrace_Managed_Hostname,NL_Managed_Instance);
-		timerDynatrace.scheduleAtFixedRate(NLaggregator,TIMERDELAY,TIMERFREQUENCY);
-	}
-	
-	private void InitNLAPi()
-	{
-		NLWEBresult=new ResultsApi(NeoLoadWEB_API_CLIENT);
-	}
-	
-	/*private boolean IsTimeCloseEnougth(long NLWebduration)
-	{
-		boolean result=false;
-		
-		long NLduration=NLContext.getElapsedTime();
-		//---convert the test NLwebduration in milliseconds
-		NLWebduration=NLWebduration*1000;
-		if(NLduration-NLWebduration<MAXDURATION_TIME)
-			result=true;
-		
-		return result;
-	}*/
-	 private String GetTestName()
-	 {
-		 String ProjectName;
-		 return ProjectName=NLContext.getTestName();
-	 }
-	 private String GetTestScenarioName()
-	 {
-		 String ProjectName;
-		 return ProjectName=NLContext.getScenarioName();
-	 }
-	 private String GetProjecName()
-	 {
-		 String ProjectName;
-		 return ProjectName=NLContext.getProjectName();
-	 }
+    public DynatracePluginData(final String dynataceApiKey, final String neoLoadWebApiKey,
+                               final Optional<String> proxyName, final Context context, final String dynatraceId,
+                               final String neoLoadHost, final Optional<String> dynatraceManagedHostname, final Optional<String> nlInstance)
+            throws ClientProtocolException, DynatraceStatException, IOException {
 
-	
-	private String GetTestID() 
-	{
-		String TestID;
-		TestID=NLContext.getTestId();
-		return TestID;
-		
-	}
+        this.dynataceApiKey = dynataceApiKey;
+        dynatraceAccountId = dynatraceId;
+
+        //----define  the NLWEB API-----
+        neoLoadWebApiClient = new ApiClient();
+        neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
+        neoLoadWebApiClient.setBasePath(NEOLOAD_WEB_BASEURL);
+        //TODO get from param
+        this.dynatraceManagedHostname = dynatraceManagedHostname;
+		nlManagedInstance=nlInstance;
+        initNeoLoadApi();
+        //-------------------------
+        neoLoadContext = context;
+        //TODO get from context
+        this.proxyName = proxyName;
+        this.neoLoadHost = neoLoadHost;
+        neoLoadStat = new NLGlobalStat();
+        projectname = getProjecName();
+        testName = getTestName();
+
+        if (testId == null) {
+            setTestId(getTestId());
+            neoLoadStat = new NLGlobalStat();
+            if (neoLoadAggregator == null)
+                neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname,
+                        dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(),
+                        testName, neoLoadHost, dynatraceManagedHostname, nlManagedInstance);
+        }
+    }
+
+    private void setTestId(final String testId) {
+        this.testId = testId;
+    }
+
+    public void setProjectName(final String projectName) {
+        projectname = projectName;
+    }
+
+    public void startTimer() {
+        timerDynatrace = new Timer();
+        timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
+    }
+
+    public void stopTimer() {
+        timerDynatrace.cancel();
+    }
+
+    public void resumeTimer() throws ClientProtocolException, DynatraceStatException, IOException {
+        timerDynatrace = new Timer();
+        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(), testName, neoLoadHost, dynatraceManagedHostname, nlManagedInstance);
+        timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
+    }
+
+    private void initNeoLoadApi() {
+        nlwebResult = new ResultsApi(neoLoadWebApiClient);
+    }
+
+    private String getTestName() {
+        return neoLoadContext.getTestName();
+    }
+
+    private String getTestScenarioName() {
+        return neoLoadContext.getScenarioName();
+    }
+
+    private String getProjecName() {
+        return neoLoadContext.getProjectName();
+    }
+
+
+    private String getTestId() {
+        return neoLoadContext.getTestId();
+
+    }
 }

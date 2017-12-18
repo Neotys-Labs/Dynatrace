@@ -1,6 +1,7 @@
 package com.neotys.dynatrace.monitoring;
 
 
+import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
@@ -74,15 +75,15 @@ public class NeoLoadStatAggregator extends TimerTask {
 		param.put("Api-Token", Dynatrace_API_KEY);
 	}
 
-	public NeoLoadStatAggregator(String pDynatraceAPIKeyY, String pĈomponentName, String StrDynatraceAccoundID, ResultsApi pNLWEBresult, String pTestID, NLGlobalStat pNLStat, String ScenarioName, String pTestName, String pNLControllerHost, String dynatracemanaged, String Nlinstance) throws ClientProtocolException, DynatraceStatException, IOException {
+	public NeoLoadStatAggregator(String pDynatraceAPIKeyY, String pĈomponentName, String StrDynatraceAccoundID, ResultsApi pNLWEBresult, String pTestID, NLGlobalStat pNLStat, String ScenarioName, String pTestName, String pNLControllerHost, Optional<String> dynatracemanaged, Optional<String> Nlinstance) throws ClientProtocolException, DynatraceStatException, IOException {
 		ComponentsName = "Statistics";
 		Dynatrace_API_KEY = pDynatraceAPIKeyY;
 		NLStat = pNLStat;
 		TestID = pTestID;
 		TestName = pTestName;
-		NL_Instance = Nlinstance;
+		NL_Instance = Nlinstance.get();
 		NLWEBresult = pNLWEBresult;
-		Dynatrace_Managed_Hostname = dynatracemanaged;
+		Dynatrace_Managed_Hostname = dynatracemanaged.get();
 		Dynatrace_AccountID = StrDynatraceAccoundID;
 		NLScenarioName = ScenarioName;
 		NLControllerHost = pNLControllerHost;
