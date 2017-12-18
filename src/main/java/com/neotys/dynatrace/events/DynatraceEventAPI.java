@@ -26,8 +26,7 @@ class DynatraceEventAPI {
 
 	private static final String DYNATRACE_EVENTS_API_URL = "events";
 	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
-	private static final String DynatraceApplication = "entity/services";
-
+	private static final String DYNATRACE_APPLICATION = "entity/services";
 	private static final String NL_RUL_LAST = "/#!result/overview/?benchId=";
 	private static final String DYNATRACE_PROTOCOL = "https://";
 	private static final String START_NL_TEST = "Start NeoLoad Test";
@@ -90,7 +89,7 @@ class DynatraceEventAPI {
 
 	private List<String> getApplicationEntityId(final Optional<String> tagsParameter) throws DynatraceException, IOException, URISyntaxException {
 		final String tags = getTags(tagsParameter);
-		final String dynatraceUrl = getDynatraceApiUrl() + DynatraceApplication;
+		final String dynatraceUrl = getDynatraceApiUrl() + DYNATRACE_APPLICATION;
 		final Map<String, String> parameters = new HashMap<>();
 		parameters.put("tag", tags);
 		addTokenInParameters(parameters);
@@ -99,24 +98,17 @@ class DynatraceEventAPI {
 
 		final Optional<Proxy> proxy = getProxy(proxyName, dynatraceUrl);
 		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters, proxy);
-		List<String> applicationEntityId;
+		final List<String> applicationEntityId = new ArrayList<>();;
 		try {
 			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
 			if (jsonArrayResponse != null) {
-				applicationEntityId = new ArrayList<>();
 				for (int i = 0; i < jsonArrayResponse.length(); i++) {
 					final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
-					if (jsonApplication.has("entityId")) {
-						if (jsonApplication.has("displayName")) {
-							applicationEntityId.add(jsonApplication.getString("entityId"));
-						}
+					if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
+						applicationEntityId.add(jsonApplication.getString("entityId"));
 					}
 				}
 			} else {
-				applicationEntityId = null;
-			}
-
-			if (applicationEntityId == null) {
 				throw new DynatraceException("No Application find in The Dynatrace Account with the name " + tagsParameter.or(""));
 			}
 		} finally {
@@ -225,7 +217,6 @@ class DynatraceEventAPI {
 				break;
 			default:
 				exceptionMessage = null;
-
 		}
 		return exceptionMessage;
 	}

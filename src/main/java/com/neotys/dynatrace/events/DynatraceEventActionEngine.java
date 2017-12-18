@@ -22,10 +22,6 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 	@Override
 	public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
 		final SampleResult sampleResult = new SampleResult();
-		// TODO logs, what are the request and the response?
-		// TODO handle proxy to access Dynatrace
-		final StringBuilder requestBuilder = new StringBuilder();
-		final StringBuilder responseBuilder = new StringBuilder();
 
 		final Map<String, Optional<String>> parsedArgs;
 		try {
@@ -55,9 +51,7 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 			return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
 		}
 		sampleResult.sampleEnd();
-
-		sampleResult.setRequestContent(requestBuilder.toString());
-		sampleResult.setResponseContent(responseBuilder.toString());
+		sampleResult.setResponseContent("Event sent");
 		return sampleResult;
 	}
 
