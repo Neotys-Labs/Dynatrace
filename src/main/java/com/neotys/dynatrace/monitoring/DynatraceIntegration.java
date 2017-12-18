@@ -119,6 +119,7 @@ public class DynatraceIntegration {
 
 	}
 
+	// TODO why is it not used?
 	private void configureHttpsfordynatrace() throws NoSuchAlgorithmException, KeyManagementException {
 		httpGenerator.setAllowHostnameSSL();
 	}
