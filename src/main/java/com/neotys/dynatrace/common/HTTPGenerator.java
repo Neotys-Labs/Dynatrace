@@ -1,5 +1,7 @@
 package com.neotys.dynatrace.common;
 
+import com.google.common.base.Optional;
+import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.*;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -53,12 +55,16 @@ public class HTTPGenerator {
 	public HTTPGenerator(final String httpMethod,
 						 final String url,
 						 final Map<String, String> headers,
-						 final Map<String, String> params)
+						 final Map<String, String> params,
+						 final Optional<Proxy> proxy)
 			throws MalformedURLException, URISyntaxException {
 		this.request = generateHttpRequest(httpMethod, url);
 		final boolean isHttps = url.contains("https");
 		this.httpClient = newHttpClient(isHttps);
 
+		if (proxy.isPresent()) {
+			initProxy(proxy.get(), url);
+		}
 		addHeaders(request, headers);
 		if (params != null && !params.isEmpty()) {
 			if (!Objects.equals(httpMethod, HTTP_GET_METHOD))
@@ -69,30 +75,18 @@ public class HTTPGenerator {
 		}
 	}
 
-	public HTTPGenerator(final String httpMethod, final String url, final String proxyHost, final String proxyPort,
-						 final String proxyUser, final String proxyPass, final Map<String, String> headers,
-						 final Map<String, String> Params) {
-		this.httpClient = new DefaultHttpClient();
-		HttpHost proxy = null;
-
-		if (url.contains("http")) {
-			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort), "http");
-		} else if (url.contains("https")) {
-			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort), "https");
+	private void initProxy(final Proxy proxy, final String url) {
+		final HttpHost proxyHttpHost;
+		if (url.startsWith("https")) {
+			proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "https");
+		} else {
+			proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "http");
 		}
-
-
-		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-		if (proxyUser != null) {
+		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHttpHost);
+		if (proxy.getLogin() != null) {
 			httpClient.getCredentialsProvider().setCredentials(
-					new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
-					new UsernamePasswordCredentials(proxyUser, proxyPass));
-		}
-
-		request = generateHttpRequest(httpMethod, url);
-		addHeaders(request, headers);
-		if (Params != null) {
-			request.setParams(generateParams(Params));
+					new AuthScope(proxy.getHost(), proxy.getPort()),
+					new UsernamePasswordCredentials(proxy.getLogin(), proxy.getPassword()));
 		}
 	}
 
@@ -100,9 +94,10 @@ public class HTTPGenerator {
 													 final String url,
 													 final Map<String, String> headers,
 													 final Map<String, String> params,
+													 final Optional<Proxy> proxy,
 													 final String jsonString)
 			throws MalformedURLException, URISyntaxException {
-		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params);
+		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params, proxy);
 		final StringEntity requestEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
 		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
 		return httpGenerator;

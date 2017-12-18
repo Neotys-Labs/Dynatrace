@@ -1,7 +1,9 @@
 package com.neotys.dynatrace.events;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.Map;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.extensions.action.engine.Proxy;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,16 +48,20 @@ class DynatraceEventAPI {
 	private final String dynatraceAccountID;
 	private final List<String> applicationEntityid;
 	private final Optional<String> dynatraceManagedHostname;
+	private final Optional<String> proxyName;
 	private final Context context;
 
 	DynatraceEventAPI(final Context context,
 					  final String dynatraceID,
 					  final String dynatraceAPIKEY,
 					  final Optional<String> dynatraceTags,
-					  final Optional<String> dynatraceManagedHostname) throws DynatraceException, IOException, URISyntaxException {
+					  final Optional<String> dynatraceManagedHostname,
+					  Optional<String> proxyName)
+			throws DynatraceException, IOException, URISyntaxException {
 		this.dynatraceAccountID = dynatraceID;
 		this.dynatraceApiKey = dynatraceAPIKEY;
 		this.dynatraceManagedHostname = dynatraceManagedHostname;
+		this.proxyName = proxyName;
 		this.headers = new HashMap<>();
 		this.applicationEntityid = getApplicationEntityId(dynatraceTags);
 		this.context = context;
@@ -88,14 +95,10 @@ class DynatraceEventAPI {
 		parameters.put("tag", tags);
 		addTokenInParameters(parameters);
 
-		//initHttpClient();
-	/*	if(! Strings.isNullOrEmpty(PROXYHOST)&&! Strings.isNullOrEmpty(PROXYPORT))
-			http=new HTTPGenerator(Url, "GET",PROXYHOST,PROXYPORT,PROXYUSER,PROXYPASS, headers,Parameters );
-		else*/
-
 		context.getLogger().debug("Getting application...");
 
-		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters);
+		final Optional<Proxy> proxy = getProxy(proxyName, dynatraceUrl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters, proxy);
 		List<String> applicationEntityId;
 		try {
 			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
@@ -119,11 +122,18 @@ class DynatraceEventAPI {
 		} finally {
 			http.closeHttpClient();
 		}
-		if(context.getLogger().isDebugEnabled()) {
+		if (context.getLogger().isDebugEnabled()) {
 			context.getLogger().debug("Found applications: " + applicationEntityId);
 		}
 
 		return applicationEntityId;
+	}
+
+	private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
+		if (proxyName.isPresent()) {
+			return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
+		}
+		return Optional.absent();
 	}
 
 	void sendStartTest() throws DynatraceException, IOException, URISyntaxException {
@@ -170,7 +180,8 @@ class DynatraceEventAPI {
 
 		context.getLogger().debug("dynatrace event JSON content : " + jsonString);
 
-		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, jsonString);
+		final Optional<Proxy> proxy = getProxy(proxyName, url);
+		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, jsonString);
 		try {
 			final int httpCode = insightHttp.executeAndGetResponseCode();
 			final String exceptionMessage = getExceptionMessageFromHttpCode(httpCode);

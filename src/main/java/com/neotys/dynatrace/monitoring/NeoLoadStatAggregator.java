@@ -3,6 +3,7 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
 import io.swagger.client.model.ElementValues;
@@ -171,7 +172,8 @@ public class NeoLoadStatAggregator extends TimerTask {
         Parameters.put("startTimestamp", String.valueOf(getUtcDate()));
         Parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
-        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, Parameters);
+        // TODO proxy
+        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, Parameters, Optional.<Proxy>absent());
 
         httpCode = httpGenerator.executeAndGetResponseCode();
         httpGenerator.closeHttpClient();
@@ -195,7 +197,8 @@ public class NeoLoadStatAggregator extends TimerTask {
                 + "\"dimensions\": [\"Neoload\"],"
                 + "\"types\":[\"" + type + "\"]}";
 
-        HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, jsonString);
+        // TODO proxy
+        HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
 
         try {
             httpCode = insightHttp.executeAndGetResponseCode();
@@ -290,7 +293,8 @@ public class NeoLoadStatAggregator extends TimerTask {
 
         if (i > 0) {
 
-			insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, jsonString);
+            // TODO proxy
+			insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
 
             try {
                 httpCode = insightHttp.executeAndGetResponseCode();

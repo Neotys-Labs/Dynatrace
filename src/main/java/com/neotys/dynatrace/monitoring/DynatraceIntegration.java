@@ -1,9 +1,9 @@
 package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.extensions.action.engine.Proxy;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClientFactory;
 import com.neotys.rest.dataexchange.model.ContextBuilder;
@@ -144,11 +144,8 @@ public class DynatraceIntegration {
 		parameters.put("tag", tags);
 		sendTokenIngetParam(parameters);
 		//initHttpClient();
-		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
-		} else {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
-		}
+		// TODO proxy
+		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, Optional.<Proxy>absent());
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {
@@ -206,11 +203,8 @@ public class DynatraceIntegration {
 		parameters.put("tag", tags);
 		sendTokenIngetParam(parameters);
 
-		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort))
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
-		else
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
-
+		// TODO proxy
+		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, Optional.<Proxy>absent());
 
 		jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonArray != null) {
@@ -239,15 +233,12 @@ public class DynatraceIntegration {
 		parameters.put("tag", tags);
 		sendTokenIngetParam(parameters);
 
-		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
-		} else {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
-		}
+		// TODO proxy
+		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, Optional.<Proxy>absent());
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {
-			dynatraceApplicationHostIds = new ArrayList<String>();
+			dynatraceApplicationHostIds = new ArrayList<>();
 			for (int i = 0; i < jsonObj.length(); i++) {
 				jsonApplication = jsonObj.getJSONObject(i);
 				if (jsonApplication.has("entityId")) {
@@ -443,11 +434,8 @@ public class DynatraceIntegration {
 		jsonEntities += "]}";
 
 
-		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, Url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
-		} else {
-			httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, Url, header, parameters, jsonEntities);
-		}
+		// TODO proxy
+		httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, Url, header, parameters, Optional.<Proxy>absent(), jsonEntities);
 
 		jsonApplication = httpGenerator.executeAnGetJsonResponse();
 		if (jsonApplication != null) {
@@ -507,11 +495,9 @@ public class DynatraceIntegration {
 		jsonEntities = jsonEntities.substring(0, jsonEntities.length() - 1);
 		jsonEntities += "]}";
 
-		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
-		} else {
-			httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, jsonEntities);
-		}
+
+		// TODO proxy
+		httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, Optional.<Proxy>absent(), jsonEntities);
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {

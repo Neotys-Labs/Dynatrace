@@ -9,7 +9,6 @@ import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Logger;
 import com.neotys.extensions.action.engine.SampleResult;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -58,16 +57,17 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             pluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
             if (pluginData == null) {
                 // Delay by two seconds to ensure no conflicts in re-establishing connection
-                try {
+                // TODO catch exceptions?
+//                try {
                     pluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
                             context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname, dataExchangeApiKey);
 
                     context.getCurrentVirtualUser().put("PLUGINDATA", pluginData);
                     //----bug to resolve on the senteventapi
                     //eventAPI.SendStartTest();
-                } catch (IOException e) {
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
-                }
+//                } catch (IOException e) {
+//                    return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
+//                }
 
                 pluginData.startTimer();
             } else {
