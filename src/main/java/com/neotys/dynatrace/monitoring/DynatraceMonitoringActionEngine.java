@@ -76,7 +76,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
             long startTs = System.currentTimeMillis() - context.getElapsedTime();
             logger.debug("Sending start test...");
-            dynatrace = new DynatraceIntegration(dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, proxyName, dynatraceManagedHostname, startTs);
+            dynatrace = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
