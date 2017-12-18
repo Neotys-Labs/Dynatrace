@@ -8,7 +8,6 @@ import io.swagger.client.api.ResultsApi;
 import java.util.Timer;
 
 public class DynatracePluginData {
-    private static final String NEOLOAD_WEB_BASEURL = "https://neoload-api.saas.neotys.com/v1/";
     private static final int MAXDURATION_TIME = 2000;
     private static final String NL_TEST_RUNNING = "RUNNING";
     private static final int TIMER_FREQUENCY = 30000;
@@ -21,7 +20,7 @@ public class DynatracePluginData {
     private NLGlobalStat neoLoadStat = null;
     Timer timerDynatrace = null;
 
-    private final String neoLoadHost;
+    private final String dataExchangeApiUrl;
 
     private String dynataceApiKey;
     private String testId = null;
@@ -29,13 +28,12 @@ public class DynatracePluginData {
     private String dynatraceAccountId = null;
     private String testName = null;
     private String dynatraceApplicationName;
-    private Optional<String> nlManagedInstance;
     private Optional<String> dynatraceManagedHostname = null;
     private final Optional<String> proxyName;
 
     public DynatracePluginData(final String dynataceApiKey, final String neoLoadWebApiKey,
                                final Optional<String> proxyName, final Context context, final String dynatraceId,
-                               final String neoLoadHost, final Optional<String> dynatraceManagedHostname, final Optional<String> nlInstance) {
+                               final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname) {
 
         this.dynataceApiKey = dynataceApiKey;
         dynatraceAccountId = dynatraceId;
@@ -43,15 +41,14 @@ public class DynatracePluginData {
         //----define  the NLWEB API-----
         neoLoadWebApiClient = new ApiClient();
         neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
-        neoLoadWebApiClient.setBasePath(NEOLOAD_WEB_BASEURL);
+        neoLoadWebApiClient.setBasePath(context.getWebPlatformApiUrl());
         this.dynatraceManagedHostname = dynatraceManagedHostname;
-        nlManagedInstance = nlInstance;
         initNeoLoadApi();
         //-------------------------
         neoLoadContext = context;
         //TODO get from context ?
         this.proxyName = proxyName;
-        this.neoLoadHost = neoLoadHost;
+        this.dataExchangeApiUrl = dataExchangeApiUrl;
         neoLoadStat = new NLGlobalStat();
         projectname = getProjecName();
         testName = getTestName();
@@ -62,7 +59,7 @@ public class DynatracePluginData {
             if (neoLoadAggregator == null)
                 neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname,
                         dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(),
-                        testName, neoLoadHost, dynatraceManagedHostname, nlManagedInstance);
+                        testName, dataExchangeApiUrl, dynatraceManagedHostname);
         }
     }
 
@@ -85,7 +82,7 @@ public class DynatracePluginData {
 
     public void resumeTimer() {
         timerDynatrace = new Timer();
-        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(), testName, neoLoadHost, dynatraceManagedHostname, nlManagedInstance);
+        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(), testName, dataExchangeApiUrl, dynatraceManagedHostname);
         timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
     }
 

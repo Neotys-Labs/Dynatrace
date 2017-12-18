@@ -66,9 +66,8 @@ public class NeoLoadStatAggregator extends TimerTask {
     private String applicationEntityId;
     private String nlScenarioName;
     private String dynatraceManagedHostName;
-    private String nlControllerHost;
+    private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
-    private String nlInstance;
 
     private void initHttpClient() {
         headerMap = new HashMap<String, String>();
@@ -85,19 +84,17 @@ public class NeoLoadStatAggregator extends TimerTask {
     public NeoLoadStatAggregator(final String dynatraceApiKey, final String componentName,
                                  final String dynatraceAccountId, final ResultsApi nlWebResult,
                                  final String testId, final NLGlobalStat neoLoadStat, final String scenarioName,
-                                 final String testName, final String nlControllerHost, final Optional<String> dynatraceManagedHostName,
-                                 final Optional<String> nlInstance) {
+                                 final String testName, final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostName) {
         componentsName = "Statistics";
         this.dynatraceApiKey = dynatraceApiKey;
         this.neoLoadStat = neoLoadStat;
         this.testId = testId;
         this.testName = testName;
-        this.nlInstance = nlInstance.get();
         this.nlWebResult = nlWebResult;
         this.dynatraceManagedHostName = dynatraceManagedHostName.get();
         this.dynatraceAccountId = dynatraceAccountId;
         nlScenarioName = scenarioName;
-        this.nlControllerHost = nlControllerHost;
+        this.dataExchangeApiUrl = dataExchangeApiUrl;
         initHttpClient();
     }
 
@@ -226,21 +223,16 @@ public class NeoLoadStatAggregator extends TimerTask {
     }
 
     private String getNlUrl() {
-        String result;
-        if (nlInstance != null) {
-            result = HTTPS + nlInstance + NEOLOAD_URL_LAST;
-        } else {
-            result = HTTPS + NEOLOAD_SAAS_NEOTYS_COM + NEOLOAD_URL_LAST;
-        }
-        return result;
+        // TODO get nl web front URL from context.
+        return HTTPS + NEOLOAD_SAAS_NEOTYS_COM + NEOLOAD_URL_LAST;
     }
 
     ///---------to update after the feedback from ANdy
     private void sendMetricToTimeSeriestApi(final List<String[]> data, final String type)
             throws DynatraceStatException, MalformedURLException, URISyntaxException {
         int httpCode;
-        HashMap<String, String> head = new HashMap<String, String>();
-        HashMap<String, String> parameters = new HashMap<String, String>();
+        HashMap<String, String> head = new HashMap<>();
+        HashMap<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
 
         addTokenIngetParam(parameters);
@@ -249,12 +241,9 @@ public class NeoLoadStatAggregator extends TimerTask {
         String exceptionMessage = null;
         long time = System.currentTimeMillis();
 
-        if ("localhost".equalsIgnoreCase(nlControllerHost)){
-            nlControllerHost = "10.0.1.0";
-        }
-
+        // DO we need to get controller host and put in ipAddresses.
         String jsonString = "{\"displayName\" : \"NeoLoad Data\","
-                + "\"ipAddresses\" : [\"" + nlControllerHost + "\"],"
+                + "\"ipAddresses\" : [\"" + dataExchangeApiUrl + "\"],"
                 + "\"listenPorts\" : [\"" + 7400 + "\"],"
                 + "\"type\" : \"" + type + "\","
                 + "\"favicon\" : \"" + NL_PICTURE_URL + "\","

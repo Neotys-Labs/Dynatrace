@@ -60,7 +60,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
                 // TODO catch exceptions?
 //                try {
                     pluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
-                            context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname, dataExchangeApiKey);
+                            context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname);
 
                     context.getCurrentVirtualUser().put("PLUGINDATA", pluginData);
                     //----bug to resolve on the senteventapi
