@@ -17,6 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimerTask;
 
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_PUT_METHOD;
+
 
 public class NeoLoadStatAggregator extends TimerTask {
 	private HashMap<String, String> Header = null;
@@ -178,7 +182,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 		Parameters.put("startTimestamp", String.valueOf(GetUTCDate()));
 		Parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
-		http = new HTTPGenerator(Url, "GET", Header, Parameters);
+		http = new HTTPGenerator(Url, HTTP_GET_METHOD, Header, Parameters);
 
 		httpcode = http.executeAndGetResponseCode();
 		if (httpcode != HTTP_RESPONSE)
@@ -212,7 +216,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 				+ "\"dimensions\": [\"Neoload\"],"
 				+ "\"types\":[\"" + Type + "\"]}";
 
-		Insight_HTTP = new HTTPGenerator("PUT", URL, head, Parameters, JSON_String);
+		Insight_HTTP = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, URL, head, Parameters, JSON_String);
 
 		try {
 			httpcode = Insight_HTTP.executeAndGetResponseCode();
@@ -308,7 +312,7 @@ public class NeoLoadStatAggregator extends TimerTask {
 
 		if (i > 0) {
 
-			Insight_HTTP = new HTTPGenerator("POST", URL, head, Parameters, JSON_String);
+			Insight_HTTP = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, URL, head, Parameters, JSON_String);
 
 			try {
 				httpcode = Insight_HTTP.executeAndGetResponseCode();

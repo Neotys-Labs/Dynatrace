@@ -23,6 +23,9 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
+
 public class DynatraceIntegration {
 	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
 	private static final String DYNATRACE_APPLICATION = "entity/services";
@@ -81,11 +84,11 @@ public class DynatraceIntegration {
 		getDynatraceData();
 	}
 
-    public DynatraceIntegration(String dynatraceApiKey, String dynatraceId, Optional<String> dynatraceTags, String dataExchangeApiUrl, Optional<String> proxyName, Optional<String> dynatraceManagedHostname, long startTs) {
-    // TODO Implement
+	public DynatraceIntegration(String dynatraceApiKey, String dynatraceId, Optional<String> dynatraceTags, String dataExchangeApiUrl, Optional<String> proxyName, Optional<String> dynatraceManagedHostname, long startTs) {
+		// TODO Implement
 	}
 
-    private boolean isRelevantDimension(JSONArray array) {
+	private boolean isRelevantDimension(JSONArray array) {
 		boolean result = false;
 		for (String listItem : relevantDimensions) {
 			for (int i = 0; i < array.length(); i++) {
@@ -142,9 +145,9 @@ public class DynatraceIntegration {
 		sendTokenIngetParam(parameters);
 		//initHttpClient();
 		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(url, "GET", proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
 		} else {
-			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
 		}
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
@@ -204,9 +207,9 @@ public class DynatraceIntegration {
 		sendTokenIngetParam(parameters);
 
 		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort))
-			httpGenerator = new HTTPGenerator(url, "GET", proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
 		else
-			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
 
 
 		jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
@@ -237,9 +240,9 @@ public class DynatraceIntegration {
 		sendTokenIngetParam(parameters);
 
 		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(url, "GET", proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
 		} else {
-			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters);
 		}
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
@@ -441,9 +444,9 @@ public class DynatraceIntegration {
 
 
 		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(Url, "GET", proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, Url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
 		} else {
-			httpGenerator = new HTTPGenerator("POST", Url, header, parameters, jsonEntities);
+			httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, Url, header, parameters, jsonEntities);
 		}
 
 		jsonApplication = httpGenerator.executeAnGetJsonResponse();
@@ -505,9 +508,9 @@ public class DynatraceIntegration {
 		jsonEntities += "]}";
 
 		if (!Strings.isNullOrEmpty(proxyHost) && !Strings.isNullOrEmpty(proxyPort)) {
-			httpGenerator = new HTTPGenerator(url, "GET", proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
+			httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, proxyHost, proxyPort, proxyUser, proxyPass, header, parameters);
 		} else {
-			httpGenerator = new HTTPGenerator("POST", url, header, parameters, jsonEntities);
+			httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, jsonEntities);
 		}
 
 		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();

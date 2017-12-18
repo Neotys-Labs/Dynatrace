@@ -15,6 +15,9 @@ import org.json.JSONObject;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.extensions.action.engine.Context;
 
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
+
 
 class DynatraceEventAPI {
 
@@ -92,35 +95,35 @@ class DynatraceEventAPI {
 
 		context.getLogger().debug("Getting application...");
 
-		final HTTPGenerator http = new HTTPGenerator(dynatraceUrl, "GET", headers, parameters);
-		List<String> applicationEntityid;
+		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters);
+		List<String> applicationEntityId;
 		try {
 			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
 			if (jsonArrayResponse != null) {
-				applicationEntityid = new ArrayList<>();
+				applicationEntityId = new ArrayList<>();
 				for (int i = 0; i < jsonArrayResponse.length(); i++) {
 					final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
 					if (jsonApplication.has("entityId")) {
 						if (jsonApplication.has("displayName")) {
-							applicationEntityid.add(jsonApplication.getString("entityId"));
+							applicationEntityId.add(jsonApplication.getString("entityId"));
 						}
 					}
 				}
 			} else {
-				applicationEntityid = null;
+				applicationEntityId = null;
 			}
 
-			if (applicationEntityid == null) {
+			if (applicationEntityId == null) {
 				throw new DynatraceException("No Application find in The Dynatrace Account with the name " + tagsParameter.or(""));
 			}
 		} finally {
 			http.closeHttpClient();
 		}
 		if(context.getLogger().isDebugEnabled()) {
-			context.getLogger().debug("Found applications: " + applicationEntityid);
+			context.getLogger().debug("Found applications: " + applicationEntityId);
 		}
 
-		return applicationEntityid;
+		return applicationEntityId;
 	}
 
 	void sendStartTest() throws DynatraceException, IOException, URISyntaxException {
@@ -167,7 +170,7 @@ class DynatraceEventAPI {
 
 		context.getLogger().debug("dynatrace event JSON content : " + jsonString);
 
-		final HTTPGenerator insightHttp = new HTTPGenerator("POST", url, headers, parameters, jsonString);
+		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, jsonString);
 		try {
 			final int httpCode = insightHttp.executeAndGetResponseCode();
 			final String exceptionMessage = getExceptionMessageFromHttpCode(httpCode);

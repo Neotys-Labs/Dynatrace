@@ -27,7 +27,10 @@ import org.json.JSONObject;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -39,117 +42,104 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HTTPGenerator {
-	private final static String HTTP_GET_METHOD = "GET";
-	private final static String HTTP_POST_METHOD = "POST";
-	private final static String HTTP_OPTION_METHOD = "OPTION";
-	private final static String HTTP_PUT_METHOD = "PUT";
+	public final static String HTTP_GET_METHOD = "GET";
+	public final static String HTTP_POST_METHOD = "POST";
+	public final static String HTTP_OPTION_METHOD = "OPTION";
+	public final static String HTTP_PUT_METHOD = "PUT";
 
 	private final DefaultHttpClient httpClient;
-	private final String httpMethod;
-	private String url;
-	private HttpRequestBase request;
-	private int statusCode = 0;
+	private final HttpRequestBase request;
 
-	@SuppressWarnings("deprecation")
-	public HTTPGenerator(final String url, final String method, final Map<String, String> headers, final Map<String, String> params) throws MalformedURLException, URISyntaxException {
-		this.httpMethod = method;
-		this.url = url;
+	public HTTPGenerator(final String httpMethod,
+						 final String url,
+						 final Map<String, String> headers,
+						 final Map<String, String> params)
+			throws MalformedURLException, URISyntaxException {
+		this.request = generateHttpRequest(httpMethod, url);
+		final boolean isHttps = url.contains("https");
+		this.httpClient = newHttpClient(isHttps);
 
-		request = generateHttpRequest(httpMethod, this.url);
-		request = generateHeaders(headers, request);
+		addHeaders(request, headers);
 		if (params != null && !params.isEmpty()) {
-			if (!Objects.equals(httpMethod, "GET"))
+			if (!Objects.equals(httpMethod, HTTP_GET_METHOD))
 				request.setParams(generateParams(params));
 			else {
-				this.url = addGetParametersToUrl(url, params);
-				request.setURI(new URL(this.url).toURI());
+				setRequestUrl(request, url, params);
 			}
 		}
-		if (this.url.contains("https")) {
-			DefaultHttpClient Client = new DefaultHttpClient();
-			HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-			SchemeRegistry registry = new SchemeRegistry();
-			SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-			socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-			registry.register(new Scheme("https", socketFactory, 443));
-			SingleClientConnManager mgr = new SingleClientConnManager(Client.getParams(), registry);
-			httpClient = new DefaultHttpClient(mgr, Client.getParams());
-
-			// Set verifier
-			HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
-
-		} else {
-			httpClient = new DefaultHttpClient();
-			httpClient.getConnectionManager();
-		}
-
 	}
 
-	@SuppressWarnings("deprecation")
-	public HTTPGenerator(final String method, final String url, final Map<String, String> headers, final Map<String, String> params, final String jsonString) throws MalformedURLException, URISyntaxException {
-		this.httpMethod = method;
-		this.url = url;
-		this.request = generateHttpRequest(httpMethod, this.url);
-		this.request = generateHeaders(headers, request);
-		this.url = addGetParametersToUrl(url, params);
-		this.request.setURI(new URL(this.url).toURI());
-
-		final StringEntity requestEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
-		setJsonParameter(requestEntity, request);
-
-		if (this.url.contains("https")) {
-			DefaultHttpClient Client = new DefaultHttpClient();
-			HostnameVerifier hostnameVerifier = org.apache.http.conn.ssl.SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-
-			SchemeRegistry registry = new SchemeRegistry();
-			SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-			socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
-			registry.register(new Scheme("https", socketFactory, 443));
-			SingleClientConnManager mgr = new SingleClientConnManager(Client.getParams(), registry);
-			this.httpClient = new DefaultHttpClient(mgr, Client.getParams());
-
-			// Set verifier
-			HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-
-		} else {
-			this.httpClient = new DefaultHttpClient();
-			this.httpClient.getConnectionManager();
-		}
-
-	}
-
-	public HTTPGenerator(final String url, final String method, final String proxyHost, final String proxyPort,
+	public HTTPGenerator(final String httpMethod, final String url, final String proxyHost, final String proxyPort,
 						 final String proxyUser, final String proxyPass, final Map<String, String> headers,
 						 final Map<String, String> Params) {
 		this.httpClient = new DefaultHttpClient();
-		this.url = url;
-		this.httpMethod = method;
 		HttpHost proxy = null;
 
-		if (url.contains("http"))
+		if (url.contains("http")) {
 			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort), "http");
-		else if (url.contains("https"))
+		} else if (url.contains("https")) {
 			proxy = new HttpHost(proxyHost, Integer.parseInt(proxyPort), "https");
+		}
 
 
 		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		if (proxyUser != null) {
-
 			httpClient.getCredentialsProvider().setCredentials(
 					new AuthScope(proxyHost, Integer.parseInt(proxyPort)),
 					new UsernamePasswordCredentials(proxyUser, proxyPass));
 		}
 
-		request = generateHttpRequest(httpMethod, this.url);
-		request = generateHeaders(headers, request);
+		request = generateHttpRequest(httpMethod, url);
+		addHeaders(request, headers);
 		if (Params != null) {
 			request.setParams(generateParams(Params));
 		}
 	}
 
-	private void setJsonParameter(final StringEntity JsonContent, final HttpRequestBase request) {
+	public static HTTPGenerator newJsonHttpGenerator(final String httpMethod,
+													 final String url,
+													 final Map<String, String> headers,
+													 final Map<String, String> params,
+													 final String jsonString)
+			throws MalformedURLException, URISyntaxException {
+		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params);
+		final StringEntity requestEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
+		return httpGenerator;
+	}
+
+	private static void setRequestUrl(final HttpRequestBase request, final String url, final Map<String, String> params)
+			throws URISyntaxException, MalformedURLException {
+		final String urlWithParameters = addGetParametersToUrl(url, params);
+		request.setURI(new URL(urlWithParameters).toURI());
+	}
+
+	private static DefaultHttpClient newHttpClient(final boolean isHttps) {
+		if (isHttps) {
+			return newHttpsClient();
+		} else {
+			final DefaultHttpClient httpClient = new DefaultHttpClient();
+			httpClient.getConnectionManager();
+			return httpClient;
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private static DefaultHttpClient newHttpsClient() {
+		final DefaultHttpClient Client = new DefaultHttpClient();
+		final HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+
+		final SchemeRegistry registry = new SchemeRegistry();
+		final SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+		socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		registry.register(new Scheme("https", socketFactory, 443));
+		final SingleClientConnManager mgr = new SingleClientConnManager(Client.getParams(), registry);
+		// Set verifier
+		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+		return new DefaultHttpClient(mgr, Client.getParams());
+	}
+
+	private static void addJsonParameters(final HttpRequestBase request, final StringEntity JsonContent, final String httpMethod) {
 		switch (httpMethod) {
 			case HTTP_POST_METHOD:
 				((HttpPost) request).setEntity(JsonContent);
@@ -161,6 +151,7 @@ public class HTTPGenerator {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	private HttpParams generateParams(final Map<String, String> params) {
 		if (params != null) {
 			HttpParams result = new BasicHttpParams();
@@ -171,13 +162,12 @@ public class HTTPGenerator {
 		} else return null;
 	}
 
-	private HttpRequestBase generateHeaders(final Map<String, String> headersMap, final HttpRequestBase request) {
+	private static void addHeaders(final HttpRequestBase request, final Map<String, String> headersMap) {
 		if (headersMap != null) {
 			for (final Map.Entry<String, String> entry : headersMap.entrySet()) {
 				request.setHeader(entry.getKey(), entry.getValue());
 			}
 		}
-		return request;
 	}
 
 	private static HttpRequestBase generateHttpRequest(final String method, final String url) {
@@ -189,9 +179,9 @@ public class HTTPGenerator {
 			case HTTP_PUT_METHOD:
 				return new HttpPut(url);
 			case HTTP_OPTION_METHOD:
-				break;
+			default:
+				throw new IllegalStateException("Unsupported method");
 		}
-		return null;
 	}
 
 	public void closeHttpClient() {
@@ -224,7 +214,6 @@ public class HTTPGenerator {
 
 	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
-		this.statusCode = response.getStatusLine().getStatusCode();
 		if (isJsonContent(response)) {
 			final String stringResponse = getStringResponse(response);
 			if (stringResponse != null) {
@@ -236,7 +225,7 @@ public class HTTPGenerator {
 
 	public JSONObject executeAnGetJsonResponse() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
-		this.statusCode = response.getStatusLine().getStatusCode();
+		final int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode == 200 && isJsonContent(response)) {
 			final String stringResponse = getStringResponse(response);
 			if (stringResponse != null) {
