@@ -171,177 +171,116 @@ public class HTTPGenerator {
 		} else return null;
 	}
 
-	private HttpRequestBase generateHeaders(final Map<String, String> head, final HttpRequestBase request) {
-		if (head != null) {
-			for (Map.Entry<String, String> entry : head.entrySet()) {
+	private HttpRequestBase generateHeaders(final Map<String, String> headersMap, final HttpRequestBase request) {
+		if (headersMap != null) {
+			for (final Map.Entry<String, String> entry : headersMap.entrySet()) {
 				request.setHeader(entry.getKey(), entry.getValue());
 			}
 		}
-
 		return request;
 	}
 
 	private static HttpRequestBase generateHttpRequest(final String method, final String url) {
-		HttpRequestBase request = null;
 		switch (method) {
 			case HTTP_GET_METHOD:
-				request = new HttpGet(url);
-				break;
+				return new HttpGet(url);
 			case HTTP_POST_METHOD:
-				request = new HttpPost(url);
-				break;
+				return new HttpPost(url);
+			case HTTP_PUT_METHOD:
+				return new HttpPut(url);
 			case HTTP_OPTION_METHOD:
 				break;
-			case HTTP_PUT_METHOD:
-				request = new HttpPut(url);
-				break;
-
 		}
-		return request;
+		return null;
 	}
 
 	public void closeHttpClient() {
 		httpClient.getConnectionManager().shutdown();
 	}
 
-	private static String addGetParametersToUrl(String url, final Map<String, String> params) {
-
-		if (!url.endsWith("?"))
-			url += "?";
-
-		List<NameValuePair> parameters = new LinkedList<NameValuePair>();
-
+	private static String addGetParametersToUrl(final String url, final Map<String, String> params) {
+		final StringBuilder urlBuilder = new StringBuilder(url);
+		if (!url.endsWith("?")) {
+			urlBuilder.append("?");
+		}
+		final List<NameValuePair> parameters = new LinkedList<>();
 		if (params != null) {
 			for (Map.Entry<String, String> entry : params.entrySet()) {
 				parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
 			}
 		}
-
-		String paramString = URLEncodedUtils.format(parameters, HTTP.UTF_8);
-
-		url += paramString;
-		return url;
+		final String paramString = URLEncodedUtils.format(parameters, HTTP.UTF_8);
+		urlBuilder.append(paramString);
+		return urlBuilder.toString();
 	}
 
 	public void setAllowHostnameSSL() throws NoSuchAlgorithmException, KeyManagementException {
-		SSLSocketFactory sf = null;
-		SSLContext sslContext = null;
-		StringWriter writer;
-		sslContext = SSLContext.getInstance("TLS");
+		final SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(null, null, null);
-		sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-		Scheme sch = new Scheme("https", 443, sf);
+		final SSLSocketFactory sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		final Scheme sch = new Scheme("https", 443, sf);
 		httpClient.getConnectionManager().getSchemeRegistry().register(sch);
-
-
 	}
 
-	public JSONArray getJSONArrayHTTPresponse() throws IOException {
-
-		JSONArray json = null;
-		HttpResponse response = null;
-
-		Header[] requestHeaders = request.getAllHeaders();
-
-
-		response = httpClient.execute(request);
-		statusCode = response.getStatusLine().getStatusCode();
-
-		if (isJsonContent(response))
-			json = new JSONArray(getStringResponse(response));
-
-		return json;
-
-	}
-
-	public JSONObject getJsonHttpResponse() throws IOException {
-
-		JSONObject json = null;
-		HttpResponse response = null;
-
-		Header[] requestHeaders = request.getAllHeaders();
-
-
-		response = httpClient.execute(request);
-		statusCode = response.getStatusLine().getStatusCode();
-
-		if (statusCode == 200) {
-			if (isJsonContent(response))
-				json = new JSONObject(getStringResponse(response));
-
+	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
+		final HttpResponse response = httpClient.execute(request);
+		this.statusCode = response.getStatusLine().getStatusCode();
+		if (isJsonContent(response)) {
+			final String stringResponse = getStringResponse(response);
+			if (stringResponse != null) {
+				return new JSONArray(stringResponse);
+			}
 		}
+		return null;
+	}
 
-		return json;
-
-
+	public JSONObject executeAnGetJsonResponse() throws IOException {
+		final HttpResponse response = httpClient.execute(request);
+		this.statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode == 200 && isJsonContent(response)) {
+			final String stringResponse = getStringResponse(response);
+			if (stringResponse != null) {
+				return new JSONObject(stringResponse);
+			}
+		}
+		return null;
 	}
 
 	public int executeAndGetResponseCode() throws IOException {
-
-		JSONObject json = null;
-		HttpResponse response = null;
-
-		Header[] requestHeaders = request.getAllHeaders();
-
-
-		response = httpClient.execute(request);
-
-		statusCode = response.getStatusLine().getStatusCode();
-
-
-		return statusCode;
-
-
+		final HttpResponse response = httpClient.execute(request);
+		return response.getStatusLine().getStatusCode();
 	}
 
 	private static String convertStreamToString(final InputStream is) throws IOException {
-
-		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		StringBuilder sb = new StringBuilder();
-
-		String line;
-		try {
+		final StringBuilder sb = new StringBuilder();
+		try (final InputStreamReader in = new InputStreamReader(is); final BufferedReader reader = new BufferedReader(in)) {
+			String line;
 			while ((line = reader.readLine()) != null) {
 				sb.append(line).append("\n");
 			}
-		} finally {
-			is.close();
 		}
 		return sb.toString();
 	}
 
 
-	public boolean isJsonContent(final HttpResponse resp) {
-		boolean result = false;
-		Header contentTypeHeader = resp.getFirstHeader("Content-Type");
-		if (contentTypeHeader.getValue().contains("application/json")) {
-			result = true;
-		}
-
-		return result;
+	private static boolean isJsonContent(final HttpResponse resp) {
+		final Header contentTypeHeader = resp.getFirstHeader("Content-Type");
+		return contentTypeHeader.getValue().contains("application/json");
 	}
 
-	public String getStringResponse(final HttpResponse resp) throws IOException {
-		String result = null;
-
-		HttpEntity entity = resp.getEntity();
-
+	private static String getStringResponse(final HttpResponse resp) throws IOException {
+		final HttpEntity entity = resp.getEntity();
 		if (entity != null) {
-
 			// A Simple JSON Response Read
-			InputStream instream = entity.getContent();
-			result = convertStreamToString(instream);
-			// now you have the string representation of the HTML request
-			// Headers
-			org.apache.http.Header[] headers = resp.getAllHeaders();
-
-
-			instream.close();
-			if (resp.getStatusLine().getStatusCode() != 200) {
-				return null;
+			try (final InputStream inputStream = entity.getContent()) {
+				final String result = convertStreamToString(inputStream);
+				if (resp.getStatusLine().getStatusCode() != 200) {
+					return null;
+				} else {
+					return result;
+				}
 			}
-
 		}
-		return result;
+		return null;
 	}
 }

@@ -147,7 +147,7 @@ public class DynatraceIntegration {
 			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
 		}
 
-		jsonObj = httpGenerator.getJSONArrayHTTPresponse();
+		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {
 			dynatraceApplicationServiceIds = new ArrayList<String>();
 			for (int i = 0; i < jsonObj.length(); i++) {
@@ -209,7 +209,7 @@ public class DynatraceIntegration {
 			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
 
 
-		jsonArray = httpGenerator.getJSONArrayHTTPresponse();
+		jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonArray != null) {
 			for (int i = 0; i < jsonArray.length(); i++) {
 				jsonApplication = jsonArray.getJSONObject(i);
@@ -242,7 +242,7 @@ public class DynatraceIntegration {
 			httpGenerator = new HTTPGenerator(url, "GET", header, parameters);
 		}
 
-		jsonObj = httpGenerator.getJSONArrayHTTPresponse();
+		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {
 			dynatraceApplicationHostIds = new ArrayList<String>();
 			for (int i = 0; i < jsonObj.length(); i++) {
@@ -446,7 +446,7 @@ public class DynatraceIntegration {
 			httpGenerator = new HTTPGenerator("POST", Url, header, parameters, jsonEntities);
 		}
 
-		jsonApplication = httpGenerator.getJsonHttpResponse();
+		jsonApplication = httpGenerator.executeAnGetJsonResponse();
 		if (jsonApplication != null) {
 			if (jsonApplication.has("result")) {
 				jsonApplication = jsonApplication.getJSONObject("result");
@@ -510,7 +510,7 @@ public class DynatraceIntegration {
 			httpGenerator = new HTTPGenerator("POST", url, header, parameters, jsonEntities);
 		}
 
-		jsonObj = httpGenerator.getJSONArrayHTTPresponse();
+		jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
 		if (jsonObj != null) {
 
 			for (int i = 0; i < jsonObj.length(); i++) {

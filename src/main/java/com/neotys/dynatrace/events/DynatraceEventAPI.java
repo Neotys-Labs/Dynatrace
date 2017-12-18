@@ -95,7 +95,7 @@ class DynatraceEventAPI {
 		final HTTPGenerator http = new HTTPGenerator(dynatraceUrl, "GET", headers, parameters);
 		List<String> applicationEntityid;
 		try {
-			final JSONArray jsonArrayResponse = http.getJSONArrayHTTPresponse();
+			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
 			if (jsonArrayResponse != null) {
 				applicationEntityid = new ArrayList<>();
 				for (int i = 0; i < jsonArrayResponse.length(); i++) {
