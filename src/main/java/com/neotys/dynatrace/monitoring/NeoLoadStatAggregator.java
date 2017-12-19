@@ -6,6 +6,7 @@ import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.CreationStatus;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
+import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
@@ -14,9 +15,8 @@ import io.swagger.client.model.TestStatistics;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TimerTask;
+import java.net.URL;
+import java.util.*;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
@@ -52,6 +52,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final int HTTP_RESPONSE_CREATED = 201;
     private static final int HTTP_RESPONSE_ALREADY = 200;
     private static final int MIN_DYNATRACE_DURATION = 30;
+    private final Optional<String> proxyName;
+    private final Context context;
 
     private HTTPGenerator httpGenerator;
     private ResultsApi nlWebResult;
@@ -70,29 +72,34 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private long lastDuration = 0;
 
     private void initHttpClient() {
-        headerMap = new HashMap<String, String>();
+        headerMap = new HashMap<>();
         //	headerMap.put("X-License-Key", NewRElicLicenseKey);
         //headerMap.put("Content-Type", "application/json");
         //headerMap.put("Accept","application/json");
 
     }
 
-    public void addTokenIngetParam(final HashMap<String, String> param) {
+    public void addTokenIngetParam(final Map<String, String> param) {
         param.put("Api-Token", dynatraceApiKey);
     }
 
-    public NeoLoadStatAggregator(final String dynatraceApiKey, final String componentName,
-                                 final String dynatraceAccountId, final ResultsApi nlWebResult,
-                                 final String testId, final String scenarioName,
-                                 final String testName, final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostName) {
+    public NeoLoadStatAggregator(final String dynatraceApiKey,
+                                 final String dynatraceAccountId,
+                                 final ResultsApi nlWebResult,
+                                 final Context context,
+                                 final String dataExchangeApiUrl,
+                                 final Optional<String> dynatraceManagedHostName,
+                                 final Optional<String> proxyName) {
+        this.proxyName = proxyName;
         componentsName = "Statistics";
         this.dynatraceApiKey = dynatraceApiKey;
-        this.testId = testId;
-        this.testName = testName;
+        this.context = context;
+        this.testId = context.getTestId();
+        this.testName = context.getTestName();
         this.nlWebResult = nlWebResult;
         this.dynatraceManagedHostName = dynatraceManagedHostName.get();
         this.dynatraceAccountId = dynatraceAccountId;
-        this.scenarioName = scenarioName;
+        this.scenarioName = context.getScenarioName();
         this.dataExchangeApiUrl = dataExchangeApiUrl;
         initHttpClient();
     }
@@ -162,15 +169,22 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         try {
             sendStatsToDynatrace();
         } catch (ApiException | DynatraceStatException | IOException | URISyntaxException e) {
-            e.printStackTrace();
+            context.getLogger().error("Error while sending stats to Dynatrace", e);
         }
+    }
+
+    private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
+        if (proxyName.isPresent()) {
+            return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
+        }
+        return Optional.absent();
     }
 
     @Override
     public int registerCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
         int httpCode = 0;
-        HashMap<String, String> head = new HashMap<String, String>();
-        HashMap<String, String> parameters = new HashMap<String, String>();
+        Map<String, String> head = new HashMap<>();
+        Map<String, String> parameters = new HashMap<>();
         String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
         String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
         addTokenIngetParam(parameters);
@@ -180,19 +194,16 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                 + "\"dimensions\": [\"Neoload\"],"
                 + "\"types\":[\"" + dynatraceCustomMetric.getTypes() + "\"]}";
 
-        // TODO proxy
-        HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
+        final Optional<Proxy> proxy = getProxy(proxyName, url);
+        final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
 
-        try {
-            httpCode = insightHttp.executeAndGetResponseCode();
-            if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY)
-                //------change the code to give a status if the data has been properly created...---review this pieece of code
-                dynatraceCustomMetric.setStatus(CreationStatus.CREATED);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        httpCode = insightHttp.executeAndGetResponseCode();
         insightHttp.closeHttpClient();
+        if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY) {
+            //------change the code to give a status if the data has been properly created...---review this pieece of code
+            dynatraceCustomMetric.setStatus(CreationStatus.CREATED);
+
+        }
         return httpCode;
     }
 
@@ -245,8 +256,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
         if (hasMetrics) {
 
-            // TODO proxy
-            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
+            final Optional<Proxy> proxy = getProxy(proxyName, url);
+            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, jsonString);
 
             try {
                 httpCode = insightHttp.executeAndGetResponseCode();
@@ -303,8 +314,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
         parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
-        // TODO proxy
-        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, parameters, Optional.<Proxy>absent());
+        final Optional<Proxy> proxy = getProxy(proxyName, url);
+        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, parameters, proxy);
 
         httpCode = httpGenerator.executeAndGetResponseCode();
         httpGenerator.closeHttpClient();
