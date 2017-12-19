@@ -14,7 +14,7 @@ public interface DynatraceMonitoringApi {
 
     int registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException;
 
-    int reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws MalformedURLException, URISyntaxException, DynatraceStatException;
+    int reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException;
 
     int hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException;
 }

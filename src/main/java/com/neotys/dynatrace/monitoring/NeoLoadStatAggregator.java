@@ -23,7 +23,7 @@ import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi{
 
-    private final String DYNATRACE_API_URL = "events/";
+    private static final String DYNATRACE_API_URL = "events/";
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
     private static final String DYNATRACE_APPLICATION = "entity/services";
     private static final String DYNATRACE_TIME_SERIES_CREATION = "timeseries/custom";
@@ -52,6 +52,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final int HTTP_RESPONSE_CREATED = 201;
     private static final int HTTP_RESPONSE_ALREADY = 200;
     private static final int MIN_DYNATRACE_DURATION = 30;
+
     private final Optional<String> proxyName;
     private final Context context;
 
@@ -113,7 +114,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             if (statsResult != null) {
                 lastDuration = sendData(statsResult);
             } else {
-                System.out.println("stats est null");
+                context.getLogger().debug("No stats found in NeoLoad web API.");
             }
         }
     }
@@ -148,14 +149,11 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     private String getApiUrl() {
-        String result;
-
         if (dynatraceManagedHostName != null) {
-            result = DYNATRACE_PROTOCOL + dynatraceManagedHostName + "/api/v1/";
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostName + "/api/v1/";
         } else {
-            result = DYNATRACE_PROTOCOL + dynatraceAccountId + DYNATRACE_URL;
+            return DYNATRACE_PROTOCOL + dynatraceAccountId + DYNATRACE_URL;
         }
-        return result;
     }
 
     private String getNlUrl() {
@@ -183,13 +181,13 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     @Override
     public int registerCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
         int httpCode = 0;
-        Map<String, String> head = new HashMap<>();
-        Map<String, String> parameters = new HashMap<>();
-        String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
+        final Map<String, String> head = new HashMap<>();
+        final Map<String, String> parameters = new HashMap<>();
+        final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
+        final String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
         addTokenIngetParam(parameters);
 
-        String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
+        final String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
                 + "\"dimensions\": [\"Neoload\"],"
                 + "\"types\":[\"" + dynatraceCustomMetric.getTypes() + "\"]}";
@@ -197,8 +195,11 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
 
-        httpCode = insightHttp.executeAndGetResponseCode();
-        insightHttp.closeHttpClient();
+        try {
+            httpCode = insightHttp.executeAndGetResponseCode();
+        } finally {
+            insightHttp.closeHttpClient();
+        }
         if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY) {
             //------change the code to give a status if the data has been properly created...---review this pieece of code
             dynatraceCustomMetric.setStatus(CreationStatus.CREATED);
@@ -209,10 +210,10 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
 
     @Override
-    public int reportCustomMetrics(List<DynatraceCustomMetric> dynatraceCustomMetrics) throws MalformedURLException, URISyntaxException, DynatraceStatException {
+    public int reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException {
         int httpCode = 0;
-        HashMap<String, String> head = new HashMap<>();
-        HashMap<String, String> parameters = new HashMap<>();
+        final Map<String, String> head = new HashMap<>();
+        final Map<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
 
         addTokenIngetParam(parameters);
@@ -261,54 +262,52 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
             try {
                 httpCode = insightHttp.executeAndGetResponseCode();
-                switch (httpCode) {
-
-                    case BAD_REQUEST:
-                        exceptionMessage = "The request or headers are in the wrong format, or the URL is incorrect, or the GUID does not meet the validation requirements.";
-                        break;
-                    case UNAUTHORIZED:
-                        exceptionMessage = "Authentication error (no license key header, or invalid license key).";
-                        break;
-                    case NOT_FOUND:
-                        exceptionMessage = "Invalid URL.";
-                        break;
-                    case METHOD_NOT_ALLOWED:
-                        exceptionMessage = "Returned if the method is an invalid or unexpected type (GET/POST/PUT/etc.).";
-                        break;
-                    case REQUEST_ENTITY_TOO_LARGE:
-                        exceptionMessage = "Too many metrics were sent in one request, or too many components (instances) were specified in one request, or other single-request limits were reached.";
-                        break;
-                    case INTERNAL_SERVER_ERROR:
-                        exceptionMessage = "Unexpected server error";
-                        break;
-                    case BAD_GATEWAY:
-                        exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                        break;
-                    case SERVICE_UNAVAIBLE:
-                        exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                        break;
-                    case GATEWAY_TIMEOUT:
-                        exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                        break;
-
-                }
-                if (exceptionMessage != null)
-                    throw new DynatraceStatException(exceptionMessage);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            } finally {
+                insightHttp.closeHttpClient();
             }
-            insightHttp.closeHttpClient();
+            switch (httpCode) {
+                case BAD_REQUEST:
+                    exceptionMessage = "The request or headers are in the wrong format, or the URL is incorrect, or the GUID does not meet the validation requirements.";
+                    break;
+                case UNAUTHORIZED:
+                    exceptionMessage = "Authentication error (no license key header, or invalid license key).";
+                    break;
+                case NOT_FOUND:
+                    exceptionMessage = "Invalid URL.";
+                    break;
+                case METHOD_NOT_ALLOWED:
+                    exceptionMessage = "Returned if the method is an invalid or unexpected type (GET/POST/PUT/etc.).";
+                    break;
+                case REQUEST_ENTITY_TOO_LARGE:
+                    exceptionMessage = "Too many metrics were sent in one request, or too many components (instances) were specified in one request, or other single-request limits were reached.";
+                    break;
+                case INTERNAL_SERVER_ERROR:
+                    exceptionMessage = "Unexpected server error";
+                    break;
+                case BAD_GATEWAY:
+                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
+                    break;
+                case SERVICE_UNAVAIBLE:
+                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
+                    break;
+                case GATEWAY_TIMEOUT:
+                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
+                    break;
+
+            }
+            if (exceptionMessage != null) {
+                throw new DynatraceStatException(exceptionMessage);
+            }
         }
         return httpCode;
     }
 
     @Override
-    public int hasCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
+    public int hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
         int httpCode;
-        String url = getApiUrl() + DYNATRACE_TIME_SERIES;
-        HashMap<String, String> parameters = new HashMap<String, String>();
-        String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
+        final String url = getApiUrl() + DYNATRACE_TIME_SERIES;
+        final Map<String, String> parameters = new HashMap<>();
+        final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
         addTokenIngetParam(parameters);
         parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
@@ -317,8 +316,11 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, parameters, proxy);
 
-        httpCode = httpGenerator.executeAndGetResponseCode();
-        httpGenerator.closeHttpClient();
+        try {
+            httpCode = httpGenerator.executeAndGetResponseCode();
+        } finally {
+            httpGenerator.closeHttpClient();
+        }
 
         return httpCode;
     }

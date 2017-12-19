@@ -172,18 +172,21 @@ public class DynatraceIntegration {
 		final Optional<Proxy> proxy = getProxy(proxyName, url);
 		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
-		final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
-		httpGenerator.closeHttpClient();
-		if (jsonObj != null) {
-			dynatraceApplicationServiceIds = new ArrayList<>();
-			for (int i = 0; i < jsonObj.length(); i++) {
-				final JSONObject jsonApplication = jsonObj.getJSONObject(i);
-				if (jsonApplication.has("entityId")) {
-					dynatraceApplicationServiceIds.add(jsonApplication.getString("entityId"));
+		try {
+			final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
+			if (jsonObj != null) {
+				dynatraceApplicationServiceIds = new ArrayList<>();
+				for (int i = 0; i < jsonObj.length(); i++) {
+					final JSONObject jsonApplication = jsonObj.getJSONObject(i);
+					if (jsonApplication.has("entityId")) {
+						dynatraceApplicationServiceIds.add(jsonApplication.getString("entityId"));
+					}
 				}
+			} else {
+				throw new DynatraceException("No Application find in the Dynatrace Account with the name " + tags);
 			}
-		} else {
-			throw new DynatraceException("No Application find in the Dynatrace Account with the name " + tags);
+		} finally {
+			httpGenerator.closeHttpClient();
 		}
 
 		return dynatraceApplicationServiceIds;
@@ -221,17 +224,20 @@ public class DynatraceIntegration {
 		final Optional<Proxy> proxy = getProxy(proxyName, url);
 		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
-		final JSONArray jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
-		httpGenerator.closeHttpClient();
-		if (jsonArray != null) {
-			for (int i = 0; i < jsonArray.length(); i++) {
-				final JSONObject jsonApplication = jsonArray.getJSONObject(i);
-				if (jsonApplication.has("entityId")) {
-					if (jsonApplication.has("displayName")) {
-						dynatraceApplicationHostIds.add(jsonApplication.getString("entityId"));
+		try {
+			final JSONArray jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
+			if (jsonArray != null) {
+				for (int i = 0; i < jsonArray.length(); i++) {
+					final JSONObject jsonApplication = jsonArray.getJSONObject(i);
+					if (jsonApplication.has("entityId")) {
+						if (jsonApplication.has("displayName")) {
+							dynatraceApplicationHostIds.add(jsonApplication.getString("entityId"));
+						}
 					}
 				}
 			}
+		} finally {
+			httpGenerator.closeHttpClient();
 		}
 	}
 
@@ -245,27 +251,30 @@ public class DynatraceIntegration {
 		final Optional<Proxy> proxy = getProxy(proxyName, url);
 		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
-		final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
-		if (jsonObj != null) {
-			dynatraceApplicationHostIds = new ArrayList<>();
-			for (int i = 0; i < jsonObj.length(); i++) {
-				final JSONObject jsonApplication = jsonObj.getJSONObject(i);
-				if (jsonApplication.has("entityId")) {
-					if (jsonApplication.has("fromRelationships")) {
-						final JSONObject jsonFromRelation = jsonApplication.getJSONObject("fromRelationships");
-						if (jsonFromRelation.has("runsOn")) {
-							final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
-							if (jsonRunOn != null) {
-								for (int j = 0; j < jsonRunOn.length(); j++) {
-									dynatraceApplicationHostIds.add(jsonRunOn.getString(j));
+		try {
+			final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
+			if (jsonObj != null) {
+				dynatraceApplicationHostIds = new ArrayList<>();
+				for (int i = 0; i < jsonObj.length(); i++) {
+					final JSONObject jsonApplication = jsonObj.getJSONObject(i);
+					if (jsonApplication.has("entityId")) {
+						if (jsonApplication.has("fromRelationships")) {
+							final JSONObject jsonFromRelation = jsonApplication.getJSONObject("fromRelationships");
+							if (jsonFromRelation.has("runsOn")) {
+								final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
+								if (jsonRunOn != null) {
+									for (int j = 0; j < jsonRunOn.length(); j++) {
+										dynatraceApplicationHostIds.add(jsonRunOn.getString(j));
+									}
 								}
 							}
 						}
 					}
 				}
 			}
+		} finally {
+			httpGenerator.closeHttpClient();
 		}
-		httpGenerator.closeHttpClient();
 	}
 
 	private void sendTokenIngetParam(final Map<String, String> param) {
@@ -340,27 +349,30 @@ public class DynatraceIntegration {
 		final Optional<Proxy> proxy = getProxy(proxyName, url);
 		httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, proxy, json);
 
-		jsonApplication = httpGenerator.executeAnGetJsonResponse();
-		httpGenerator.closeHttpClient();
-		if (jsonApplication == null || !jsonApplication.has("result")) {
-			return Collections.emptyList();
-		}
 		final List<DynatraceMetric> metrics = new ArrayList<>();
-		jsonApplication = jsonApplication.getJSONObject("result");
-		if (jsonApplication.has("dataPoints")) {
-			if (jsonApplication.has("entities")) {
-				final JSONObject jsonEntity = jsonApplication.getJSONObject("entities");
-				final Map<String, String> entities = getEntityDefinition(jsonEntity);
+		try {
+			jsonApplication = httpGenerator.executeAnGetJsonResponse();
+			if (jsonApplication == null || !jsonApplication.has("result")) {
+				return Collections.emptyList();
+			}
+			jsonApplication = jsonApplication.getJSONObject("result");
+			if (jsonApplication.has("dataPoints")) {
+				if (jsonApplication.has("entities")) {
+					final JSONObject jsonEntity = jsonApplication.getJSONObject("entities");
+					final Map<String, String> entities = getEntityDefinition(jsonEntity);
 
-				final JSONObject jsonDataPoint = jsonApplication.getJSONObject("dataPoints");
-				final Iterator<?> keysIterator = jsonDataPoint.keys();
-				while (keysIterator.hasNext()) {
-					final String entity = (String) keysIterator.next();
-					final String displayName = getEntityDisplayName(entities, entity);
-					final JSONArray arr = jsonDataPoint.getJSONArray(entity);
-					addDataMetrics(metrics, jsonApplication, entity, displayName, arr);
+					final JSONObject jsonDataPoint = jsonApplication.getJSONObject("dataPoints");
+					final Iterator<?> keysIterator = jsonDataPoint.keys();
+					while (keysIterator.hasNext()) {
+						final String entity = (String) keysIterator.next();
+						final String displayName = getEntityDisplayName(entities, entity);
+						final JSONArray arr = jsonDataPoint.getJSONArray(entity);
+						addDataMetrics(metrics, jsonApplication, entity, displayName, arr);
+					}
 				}
 			}
+		} finally {
+			httpGenerator.closeHttpClient();
 		}
 		return metrics;
 	}
