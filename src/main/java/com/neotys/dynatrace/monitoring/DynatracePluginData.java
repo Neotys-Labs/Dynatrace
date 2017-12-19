@@ -15,9 +15,8 @@ public class DynatracePluginData {
 
     private Context neoLoadContext;
     private ApiClient neoLoadWebApiClient;
-    private ResultsApi nlwebResult;
+    private ResultsApi nlWebResult;
     private NeoLoadStatAggregator neoLoadAggregator = null;
-    private NLGlobalStat neoLoadStat = null;
     Timer timerDynatrace = null;
 
     private final String dataExchangeApiUrl;
@@ -49,16 +48,14 @@ public class DynatracePluginData {
         //TODO get from context ?
         this.proxyName = proxyName;
         this.dataExchangeApiUrl = dataExchangeApiUrl;
-        neoLoadStat = new NLGlobalStat();
         projectname = getProjecName();
         testName = getTestName();
 
         if (testId == null) {
             setTestId(getTestId());
-            neoLoadStat = new NLGlobalStat();
             if (neoLoadAggregator == null)
                 neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname,
-                        dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(),
+                        dynatraceAccountId, nlWebResult, testId, getTestScenarioName(),
                         testName, dataExchangeApiUrl, dynatraceManagedHostname);
         }
     }
@@ -82,12 +79,12 @@ public class DynatracePluginData {
 
     public void resumeTimer() {
         timerDynatrace = new Timer();
-        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlwebResult, testId, neoLoadStat, getTestScenarioName(), testName, dataExchangeApiUrl, dynatraceManagedHostname);
+        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, projectname, dynatraceAccountId, nlWebResult, testId, getTestScenarioName(), testName, dataExchangeApiUrl, dynatraceManagedHostname);
         timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
     }
 
     private void initNeoLoadApi() {
-        nlwebResult = new ResultsApi(neoLoadWebApiClient);
+        nlWebResult = new ResultsApi(neoLoadWebApiClient);
     }
 
     private String getTestName() {

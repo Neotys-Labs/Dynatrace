@@ -3,10 +3,12 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.dynatrace.monitoring.neoloadmetrics.CreationStatus;
+import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
+import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
 import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
-import io.swagger.client.model.ElementValues;
 import io.swagger.client.model.TestStatistics;
 
 import java.io.IOException;
@@ -16,12 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimerTask;
 
-import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
-import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
-import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_PUT_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
-public class NeoLoadStatAggregator extends TimerTask {
+public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi{
 
     private final String DYNATRACE_API_URL = "events/";
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
@@ -37,7 +37,7 @@ public class NeoLoadStatAggregator extends TimerTask {
     private static final String NEOLOADL_GUID = "com.neotys.NeoLoad.plugin";
     private static final String VERSION = "1.0.0";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
-    private static final String NLTYPE = "NeoLoad";
+    private static final String NEOLOAD_TYPE = "NeoLoad";
 
     private static final int BAD_REQUEST = 400;
     private static final int UNAUTHORIZED = 403;
@@ -51,9 +51,8 @@ public class NeoLoadStatAggregator extends TimerTask {
     private static final int HTTP_RESPONSE = 200;
     private static final int HTTP_RESPONSE_CREATED = 201;
     private static final int HTTP_RESPONSE_ALREADY = 200;
-    private static final int MIN_NEW_RELIC_DURATION = 30;
+    private static final int MIN_DYNATRACE_DURATION = 30;
 
-    private NLGlobalStat neoLoadStat;
     private HTTPGenerator httpGenerator;
     private ResultsApi nlWebResult;
 
@@ -64,10 +63,11 @@ public class NeoLoadStatAggregator extends TimerTask {
     private String testName;
     private final String testId;
     private String applicationEntityId;
-    private String nlScenarioName;
+    private String scenarioName;
     private String dynatraceManagedHostName;
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
+    private long lastDuration = 0;
 
     private void initHttpClient() {
         headerMap = new HashMap<String, String>();
@@ -83,71 +83,53 @@ public class NeoLoadStatAggregator extends TimerTask {
 
     public NeoLoadStatAggregator(final String dynatraceApiKey, final String componentName,
                                  final String dynatraceAccountId, final ResultsApi nlWebResult,
-                                 final String testId, final NLGlobalStat neoLoadStat, final String scenarioName,
+                                 final String testId, final String scenarioName,
                                  final String testName, final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostName) {
         componentsName = "Statistics";
         this.dynatraceApiKey = dynatraceApiKey;
-        this.neoLoadStat = neoLoadStat;
         this.testId = testId;
         this.testName = testName;
         this.nlWebResult = nlWebResult;
         this.dynatraceManagedHostName = dynatraceManagedHostName.get();
         this.dynatraceAccountId = dynatraceAccountId;
-        nlScenarioName = scenarioName;
+        this.scenarioName = scenarioName;
         this.dataExchangeApiUrl = dataExchangeApiUrl;
         initHttpClient();
     }
 
     private void sendStatsToDynatrace() throws ApiException, DynatraceStatException, IOException, URISyntaxException {
         TestStatistics statsResult;
-        long utc;
-        long lastDuration;
+        long utc = System.currentTimeMillis() / 1000;
 
-        utc = System.currentTimeMillis() / 1000;
-        lastDuration = neoLoadStat.getLasduration();
-
-        if (lastDuration == 0 || (utc - lastDuration) >= MIN_NEW_RELIC_DURATION) {
+        if (lastDuration == 0 || (utc - lastDuration) >= MIN_DYNATRACE_DURATION) {
             statsResult = nlWebResult.getTestStatistics(testId);
             if (statsResult != null) {
-                lastDuration = sendData(statsResult, lastDuration);
-                neoLoadStat.setLasduration(lastDuration);
+                lastDuration = sendData(statsResult);
             } else {
                 System.out.println("stats est null");
             }
         }
     }
 
-    private void updateRequestStats() throws ApiException {
-        ElementValues requestValues = nlWebResult.getTestElementsValues(testId, "all-requests");
-        neoLoadStat.UpdateRequestStat(requestValues, "REQUEST");
 
-        ElementValues transactionsValues = nlWebResult.getTestElementsValues(testId, "all-transactions");
-        neoLoadStat.UpdateRequestStat(transactionsValues, "TRANSACTION");
-    }
-
-    public long sendData(final TestStatistics stat, final long lasDuration)
+    public long sendData(final TestStatistics testStatistics)
             throws DynatraceStatException, IOException, ApiException, URISyntaxException {
-        List<String[]> data;
-        long utc;
-        utc = System.currentTimeMillis() / 1000;
+        long utc = System.currentTimeMillis() / 1000;
 
-        if (neoLoadStat == null)
-            neoLoadStat = new NLGlobalStat(stat);
-        else {
-            neoLoadStat.UpdateStat(stat);
-        }
-        updateRequestStats();
-        data = neoLoadStat.GetNLData();
+        NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(testStatistics);
 
         if (!timeSeriesConfigured) {
-            if (!isNlDataExists(data.get(0)[1])) {
-                for (String[] metric : data)
-                    createNlTimeSeries(metric[1], metric[0], NLTYPE, metric[2], neoLoadStat);
-
-                timeSeriesConfigured = true;
+            if (hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT)) != HTTP_RESPONSE) {
+                for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
+                    //Register metrics
+                    registerCustomMetric(dynatraceTimeseries);
+                }
             }
+            timeSeriesConfigured = true;
         }
-        sendMetricToTimeSeriestApi(data, NLTYPE);
+
+        //Report activity
+        reportCustomMetrics((List<DynatraceCustomMetric>) NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values());
 
         return utc;
     }
@@ -156,59 +138,6 @@ public class NeoLoadStatAggregator extends TimerTask {
         long timeInMillisSinceEpoch123 = System.currentTimeMillis();
         timeInMillisSinceEpoch123 -= 200000;
         return timeInMillisSinceEpoch123;
-    }
-
-    private boolean isNlDataExists(final String timeSeries) throws IOException, URISyntaxException {
-        boolean results;
-        int httpCode;
-        String url = getApiUrl() + DYNATRACE_TIME_SERIES;
-        HashMap<String, String> Parameters = new HashMap<String, String>();
-        addTokenIngetParam(Parameters);
-        String displayname = null;
-        Parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeries);
-        Parameters.put("startTimestamp", String.valueOf(getUtcDate()));
-        Parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
-
-        // TODO proxy
-        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, Parameters, Optional.<Proxy>absent());
-
-        httpCode = httpGenerator.executeAndGetResponseCode();
-        httpGenerator.closeHttpClient();
-
-        return httpCode == HTTP_RESPONSE;
-    }
-
-
-    ///---------to update after the feedback from ANdy
-    private void createNlTimeSeries(final String timeSeriesName, final String displayName,
-                                    final String type, final String unit, final NLGlobalStat stat)
-            throws MalformedURLException, URISyntaxException {
-        int httpCode;
-        HashMap<String, String> head = new HashMap<String, String>();
-        HashMap<String, String> parameters = new HashMap<String, String>();
-        String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
-        addTokenIngetParam(parameters);
-
-        String jsonString = "{\"displayName\":\"" + displayName + "\","
-                + "\"unit\":\"" + unit + "\","
-                + "\"dimensions\": [\"Neoload\"],"
-                + "\"types\":[\"" + type + "\"]}";
-
-        // TODO proxy
-        HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
-
-        try {
-            httpCode = insightHttp.executeAndGetResponseCode();
-            if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY)
-                //------change the code to give a status if the data has been properly created...---review this pieece of code
-                stat.setStatus(timeSeriesName);
-            //throw new DynatraceStatException("Unable to create TImeseries : "+DYNATRACE_TIME_SERIES_CREATION+":"+TimeseriesName);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        insightHttp.closeHttpClient();
     }
 
     private String getApiUrl() {
@@ -227,10 +156,50 @@ public class NeoLoadStatAggregator extends TimerTask {
         return HTTPS + NEOLOAD_SAAS_NEOTYS_COM + NEOLOAD_URL_LAST;
     }
 
-    ///---------to update after the feedback from ANdy
-    private void sendMetricToTimeSeriestApi(final List<String[]> data, final String type)
-            throws DynatraceStatException, MalformedURLException, URISyntaxException {
-        int httpCode;
+
+    @Override
+    public void run() {
+        try {
+            sendStatsToDynatrace();
+        } catch (ApiException | DynatraceStatException | IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public int registerCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
+        int httpCode = 0;
+        HashMap<String, String> head = new HashMap<String, String>();
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
+        String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
+        addTokenIngetParam(parameters);
+
+        String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
+                + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
+                + "\"dimensions\": [\"Neoload\"],"
+                + "\"types\":[\"" + dynatraceCustomMetric.getTypes() + "\"]}";
+
+        // TODO proxy
+        HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
+
+        try {
+            httpCode = insightHttp.executeAndGetResponseCode();
+            if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY)
+                //------change the code to give a status if the data has been properly created...---review this pieece of code
+                dynatraceCustomMetric.setStatus(CreationStatus.CREATED);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        insightHttp.closeHttpClient();
+        return httpCode;
+    }
+
+
+    @Override
+    public int reportCustomMetrics(List<DynatraceCustomMetric> dynatraceCustomMetrics) throws MalformedURLException, URISyntaxException, DynatraceStatException {
+        int httpCode = 0;
         HashMap<String, String> head = new HashMap<>();
         HashMap<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
@@ -241,49 +210,43 @@ public class NeoLoadStatAggregator extends TimerTask {
         String exceptionMessage = null;
         long time = System.currentTimeMillis();
 
-        // DO we need to get controller host and put in ipAddresses.
+        // TODO we need to get controller host and put in ipAddresses.
         String jsonString = "{\"displayName\" : \"NeoLoad Data\","
                 + "\"ipAddresses\" : [\"" + dataExchangeApiUrl + "\"],"
                 + "\"listenPorts\" : [\"" + 7400 + "\"],"
-                + "\"type\" : \"" + type + "\","
+                + "\"type\" : \"" + NEOLOAD_TYPE + "\","
                 + "\"favicon\" : \"" + NL_PICTURE_URL + "\","
                 + "\"configUrl\" : \"" + getNlUrl() + testId + "\","
                 + "\"tags\": [\"Loadtest\", \"NeoLoad\"],"
-                + "\"properties\" : { \"TestName\" : \"" + testName + "\" ,\"ScenarioName\" : \"" + nlScenarioName + "\"  },"
+                + "\"properties\" : { \"TestName\" : \"" + testName + "\" ,\"ScenarioName\" : \"" + scenarioName + "\"  },"
                 + "\"series\" : [";
 
-        String conStr;
 
-        int i = 0;
-        int totalSize = data.size() - 1;
-        for (String[] metric : data) {
-            if (metric[4].equalsIgnoreCase("true")) {
-
-                conStr = "{"
-                        + "\"timeseriesId\" : \"custom:" + metric[1] + "\","
-                        + "\"dimensions\" : { \"Neoload\" : \"" + metric[0] + "\"  },"
-                        + "\"dataPoints\" : [ [" + String.valueOf(time) + "  , " + metric[3] + " ] ]"
+        boolean hasMetrics = false;
+        for (DynatraceCustomMetric dynatraceCustomMetric : dynatraceCustomMetrics){
+            if(CreationStatus.CREATED.equals(dynatraceCustomMetric.getStatus())){
+                String conStr = "{"
+                        + "\"timeseriesId\" : \"custom:" + dynatraceCustomMetric.getTypes().get(0) + "\","
+                        + "\"dimensions\" : { \"Neoload\" : \"" + dynatraceCustomMetric.getDimensions().get(0) + "\"  },"
+                        + "\"dataPoints\" : [ [" + String.valueOf(time) + "  , " + dynatraceCustomMetric.getValue() + " ] ]"
                         + "}";
 
 
-                jsonString += conStr;
-                if (i < (totalSize))
-                    jsonString += ",";
-
-                i++;
-            } else
-                totalSize--;
+                jsonString += conStr + ",";
+                hasMetrics= true;
+            }
         }
 
-        if (jsonString.substring(jsonString.length() - 1).equalsIgnoreCase(","))
+        if (",".equalsIgnoreCase(jsonString.substring(jsonString.length() - 1))) {
             jsonString = jsonString.substring(0, jsonString.length() - 1);
+        }
 
         jsonString += "]}";
 
-        if (i > 0) {
+        if (hasMetrics) {
 
             // TODO proxy
-			insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
+            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, Optional.<Proxy>absent(), jsonString);
 
             try {
                 httpCode = insightHttp.executeAndGetResponseCode();
@@ -322,22 +285,31 @@ public class NeoLoadStatAggregator extends TimerTask {
                     throw new DynatraceStatException(exceptionMessage);
 
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             insightHttp.closeHttpClient();
         }
+        return httpCode;
     }
 
-
     @Override
-    public void run() {
-        try {
-            sendStatsToDynatrace();
-        } catch (ApiException | DynatraceStatException | IOException | URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public int hasCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
+        int httpCode;
+        String url = getApiUrl() + DYNATRACE_TIME_SERIES;
+        HashMap<String, String> parameters = new HashMap<String, String>();
+        String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
+        addTokenIngetParam(parameters);
+        parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
+        parameters.put("startTimestamp", String.valueOf(getUtcDate()));
+        parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
+
+        // TODO proxy
+        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, parameters, Optional.<Proxy>absent());
+
+        httpCode = httpGenerator.executeAndGetResponseCode();
+        httpGenerator.closeHttpClient();
+
+        return httpCode;
     }
 }
 
