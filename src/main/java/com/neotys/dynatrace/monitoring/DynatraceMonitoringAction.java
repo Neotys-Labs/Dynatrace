@@ -22,7 +22,7 @@ public final class DynatraceMonitoringAction implements Action {
 
 	@Override
 	public String getType() {
-		return "DynatraceMonitoring";
+		return "DynatraceMonitoringAction";
 	}
 
 	private static final ImageIcon LOGO_ICON;
@@ -81,7 +81,7 @@ public final class DynatraceMonitoringAction implements Action {
 
 	@Override
 	public Optional<String> getMinimumNeoLoadVersion() {
-		return Optional.of("6.3");
+		return Optional.of("6.2");
 	}
 
 	@Override

@@ -8,7 +8,7 @@ public class DynatraceEventStopActionTest {
 	@Test
 	public void shouldReturnType() {
 		final DynatraceEventAction action = new DynatraceEventAction();
-		assertEquals("DynatraceEvent", action.getType());
+		assertEquals("DynatraceEventAction", action.getType());
 	}
 
 }
