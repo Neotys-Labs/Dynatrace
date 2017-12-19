@@ -137,7 +137,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         }
 
         //Report activity
-        reportCustomMetrics((List<DynatraceCustomMetric>) NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values());
+        reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
 
         return utc;
     }

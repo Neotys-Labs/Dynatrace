@@ -51,11 +51,7 @@ public class HTTPGenerator {
 		}
 		addHeaders(request, headers);
 		if (params != null && !params.isEmpty()) {
-			if (!Objects.equals(httpMethod, HTTP_GET_METHOD))
-				request.setParams(generateParams(params));
-			else {
-				setRequestUrl(request, url, params);
-			}
+			setRequestUrl(request, url, params);
 		}
 	}
 

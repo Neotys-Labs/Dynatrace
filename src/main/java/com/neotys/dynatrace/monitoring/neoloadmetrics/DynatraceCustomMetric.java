@@ -7,7 +7,7 @@ import java.util.List;
 public class DynatraceCustomMetric {
 
     static DecimalFormat decimalFormat = new DecimalFormat("#.##########");
-    private static final String NEOLOAD = "Neoload";
+    private static final String NEOLOAD = "NeoLoad";
 
     private String name;
     private String displayName;
