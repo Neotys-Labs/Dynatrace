@@ -8,8 +8,10 @@ import io.swagger.client.api.ResultsApi;
 import java.util.Timer;
 
 public class DynatracePluginData {
-    private static final int MAXDURATION_TIME = 2000;
     private static final String NL_TEST_RUNNING = "RUNNING";
+    private static final String NLWEB_VERSION = "v1";
+
+    private static final int MAXDURATION_TIME = 2000;
     private static final int TIMER_FREQUENCY = 30000;
     private static final int TIMER_DELAY = 0;
 
@@ -37,7 +39,7 @@ public class DynatracePluginData {
         //----define  the NLWEB API-----
         neoLoadWebApiClient = new ApiClient();
         neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
-        neoLoadWebApiClient.setBasePath(context.getWebPlatformApiUrl());
+        neoLoadWebApiClient.setBasePath(context.getWebPlatformApiUrl() + NLWEB_VERSION + "/");
         this.dynatraceManagedHostname = dynatraceManagedHostname;
         initNeoLoadApi();
         //-------------------------

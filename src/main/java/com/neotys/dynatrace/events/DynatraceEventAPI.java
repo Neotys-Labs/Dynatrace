@@ -94,11 +94,12 @@ class DynatraceEventAPI {
 		parameters.put("tag", tags);
 		addTokenInParameters(parameters);
 
-		context.getLogger().debug("Getting application...");
+		//TODO NPE
+//		context.getLogger().debug("Getting application...");
 
 		final Optional<Proxy> proxy = getProxy(proxyName, dynatraceUrl);
 		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters, proxy);
-		final List<String> applicationEntityId = new ArrayList<>();;
+		final List<String> applicationEntityId = new ArrayList<>();
 		try {
 			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
 			if (jsonArrayResponse != null) {
@@ -114,9 +115,11 @@ class DynatraceEventAPI {
 		} finally {
 			http.closeHttpClient();
 		}
-		if (context.getLogger().isDebugEnabled()) {
-			context.getLogger().debug("Found applications: " + applicationEntityId);
-		}
+
+		// TODO NPE
+//		if (context.getLogger().isDebugEnabled()) {
+//			context.getLogger().debug("Found applications: " + applicationEntityId);
+//		}
 
 		return applicationEntityId;
 	}
@@ -223,8 +226,8 @@ class DynatraceEventAPI {
 
 	private String getDynatraceApiUrl() {
 		String result;
-		if (dynatraceManagedHostname != null) {
-			result = DYNATRACE_PROTOCOL + dynatraceManagedHostname + "/api/v1/";
+		if (dynatraceManagedHostname.isPresent()) {
+			result = DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/api/v1/";
 		} else {
 			result = DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
 		}

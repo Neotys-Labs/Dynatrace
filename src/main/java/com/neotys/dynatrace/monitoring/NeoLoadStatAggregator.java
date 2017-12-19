@@ -67,7 +67,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private final String testId;
     private String applicationEntityId;
     private String scenarioName;
-    private String dynatraceManagedHostName;
+    private Optional<String> dynatraceManagedHostName;
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
     private long lastDuration = 0;
@@ -98,7 +98,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         this.testId = context.getTestId();
         this.testName = context.getTestName();
         this.nlWebResult = nlWebResult;
-        this.dynatraceManagedHostName = dynatraceManagedHostName.get();
+        this.dynatraceManagedHostName = dynatraceManagedHostName;
         this.dynatraceAccountId = dynatraceAccountId;
         this.scenarioName = context.getScenarioName();
         this.dataExchangeApiUrl = dataExchangeApiUrl;
@@ -149,8 +149,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     private String getApiUrl() {
-        if (dynatraceManagedHostName != null) {
-            return DYNATRACE_PROTOCOL + dynatraceManagedHostName + "/api/v1/";
+        if (dynatraceManagedHostName.isPresent()) {
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostName.get() + "/api/v1/";
         } else {
             return DYNATRACE_PROTOCOL + dynatraceAccountId + DYNATRACE_URL;
         }
@@ -190,7 +190,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
                 + "\"dimensions\": [\"Neoload\"],"
-                + "\"types\":[\"" + dynatraceCustomMetric.getTypes() + "\"]}";
+                + "\"types\":[\"" + dynatraceCustomMetric.getTypes().get(0) + "\"]}";
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
@@ -314,7 +314,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = new HTTPGenerator(url, HTTP_GET_METHOD, headerMap, parameters, proxy);
+        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, headerMap, parameters, proxy);
 
         try {
             httpCode = httpGenerator.executeAndGetResponseCode();

@@ -20,8 +20,8 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_MONITORING_ACTION-01";
     private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_MONITORING_ACTION-02";
 
-    private DynatraceIntegration dynatrace;
-    private DynatracePluginData pluginData;
+    private DynatraceIntegration dynatraceIntegration;
+    private DynatracePluginData dynatracePluginData;
 
     @Override
     public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
@@ -54,33 +54,26 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         sampleResult.sampleStart();
         //TODO Add logs
         try {
-            pluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
-            if (pluginData == null) {
+            dynatracePluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
+            if (dynatracePluginData == null) {
                 // Delay by two seconds to ensure no conflicts in re-establishing connection
                 // TODO catch exceptions?
-//                try {
-                    pluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
+                    dynatracePluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
                             context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname);
 
-                    context.getCurrentVirtualUser().put("PLUGINDATA", pluginData);
-                    //----bug to resolve on the senteventapi
-                    //eventAPI.SendStartTest();
-//                } catch (IOException e) {
-//                    return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
-//                }
-
-                pluginData.startTimer();
+                    context.getCurrentVirtualUser().put("PLUGINDATA", dynatracePluginData);
+                dynatracePluginData.startTimer();
             } else {
-                pluginData.resumeTimer();
+                dynatracePluginData.resumeTimer();
             }
 
             long startTs = System.currentTimeMillis() - context.getElapsedTime();
             logger.debug("Sending start test...");
-            dynatrace = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
+            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
-            pluginData.stopTimer();
+            dynatracePluginData.stopTimer();
 
             //---check if aggregator exists
             // startimer
@@ -96,11 +89,11 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     @Override
     public void stopExecute() {
         // TODO add code executed when the test have to stop.
-        if (pluginData != null)
-            pluginData.stopTimer();
+        if (dynatracePluginData != null)
+            dynatracePluginData.stopTimer();
 
-        if (dynatrace != null)
-            dynatrace.setTestToStop();
+        if (dynatraceIntegration != null)
+            dynatraceIntegration.setTestToStop();
     }
 
 }
