@@ -69,10 +69,6 @@ public class DynatraceCustomMetric {
         return this.value;
     }
 
-    public static String getNEOLOAD() {
-        return NEOLOAD;
-    }
-
     public String getDisplayName() {
         return displayName;
     }
