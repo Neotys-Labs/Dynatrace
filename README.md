@@ -21,7 +21,7 @@ This bundle has the following actions:
 | Maturity | Experimental |
 | Author   | Neotys Partner Team |
 | License  | [BSD Simplified](https://www.neotys.com/documents/legal/bsd-neotys.txt) |
-| NeoLoad  | 6.1 (Enterprise or Professional Edition w/ Integration & Advanced Usage and NeoLoad Web option required)|
+| NeoLoad  | 6.3 (Enterprise or Professional Edition w/ Integration & Advanced Usage and NeoLoad Web option required)|
 | Requirements | NeoLoad Web SaaS subscription |
 | Bundled in NeoLoad | No
 | Download Binaries | See the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest)
@@ -45,11 +45,11 @@ Once installed, how to use in a given NeoLoad project:
 
 | Name             | Description |
 | -----            | ----- |
-| Dynatrace_ID     |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
-| Dynatrace_API_KEY| API key of your dynatrace account |
-| Tags (optional)  | Dynatrace Tags of the services used by your SUT |
-| EventStatus      |: status sent to dynatrace : START or STOP |
-| Dynatrace_Managed_Hostname (Optional) | Hostname of your dynatrace managed environment |
+| dynatraceId      |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
+| dynatraceApiKey  |  API key of your dynatrace account |
+| tags (optional)  |  Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2) |
+| proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
+| dynatraceManagedHostname (Optional) | Hostname of your dynatrace managed environment |
 
 ## Parameters for Dynatrace Monitoring
 
@@ -57,18 +57,17 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 
 | Name             | Description |
 | -----            | ----- |
-| Dynatrace_ID     |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
-| Dynatrace_API_KEY| API key of your dynatrace account |
-| Tags (optional)  | Dynatrace Tags of the services used by your SUT |
-| EventStatus      |: status sent to dynatrace : START or STOP |
-| Dynatrace_Managed_Hostname (Optional) | Hostname of your dynatrace managed environment |
-| NeoLoadAPIHost   | IP address or Host of the DataExchange API |
-| NeoLoadAPIport   | Port of the NL DataExchange API   |
-| NeoLoadKeyAPI    | API key of the DataExchange API   |
+| dynatraceId      |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
+| dynatraceApiKey  | API key of your dynatrace account |
+| tags (optional)  | Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2) |
+| dynatraceManagedHostname (Optional) | Hostname of your dynatrace managed environment |
+| dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
+| dataExchangeApiKey  (Optional)  | API key of the DataExchange API   |
+| proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
   
 ## Status Codes
 
-* NL-DynatraceMonitoring_ERROR: Issue while monitoring dynatrace  
-* NL-DynatraceEvent_ERROR: Error while sending the event to dynatrace  
-
-
+* NL-DYNATRACE_EVENT_ACTION-01: Could not parse arguments on dynatrace event
+* NL-DYNATRACE_EVENT_ACTION-02: Technical Error encouter on dynatrace event
+* NL-DYNATRACE_MONITORING_ACTION-01: Could not parse arguments on dynatrace monitoring
+* NL-DYNATRACE_MONITORING_ACTION-02: Technical Error encouter on dynatrace monitoring
