@@ -6,6 +6,7 @@ import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
+import org.apache.http.StatusLine;
 
 import java.util.HashMap;
 import java.util.List;
@@ -102,51 +103,16 @@ class DynatraceEventAPI {
 
 		final Optional<Proxy> proxy = getProxy(context, proxyName, url);
 		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, jsonString);
+		StatusLine statusLine;
 		try {
-			final int httpCode = insightHttp.executeAndGetResponseCode();
-			final String exceptionMessage = getExceptionMessageFromHttpCode(httpCode);
-			if (exceptionMessage != null) {
-				throw new DynatraceException(exceptionMessage);
-			}
+			statusLine = insightHttp.executeAndGetStatusLine();
 		} finally {
 			insightHttp.closeHttpClient();
 		}
-	}
 
-	private String getExceptionMessageFromHttpCode(final int httpCode) {
-		final String exceptionMessage;
-		switch (httpCode) {
-			case BAD_REQUEST:
-				exceptionMessage = "The request or headers are in the wrong format, or the URL is incorrect, or the GUID does not meet the validation requirements.";
-				break;
-			case UNAUTHORIZED:
-				exceptionMessage = "Authentication error (no license key header, or invalid license key).";
-				break;
-			case NOT_FOUND:
-				exceptionMessage = "Invalid URL.";
-				break;
-			case METHOD_NOT_ALLOWED:
-				exceptionMessage = "Returned if the method is an invalid or unexpected type (GET/POST/PUT/etc.).";
-				break;
-			case REQUEST_ENTITY_TOO_LARGE:
-				exceptionMessage = "Too many metrics were sent in one request, or too many components (instances) were specified in one request, or other single-request limits were reached.";
-				break;
-			case INTERNAL_SERVER_ERROR:
-				exceptionMessage = "Unexpected server error";
-				break;
-			case BAD_GATEWAY:
-				exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-				break;
-			case SERVICE_UNAVAIBLE:
-				exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-				break;
-			case GATEWAY_TIMEOUT:
-				exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-				break;
-			default:
-				exceptionMessage = null;
+		if (statusLine != null && !isSuccessHttpCode(statusLine.getStatusCode())) {
+			throw new DynatraceException(statusLine.getReasonPhrase());
 		}
-		return exceptionMessage;
 	}
 }
 

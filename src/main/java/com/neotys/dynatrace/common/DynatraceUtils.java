@@ -28,7 +28,7 @@ public class DynatraceUtils {
 	private static final ImageIcon DYNATRACE_ICON;
 
 	static {
-		final URL iconURL = DynatraceException.class.getResource("dynatrace.png");
+		final URL iconURL = DynatraceUtils.class.getResource("dynatrace.png");
 		if (iconURL != null) {
 			DYNATRACE_ICON = new ImageIcon(iconURL);
 		} else {

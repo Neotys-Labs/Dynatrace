@@ -66,7 +66,7 @@ class HTTPGeneratorUtils {
 
 	@SuppressWarnings("deprecation")
 	private static DefaultHttpClient newHttpsClient() throws Exception {
-		final DefaultHttpClient Client = new DefaultHttpClient();
+		final DefaultHttpClient client = new DefaultHttpClient();
 		final HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 		final TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
 			@Override
@@ -79,19 +79,19 @@ class HTTPGeneratorUtils {
 		final SSLSocketFactory socketFactory;
 		socketFactory = new SSLSocketFactory(acceptingTrustStrategy, (X509HostnameVerifier) hostnameVerifier);
 		registry.register(new Scheme("https", socketFactory, 443));
-		final SingleClientConnManager mgr = new SingleClientConnManager(Client.getParams(), registry);
+		final SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
 		// Set verifier
 		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-		return new DefaultHttpClient(mgr, Client.getParams());
+		return new DefaultHttpClient(mgr, client.getParams());
 	}
 
-	static void addJsonParameters(final HttpRequestBase request, final StringEntity JsonContent, final String httpMethod) {
+	static void addJsonParameters(final HttpRequestBase request, final StringEntity jsonContent, final String httpMethod) {
 		switch (httpMethod) {
 			case HTTP_POST_METHOD:
-				((HttpPost) request).setEntity(JsonContent);
+				((HttpPost) request).setEntity(jsonContent);
 				break;
 			case HTTP_PUT_METHOD:
-				((HttpPut) request).setEntity(JsonContent);
+				((HttpPut) request).setEntity(jsonContent);
 				break;
 			default:
 				throw new UnsupportedOperationException("Invalid http method");

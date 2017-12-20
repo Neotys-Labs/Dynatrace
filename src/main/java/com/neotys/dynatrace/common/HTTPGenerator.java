@@ -21,10 +21,10 @@ import java.util.Map;
 import static com.neotys.dynatrace.common.HTTPGeneratorUtils.*;
 
 public class HTTPGenerator {
-	public final static String HTTP_GET_METHOD = "GET";
-	public final static String HTTP_POST_METHOD = "POST";
-	public final static String HTTP_OPTION_METHOD = "OPTION";
-	public final static String HTTP_PUT_METHOD = "PUT";
+	public static final String HTTP_GET_METHOD = "GET";
+	public static final String HTTP_POST_METHOD = "POST";
+	public static final String HTTP_OPTION_METHOD = "OPTION";
+	public static final String HTTP_PUT_METHOD = "PUT";
 
 	private final DefaultHttpClient httpClient;
 	private final HttpRequestBase request;
