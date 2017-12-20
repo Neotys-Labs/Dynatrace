@@ -3,6 +3,7 @@ package com.neotys.dynatrace.common;
 import com.google.common.base.Optional;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
+import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -94,5 +95,10 @@ public class DynatraceUtils {
 		} else {
 			return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
 		}
+	}
+
+	public static boolean isSuccessHttpCode(final int httpCode) {
+		return httpCode >= HttpStatus.SC_OK
+				&& httpCode <= HttpStatus.SC_MULTI_STATUS;
 	}
 }

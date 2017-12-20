@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
+import static com.neotys.dynatrace.common.DynatraceUtils.isSuccessHttpCode;
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
@@ -243,15 +244,10 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                 insightHttp.closeHttpClient();
             }
 
-            if (statusLine != null && isResponseOk(statusLine.getStatusCode())) {
+            if (statusLine != null && isSuccessHttpCode(statusLine.getStatusCode())) {
                 throw new DynatraceStatException(statusLine.getReasonPhrase());
             }
         }
-    }
-
-    private boolean isResponseOk(final int httpCode) {
-        return httpCode >= HttpStatus.SC_OK
-                && httpCode <= HttpStatus.SC_MULTI_STATUS;
     }
 
     @Override
@@ -275,7 +271,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             httpGenerator.closeHttpClient();
         }
 
-        return isResponseOk(httpCode);
+        return isSuccessHttpCode(httpCode);
     }
 }
 
