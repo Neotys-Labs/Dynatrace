@@ -38,12 +38,12 @@ public enum DynatraceMonitoringOption implements Option {
             ALWAYS_VALID),
 
     NeoLoadDataExchangeApiUrl("dataExchangeApiUrl", Required, True, TEXT,
-            "where the DataExchange server is located. Typically the NeoLoad controller. For example, http://localhost:7400/DataExchange/v1/Service.svc/",
             "http://" + HostnameHolder.get() + ":7400/DataExchange/v1/Service.svc/",
+            "where the DataExchange server is located. Typically the NeoLoad controller. For example, http://localhost:7400/DataExchange/v1/Service.svc/",
             NON_EMPTY),
 
     NeoLoadDataExchangeApiKey("dataExchangeApiKey", Optional, True, TEXT,
-            "identification key specified in NeoLoad",
+            "",
             "identification key specified in NeoLoad",
             ALWAYS_VALID),
 
