@@ -62,8 +62,8 @@ class DynatraceEventAPI {
 		this.dynatraceManagedHostname = dynatraceManagedHostname;
 		this.proxyName = proxyName;
 		this.headers = new HashMap<>();
-		this.applicationEntityid = getApplicationEntityId(dynatraceTags);
 		this.context = context;
+		this.applicationEntityid = getApplicationEntityId(dynatraceTags);
 	}
 
 	private void addTokenInParameters(final Map<String, String> param) {
@@ -94,8 +94,7 @@ class DynatraceEventAPI {
 		parameters.put("tag", tags);
 		addTokenInParameters(parameters);
 
-		//TODO NPE
-//		context.getLogger().debug("Getting application...");
+		context.getLogger().debug("Getting application...");
 
 		final Optional<Proxy> proxy = getProxy(proxyName, dynatraceUrl);
 		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters, proxy);
@@ -116,10 +115,9 @@ class DynatraceEventAPI {
 			http.closeHttpClient();
 		}
 
-		// TODO NPE
-//		if (context.getLogger().isDebugEnabled()) {
-//			context.getLogger().debug("Found applications: " + applicationEntityId);
-//		}
+		if (context.getLogger().isDebugEnabled()) {
+			context.getLogger().debug("Found applications: " + applicationEntityId);
+		}
 
 		return applicationEntityId;
 	}
