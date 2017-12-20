@@ -1,6 +1,7 @@
 package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
@@ -77,7 +78,7 @@ public class HTTPGenerator {
 			proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "http");
 		}
 		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHttpHost);
-		if (proxy.getLogin() != null) {
+		if (Strings.isNullOrEmpty(proxy.getLogin())) {
 			httpClient.getCredentialsProvider().setCredentials(
 					new AuthScope(proxy.getHost(), proxy.getPort()),
 					new UsernamePasswordCredentials(proxy.getLogin(), proxy.getPassword()));
