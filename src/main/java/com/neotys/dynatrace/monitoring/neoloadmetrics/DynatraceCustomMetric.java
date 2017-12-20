@@ -17,18 +17,20 @@ public class DynatraceCustomMetric {
 
     private String value;
 
-    private CreationStatus status;
+    private boolean created;
+    private boolean valued;
 
 
     public DynatraceCustomMetric(final String displayName, final String unit,
                                  final List<String> dimensions, final List<String> types,
-                                 final String value, CreationStatus status) {
+                                 final String value) {
         this.displayName = displayName;
         this.unit = unit;
         this.dimensions = dimensions;
         this.types = types;
         this.value = value;
-        this.status = status;
+        this.created = false;
+        this.valued = false;
     }
 
     /**
@@ -41,7 +43,8 @@ public class DynatraceCustomMetric {
      */
     public static DynatraceCustomMetric of(final String name, final String displayName, final String unit,
                                            final List<String> dimensions){
-        return new DynatraceCustomMetric(displayName, unit, dimensions, Arrays.asList(NEOLOAD), null, CreationStatus.UNKONWN);
+        return new DynatraceCustomMetric(displayName, unit, dimensions,
+                Arrays.asList(NEOLOAD), null);
     }
 
 
@@ -49,6 +52,7 @@ public class DynatraceCustomMetric {
         Number newValue = 0;
         if (this.value == null) {
             newValue = value;
+            setValued(true);
         } else {
             if (value instanceof Long) {
                 newValue = (Long) value - Long.valueOf(this.value);
@@ -61,7 +65,7 @@ public class DynatraceCustomMetric {
             }
         }
 
-        if(newValue != null){
+        if (newValue != null) {
             String formatedNewValue = decimalFormat.format(newValue);
             this.value = formatedNewValue;
         }
@@ -107,14 +111,28 @@ public class DynatraceCustomMetric {
 
     public void setValue(String value) {
         this.value = value;
-        setStatus(CreationStatus.CREATED);
     }
 
-    public CreationStatus getStatus() {
-        return status;
+    public void setValue(Number value) {
+        if (value != null) {
+            this.value = value + "";
+            setValued(true);
+        }
     }
 
-    public void setStatus(CreationStatus status) {
-        this.status = status;
+    public void setCreated(boolean created) {
+        this.created = created;
+    }
+
+    public void setValued(boolean valued) {
+        this.valued = valued;
+    }
+
+    public boolean isCreated() {
+        return created;
+    }
+
+    public boolean isValued() {
+        return valued;
     }
 }

@@ -67,10 +67,9 @@ public class NeoLoadDynatraceCustomMetrics {
     }
 
     public static void updateTimeseriesToSend(TestStatistics testStatistics) {
-
-        neoLoadDynatraceTimeseries.get(REQUEST_COUNT).setValue(testStatistics.getLastRequestCountPerSecond() + "");
-        neoLoadDynatraceTimeseries.get(TRANSACTION_AVG_DURATION).setValue(testStatistics.getLastTransactionDurationAverage() / 1000 + "");
-        neoLoadDynatraceTimeseries.get(USER_LOAD).setValue(testStatistics.getLastVirtualUserCount() + "");
+        neoLoadDynatraceTimeseries.get(REQUEST_COUNT).setValue(testStatistics.getLastRequestCountPerSecond());
+        neoLoadDynatraceTimeseries.get(TRANSACTION_AVG_DURATION).setValue(testStatistics.getLastTransactionDurationAverage() / 1000);
+        neoLoadDynatraceTimeseries.get(USER_LOAD).setValue(testStatistics.getLastVirtualUserCount());
 
         neoLoadDynatraceTimeseries.get(COUNT_AVG_FAILURE).updateToLastValue(testStatistics.getTotalGlobalCountFailure());
         neoLoadDynatraceTimeseries.get(DOWNLOADED_BYTES).updateToLastValue(testStatistics.getTotalGlobalDownloadedBytes());
@@ -84,6 +83,6 @@ public class NeoLoadDynatraceCustomMetrics {
         neoLoadDynatraceTimeseries.get(TRANSACTION_SUCCESS_RATE).updateToLastValue(testStatistics.getTotalTransactionCountPerSecond());
         neoLoadDynatraceTimeseries.get(TRANSACTION_SUCCESS).updateToLastValue(testStatistics.getTotalTransactionCountSuccess());
 
-        neoLoadDynatraceTimeseries.get(REQUEST_DURATION).setValue(testStatistics.getTotalRequestDurationAverage() / 1000 + "");
+        neoLoadDynatraceTimeseries.get(REQUEST_DURATION).setValue(testStatistics.getTotalRequestDurationAverage() / 1000);
     }
 }

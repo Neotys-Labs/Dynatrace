@@ -3,7 +3,6 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.HTTPGenerator;
-import com.neotys.dynatrace.monitoring.neoloadmetrics.CreationStatus;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
 import com.neotys.extensions.action.engine.Context;
@@ -21,7 +20,7 @@ import java.util.*;
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
-public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi{
+public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi {
 
     private static final String DYNATRACE_API_URL = "events/";
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
@@ -200,10 +199,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         } finally {
             insightHttp.closeHttpClient();
         }
-        if (httpCode == HTTP_RESPONSE_CREATED || httpCode == HTTP_RESPONSE_ALREADY) {
-            //------change the code to give a status if the data has been properly created...---review this pieece of code
-            dynatraceCustomMetric.setStatus(CreationStatus.CREATED);
-
+        if (httpCode == HTTP_RESPONSE_CREATED) {
+            dynatraceCustomMetric.setCreated(true);
         }
         return httpCode;
     }
@@ -235,17 +232,17 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
 
         boolean hasMetrics = false;
-        for (DynatraceCustomMetric dynatraceCustomMetric : dynatraceCustomMetrics){
-            if(CreationStatus.CREATED.equals(dynatraceCustomMetric.getStatus())){
+        for (DynatraceCustomMetric dynatraceCustomMetric : dynatraceCustomMetrics) {
+            if (dynatraceCustomMetric.isCreated() && dynatraceCustomMetric.isValued()) {
                 String conStr = "{"
-                        + "\"timeseriesId\" : \"custom:" + dynatraceCustomMetric.getTypes().get(0) + "\","
-                        + "\"dimensions\" : { \"Neoload\" : \"" + dynatraceCustomMetric.getDimensions().get(0) + "\"  },"
+                        + "\"timeseriesId\" : \"custom:" + dynatraceCustomMetric.getDimensions().get(0) + "\","
+                        + "\"dimensions\" : { \"Neoload\" : \"" + dynatraceCustomMetric.getDisplayName() + "\"  },"
                         + "\"dataPoints\" : [ [" + String.valueOf(time) + "  , " + dynatraceCustomMetric.getValue() + " ] ]"
                         + "}";
 
 
                 jsonString += conStr + ",";
-                hasMetrics= true;
+                hasMetrics = true;
             }
         }
 
