@@ -88,7 +88,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
     @Override
     public void stopExecute() {
-        // TODO add code executed when the test have to stop.
         if (dynatracePluginData != null)
             dynatracePluginData.stopTimer();
 
