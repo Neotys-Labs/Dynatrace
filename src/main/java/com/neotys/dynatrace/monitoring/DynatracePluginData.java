@@ -39,7 +39,7 @@ public class DynatracePluginData {
         //----define  the NLWEB API-----
         neoLoadWebApiClient = new ApiClient();
         neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
-        neoLoadWebApiClient.setBasePath(context.getWebPlatformApiUrl() + NLWEB_VERSION + "/");
+        neoLoadWebApiClient.setBasePath(getBasePath(context));
         this.dynatraceManagedHostname = dynatraceManagedHostname;
         initNeoLoadApi();
         //-------------------------
@@ -48,6 +48,16 @@ public class DynatracePluginData {
         this.dataExchangeApiUrl = dataExchangeApiUrl;
         neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, dynatraceAccountId, nlWebResult,
                 context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName);
+    }
+
+    private String getBasePath(final Context context) {
+        final String webPlatformApiUrl = context.getWebPlatformApiUrl();
+        final StringBuilder basePathBuilder = new StringBuilder(webPlatformApiUrl);
+        if(!webPlatformApiUrl.endsWith("/")) {
+            basePathBuilder.append("/");
+        }
+        basePathBuilder.append(NLWEB_VERSION + "/");
+        return basePathBuilder.toString();
     }
 
     public void startTimer() {
