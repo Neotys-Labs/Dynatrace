@@ -1,7 +1,7 @@
 package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
-import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
@@ -23,16 +23,16 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static com.neotys.dynatrace.common.DynatraceUtils.getApplicationEntityId;
+import static com.neotys.dynatrace.common.DynatraceUtils.getDynatraceApiUrl;
+import static com.neotys.dynatrace.common.DynatraceUtils.getTags;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
 public class DynatraceIntegration {
-	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
-	private static final String DYNATRACE_APPLICATION = "entity/services";
 	private static final String DYNATRACE_API_PROCESS_GROUP = "entity/infrastructure/process-groups";
 	private static final String DYNATRACE_HOSTS = "entity/infrastructure/hosts";
 	private static final String DYNATRACE_TIMESERIES = "timeseries";
-	private static final String DYNATRACE_PROTOCOL = "https://";
 	private static final String NEOLOAD_LOCATION = "Dynatrace";
 
 	private static final Map<String, String> TIMESERIES_INFRA_MAP = new HashMap<>();
@@ -86,8 +86,8 @@ public class DynatraceIntegration {
 	private final DataExchangeAPIClient dataExchangeApiClient;
 	private final String dynatraceApiKey;
 	private final String dynatraceId;
-	private final String dynatraceManagedHostname;
-	private final String dynatraceApplication;
+	private final Optional<String> dynatraceManagedHostname;
+	private final Optional<String> dynatraceApplication;
 
 	private HTTPGenerator httpGenerator;
 	private List<String> dynatraceApplicationServiceIds;
@@ -109,35 +109,19 @@ public class DynatraceIntegration {
 		this.context = context;
 		this.startTS = startTs;
 		this.dynatraceApiKey = dynatraceApiKey;
-		this.dynatraceApplication = dynatraceTags.orNull();
+		this.dynatraceApplication = dynatraceTags;
 		this.dynatraceId = dynatraceId;
-		this.dynatraceManagedHostname = dynatraceManagedHostname.orNull();
+		this.dynatraceManagedHostname = dynatraceManagedHostname;
 		this.isRunning = true;
 		this.proxyName = proxyName;
 		final ContextBuilder contextBuilder = new ContextBuilder().hardware("Dynatrace").location(NEOLOAD_LOCATION).software("OneAgent")
 				.script("DynatraceMonitoring" + System.currentTimeMillis());
 		this.dataExchangeApiClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl, contextBuilder.build(), dataExchangeApiKey.orNull());
 		initHttpClient();
-		this.dynatraceApplicationServiceIds = getApplicationId();
+		this.dynatraceApplicationServiceIds = getApplicationEntityId(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
 		getHostsFromProcessGroup();
 		getHosts();
 		getDynatraceData();
-	}
-
-	private String getTags(final String applicationName) {
-		final StringBuilder result = new StringBuilder();
-		if (applicationName != null) {
-			if (applicationName.contains(",")) {
-				final String[] tagsTable = applicationName.split(",");
-				for (String tag : tagsTable) {
-					result.append(tag).append("AND");
-				}
-				return result.substring(0, result.length() - 3);
-			} else {
-				return applicationName;
-			}
-		}
-		return null;
 	}
 
 	// TODO why is it not used?
@@ -160,37 +144,6 @@ public class DynatraceIntegration {
 			return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
 		}
 		return Optional.absent();
-	}
-
-	private List<String> getApplicationId() throws DynatraceException, IOException, URISyntaxException {
-		final String tags = getTags(dynatraceApplication);
-		final String url = getApiUrl() + DYNATRACE_APPLICATION;
-		final Map<String, String> parameters = new HashMap<>();
-		parameters.put("tag", tags);
-		sendTokenIngetParam(parameters);
-		//initHttpClient();
-		final Optional<Proxy> proxy = getProxy(proxyName, url);
-		httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
-
-		try {
-			final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
-			if (jsonObj != null) {
-				dynatraceApplicationServiceIds = new ArrayList<>();
-				for (int i = 0; i < jsonObj.length(); i++) {
-					final JSONObject jsonApplication = jsonObj.getJSONObject(i);
-					if (jsonApplication.has("entityId")) {
-						dynatraceApplicationServiceIds.add(jsonApplication.getString("entityId"));
-					}
-				}
-			} else {
-				throw new DynatraceException("No Application find in the Dynatrace Account with the name " + tags);
-			}
-		} finally {
-			httpGenerator.closeHttpClient();
-		}
-
-		return dynatraceApplicationServiceIds;
-
 	}
 
 	private HashMap<String, String> getEntityDefinition(final JSONObject entity) {
@@ -216,7 +169,7 @@ public class DynatraceIntegration {
 
 	private void getHosts() throws IOException, URISyntaxException {
 		final String tags = getTags(dynatraceApplication);
-		final String url = getApiUrl() + DYNATRACE_HOSTS;
+		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
 		final Map<String, String> parameters = new HashMap<>();
 		parameters.put("tag", tags);
 		sendTokenIngetParam(parameters);
@@ -243,7 +196,7 @@ public class DynatraceIntegration {
 
 	private void getHostsFromProcessGroup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
 		final String tags = getTags(dynatraceApplication);
-		final String url = getApiUrl() + DYNATRACE_API_PROCESS_GROUP;
+		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
 		final Map<String, String> parameters = new HashMap<>();
 		parameters.put("tag", tags);
 		sendTokenIngetParam(parameters);
@@ -330,7 +283,7 @@ public class DynatraceIntegration {
 			throws IOException, NoSuchAlgorithmException, URISyntaxException {
 		JSONObject jsonApplication;
 
-		final String url = getApiUrl() + DYNATRACE_TIMESERIES;
+		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_TIMESERIES;
 		final Map<String, String> parameters = new HashMap<>();
 		sendTokenIngetParam(parameters);
 
@@ -392,14 +345,6 @@ public class DynatraceIntegration {
 				}
 			}
 
-		}
-	}
-
-	private String getApiUrl() {
-		if (dynatraceManagedHostname != null) {
-			return DYNATRACE_PROTOCOL + dynatraceManagedHostname + "/api/v1/";
-		} else {
-			return DYNATRACE_PROTOCOL + dynatraceId + DYNATRACE_URL;
 		}
 	}
 

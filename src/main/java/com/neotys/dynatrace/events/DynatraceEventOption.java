@@ -18,7 +18,7 @@ import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 public enum DynatraceEventOption implements Option {
 	DynatraceId("dynatraceId", Required, True, TEXT,
 			"Dynatrace ID ( part of the url of your dynatace saas)",
-			"Dynatrace id",
+			"Dynatrace id.",
 			NON_EMPTY),
 
 	DynatraceApiKey("dynatraceApiKey", Required, True, TEXT,

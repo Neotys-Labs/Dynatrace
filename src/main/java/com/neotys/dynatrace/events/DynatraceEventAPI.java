@@ -1,34 +1,28 @@
 package com.neotys.dynatrace.events;
 
+import com.google.common.base.Optional;
+import com.neotys.dynatrace.common.DynatraceContext;
+import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.extensions.action.engine.Context;
+import com.neotys.extensions.action.engine.Proxy;
+
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Optional;
-import com.neotys.dynatrace.common.DynatraceException;
-import com.neotys.extensions.action.engine.Proxy;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.neotys.dynatrace.common.HTTPGenerator;
-import com.neotys.extensions.action.engine.Context;
-
-import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
+import static com.neotys.dynatrace.common.DynatraceUtils.getApplicationEntityId;
+import static com.neotys.dynatrace.common.DynatraceUtils.getDynatraceApiUrl;
+import static com.neotys.dynatrace.common.DynatraceUtils.getProxy;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
 
 class DynatraceEventAPI {
 
 	private static final String DYNATRACE_EVENTS_API_URL = "events";
-	private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
-	private static final String DYNATRACE_APPLICATION = "entity/services";
 	private static final String NL_RUL_LAST = "/#!result/overview/?benchId=";
-	private static final String DYNATRACE_PROTOCOL = "https://";
 	private static final String START_NL_TEST = "Start NeoLoad Test";
 	private static final String STOP_NL_TEST = "Stop NeoLoad Test";
 
@@ -63,70 +57,7 @@ class DynatraceEventAPI {
 		this.proxyName = proxyName;
 		this.headers = new HashMap<>();
 		this.context = context;
-		this.applicationEntityid = getApplicationEntityId(dynatraceTags);
-	}
-
-	private void addTokenInParameters(final Map<String, String> param) {
-		param.put("Api-Token", dynatraceApiKey);
-	}
-
-	private String getTags(final Optional<String> tags) {
-		if (tags.isPresent()) {
-			final StringBuilder result = new StringBuilder();
-			final String tagsAsString = tags.get();
-			if (tagsAsString.contains(",")) {
-				final String[] tagsArray = tagsAsString.split(",");
-				for (String tag : tagsArray) {
-					result.append(tag).append("AND");
-				}
-				return result.substring(0, result.length() - 3);
-			} else {
-				return tagsAsString;
-			}
-		}
-		return "";
-	}
-
-	private List<String> getApplicationEntityId(final Optional<String> tagsParameter) throws DynatraceException, IOException, URISyntaxException {
-		final String tags = getTags(tagsParameter);
-		final String dynatraceUrl = getDynatraceApiUrl() + DYNATRACE_APPLICATION;
-		final Map<String, String> parameters = new HashMap<>();
-		parameters.put("tag", tags);
-		addTokenInParameters(parameters);
-
-		context.getLogger().debug("Getting application...");
-
-		final Optional<Proxy> proxy = getProxy(proxyName, dynatraceUrl);
-		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, headers, parameters, proxy);
-		final List<String> applicationEntityId = new ArrayList<>();
-		try {
-			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
-			if (jsonArrayResponse != null) {
-				for (int i = 0; i < jsonArrayResponse.length(); i++) {
-					final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
-					if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
-						applicationEntityId.add(jsonApplication.getString("entityId"));
-					}
-				}
-			} else {
-				throw new DynatraceException("No Application find in The Dynatrace Account with the name " + tagsParameter.or(""));
-			}
-		} finally {
-			http.closeHttpClient();
-		}
-
-		if (context.getLogger().isDebugEnabled()) {
-			context.getLogger().debug("Found applications: " + applicationEntityId);
-		}
-
-		return applicationEntityId;
-	}
-
-	private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
-		if (proxyName.isPresent()) {
-			return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
-		}
-		return Optional.absent();
+		this.applicationEntityid = getApplicationEntityId(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName);
 	}
 
 	void sendStartTest() throws DynatraceException, IOException, URISyntaxException {
@@ -141,9 +72,9 @@ class DynatraceEventAPI {
 	}
 
 	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws DynatraceException, IOException, URISyntaxException {
-		final String url = getDynatraceApiUrl() + DYNATRACE_EVENTS_API_URL;
+		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
-		addTokenInParameters(parameters);
+		parameters.put("Api-Token", dynatraceApiKey);
 
 		final StringBuilder entitiesBuilder = new StringBuilder();
 		for (String service : applicationEntityid) {
@@ -173,7 +104,7 @@ class DynatraceEventAPI {
 
 		context.getLogger().debug("dynatrace event JSON content : " + jsonString);
 
-		final Optional<Proxy> proxy = getProxy(proxyName, url);
+		final Optional<Proxy> proxy = getProxy(context, proxyName, url);
 		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, jsonString);
 		try {
 			final int httpCode = insightHttp.executeAndGetResponseCode();
@@ -220,16 +151,6 @@ class DynatraceEventAPI {
 				exceptionMessage = null;
 		}
 		return exceptionMessage;
-	}
-
-	private String getDynatraceApiUrl() {
-		String result;
-		if (dynatraceManagedHostname.isPresent()) {
-			result = DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/api/v1/";
-		} else {
-			result = DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
-		}
-		return result;
 	}
 }
 
