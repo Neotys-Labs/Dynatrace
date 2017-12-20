@@ -57,7 +57,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             dynatracePluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
             if (dynatracePluginData == null) {
                 // Delay by two seconds to ensure no conflicts in re-establishing connection
-                // TODO catch exceptions?
                     dynatracePluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
                             context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname);
 

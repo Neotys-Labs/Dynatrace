@@ -31,7 +31,6 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final String HTTPS = "https://";
     private static final String NEOLOAD_SAAS_NEOTYS_COM = "neoload.saas.neotys.com";
     private static final String NEOLOAD_URL_LAST = "/#!result/overview/?benchId=";
-    private static final String DYNATRACE_PROTOCOL = "https://";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
     private static final String NEOLOAD_TYPE = "NeoLoad";
 
@@ -40,12 +39,10 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private final Optional<String> proxyName;
     private final Context context;
 
-    private HTTPGenerator httpGenerator;
     private ResultsApi nlWebResult;
     private String componentIpAdresse;
     private int componentPort;
 
-    private String componentsName;
     private String dynatraceApiKey;
     private String dynatraceAccountId;
     private String testName;
@@ -64,7 +61,6 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                                  final Optional<String> dynatraceManagedHostName,
                                  final Optional<String> proxyName) {
         this.proxyName = proxyName;
-        componentsName = "Statistics";
         this.dynatraceApiKey = dynatraceApiKey;
         this.context = context;
         this.testId = context.getTestId();
@@ -131,9 +127,9 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
     private String getApiUrl() {
         if (dynatraceManagedHostName.isPresent()) {
-            return DYNATRACE_PROTOCOL + dynatraceManagedHostName.get() + "/api/v1/";
+            return HTTPS + dynatraceManagedHostName.get() + "/api/v1/";
         } else {
-            return DYNATRACE_PROTOCOL + dynatraceAccountId + DYNATRACE_URL;
+            return HTTPS + dynatraceAccountId + DYNATRACE_URL;
         }
     }
 
@@ -175,7 +171,10 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
 
+        context.getLogger().debug("dynatrace register custom metric JSON content : " + jsonString);
+
         try {
+            context.getLogger().debug("Dynatrace service : register custom metric");
             int httpCode = insightHttp.executeAndGetResponseCode();
             if (httpCode == HttpStatus.SC_CREATED) {
                 dynatraceCustomMetric.setCreated(true);
@@ -234,8 +233,11 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             final Optional<Proxy> proxy = getProxy(proxyName, url);
             insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, jsonString);
 
+            context.getLogger().debug("dynatrace report custom metric JSON content : " + jsonString);
+
             StatusLine statusLine;
             try {
+                context.getLogger().debug("Dynatrace service : report custom metric");
                 statusLine = insightHttp.executeAndGetStatusLine();
             } finally {
                 insightHttp.closeHttpClient();
@@ -259,10 +261,11 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
+        HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
         int httpCode;
         try {
+            context.getLogger().debug("Dynatrace service : has custom metric");
             httpCode = httpGenerator.executeAndGetResponseCode();
         } finally {
             httpGenerator.closeHttpClient();
