@@ -175,10 +175,8 @@ public class DynatraceIntegration {
 			if (jsonArray != null) {
 				for (int i = 0; i < jsonArray.length(); i++) {
 					final JSONObject jsonApplication = jsonArray.getJSONObject(i);
-					if (jsonApplication.has("entityId")) {
-						if (jsonApplication.has("displayName")) {
-							dynatraceApplicationHostIds.add(jsonApplication.getString("entityId"));
-						}
+					if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
+						dynatraceApplicationHostIds.add(jsonApplication.getString("entityId"));
 					}
 				}
 			}

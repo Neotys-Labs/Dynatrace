@@ -31,10 +31,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
@@ -58,7 +54,7 @@ class HTTPGeneratorUtils {
 		request.setURI(new URL(urlWithParameters).toURI());
 	}
 
-	static DefaultHttpClient newHttpClient(final boolean isHttps) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+	static DefaultHttpClient newHttpClient(final boolean isHttps) throws Exception {
 		if (isHttps) {
 			return newHttpsClient();
 		} else {
@@ -69,7 +65,7 @@ class HTTPGeneratorUtils {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static DefaultHttpClient newHttpsClient() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+	private static DefaultHttpClient newHttpsClient() throws Exception {
 		final DefaultHttpClient Client = new DefaultHttpClient();
 		final HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
 		final TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
@@ -97,7 +93,8 @@ class HTTPGeneratorUtils {
 			case HTTP_PUT_METHOD:
 				((HttpPut) request).setEntity(JsonContent);
 				break;
-
+			default:
+				throw new UnsupportedOperationException("Invalid http method");
 		}
 	}
 

@@ -16,13 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.util.Map;
 
 import static com.neotys.dynatrace.common.HTTPGeneratorUtils.*;
@@ -41,7 +34,7 @@ public class HTTPGenerator {
 						 final Map<String, String> headers,
 						 final Map<String, String> params,
 						 final Optional<Proxy> proxy)
-			throws MalformedURLException, URISyntaxException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+			throws Exception {
 		this.request = generateHttpRequest(httpMethod, url);
 		final boolean isHttps = url.contains("https");
 		this.httpClient = newHttpClient(isHttps);
@@ -61,7 +54,7 @@ public class HTTPGenerator {
 													 final Map<String, String> params,
 													 final Optional<Proxy> proxy,
 													 final String jsonString)
-			throws MalformedURLException, URISyntaxException, UnsupportedEncodingException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+			throws Exception {
 		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params, proxy);
 		final StringEntity requestEntity = new StringEntity(jsonString, "application/json","utf8");
 		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
