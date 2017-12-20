@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -121,5 +122,10 @@ public class HTTPGenerator {
 	public int executeAndGetResponseCode() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
 		return response.getStatusLine().getStatusCode();
+	}
+
+	public StatusLine executeAndGetStatusLine() throws IOException {
+		final HttpResponse response = httpClient.execute(request);
+		return response.getStatusLine();
 	}
 }

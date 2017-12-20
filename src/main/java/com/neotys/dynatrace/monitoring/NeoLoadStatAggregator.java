@@ -10,9 +10,12 @@ import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
 import io.swagger.client.model.TestStatistics;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -22,9 +25,7 @@ import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi {
 
-    private static final String DYNATRACE_API_URL = "events/";
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
-    private static final String DYNATRACE_APPLICATION = "entity/services";
     private static final String DYNATRACE_TIME_SERIES_CREATION = "timeseries/custom";
     private static final String NL_TIMESERIES_PREFIX = "neoload.";
     private static final String DYNATRACE_NEW_DATA = "entity/infrastructure/custom/";
@@ -33,23 +34,9 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final String NEOLOAD_SAAS_NEOTYS_COM = "neoload.saas.neotys.com";
     private static final String NEOLOAD_URL_LAST = "/#!result/overview/?benchId=";
     private static final String DYNATRACE_PROTOCOL = "https://";
-    private static final String NEOLOADL_GUID = "com.neotys.NeoLoad.plugin";
-    private static final String VERSION = "1.0.0";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
     private static final String NEOLOAD_TYPE = "NeoLoad";
 
-    private static final int BAD_REQUEST = 400;
-    private static final int UNAUTHORIZED = 403;
-    private static final int NOT_FOUND = 404;
-    private static final int METHOD_NOT_ALLOWED = 405;
-    private static final int REQUEST_ENTITY_TOO_LARGE = 413;
-    private static final int INTERNAL_SERVER_ERROR = 500;
-    private static final int BAD_GATEWAY = 502;
-    private static final int SERVICE_UNAVAIBLE = 503;
-    private static final int GATEWAY_TIMEOUT = 504;
-    private static final int HTTP_RESPONSE = 200;
-    private static final int HTTP_RESPONSE_CREATED = 201;
-    private static final int HTTP_RESPONSE_ALREADY = 200;
     private static final int MIN_DYNATRACE_DURATION = 30;
 
     private final Optional<String> proxyName;
@@ -57,31 +44,19 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
     private HTTPGenerator httpGenerator;
     private ResultsApi nlWebResult;
+    private String componentIpAdresse;
+    private int componentPort;
 
-    private HashMap<String, String> headerMap = null;
     private String componentsName;
     private String dynatraceApiKey;
     private String dynatraceAccountId;
     private String testName;
     private final String testId;
-    private String applicationEntityId;
     private String scenarioName;
     private Optional<String> dynatraceManagedHostName;
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
     private long lastDuration = 0;
-
-    private void initHttpClient() {
-        headerMap = new HashMap<>();
-        //	headerMap.put("X-License-Key", NewRElicLicenseKey);
-        //headerMap.put("Content-Type", "application/json");
-        //headerMap.put("Accept","application/json");
-
-    }
-
-    public void addTokenIngetParam(final Map<String, String> param) {
-        param.put("Api-Token", dynatraceApiKey);
-    }
 
     public NeoLoadStatAggregator(final String dynatraceApiKey,
                                  final String dynatraceAccountId,
@@ -101,7 +76,17 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         this.dynatraceAccountId = dynatraceAccountId;
         this.scenarioName = context.getScenarioName();
         this.dataExchangeApiUrl = dataExchangeApiUrl;
-        initHttpClient();
+
+        initComponentAdresse();
+    }
+
+    private void initComponentAdresse() {
+        URI uri = URI.create(dataExchangeApiUrl);
+        componentIpAdresse = uri.getHost();
+        if ("localhost".equalsIgnoreCase(componentIpAdresse)) {
+            componentIpAdresse = "127.0.0.1";
+        }
+        componentPort = uri.getPort();
     }
 
     private void sendStatsToDynatrace() throws ApiException, DynatraceStatException, IOException, URISyntaxException {
@@ -126,9 +111,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(testStatistics);
 
         if (!timeSeriesConfigured) {
-            if (hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT)) != HTTP_RESPONSE) {
+            if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
                 for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
-                    //Register metrics
                     registerCustomMetric(dynatraceTimeseries);
                 }
             }
@@ -178,13 +162,12 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     @Override
-    public int registerCustomMetric(DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
-        int httpCode = 0;
+    public void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
         final Map<String, String> head = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
         final String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
-        addTokenIngetParam(parameters);
+        parameters.put("Api-Token", dynatraceApiKey);
 
         final String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
@@ -195,34 +178,30 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
 
         try {
-            httpCode = insightHttp.executeAndGetResponseCode();
+            int httpCode = insightHttp.executeAndGetResponseCode();
+            if (httpCode == HttpStatus.SC_CREATED) {
+                dynatraceCustomMetric.setCreated(true);
+            }
         } finally {
             insightHttp.closeHttpClient();
         }
-        if (httpCode == HTTP_RESPONSE_CREATED) {
-            dynatraceCustomMetric.setCreated(true);
-        }
-        return httpCode;
     }
 
 
     @Override
-    public int reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException {
-        int httpCode = 0;
+    public void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException {
         final Map<String, String> head = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
 
-        addTokenIngetParam(parameters);
+        parameters.put("Api-Token", dynatraceApiKey);
 
         String url = getApiUrl() + DYNATRACE_NEW_DATA + "NeoLoadData";
-        String exceptionMessage = null;
         long time = System.currentTimeMillis();
 
-        // TODO we need to get controller host and put in ipAddresses.
         String jsonString = "{\"displayName\" : \"NeoLoad Data\","
-                + "\"ipAddresses\" : [\"" + dataExchangeApiUrl + "\"],"
-                + "\"listenPorts\" : [\"" + 7400 + "\"],"
+                + "\"ipAddresses\" : [\"" + componentIpAdresse + "\"],"
+                + "\"listenPorts\" : [\"" + componentPort + "\"],"
                 + "\"type\" : \"" + NEOLOAD_TYPE + "\","
                 + "\"favicon\" : \"" + NL_PICTURE_URL + "\","
                 + "\"configUrl\" : \"" + getNlUrl() + testId + "\","
@@ -257,69 +236,46 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             final Optional<Proxy> proxy = getProxy(proxyName, url);
             insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, jsonString);
 
+            StatusLine statusLine;
             try {
-                httpCode = insightHttp.executeAndGetResponseCode();
+                statusLine = insightHttp.executeAndGetStatusLine();
             } finally {
                 insightHttp.closeHttpClient();
             }
-            switch (httpCode) {
-                case BAD_REQUEST:
-                    exceptionMessage = "The request or headers are in the wrong format, or the URL is incorrect, or the GUID does not meet the validation requirements.";
-                    break;
-                case UNAUTHORIZED:
-                    exceptionMessage = "Authentication error (no license key header, or invalid license key).";
-                    break;
-                case NOT_FOUND:
-                    exceptionMessage = "Invalid URL.";
-                    break;
-                case METHOD_NOT_ALLOWED:
-                    exceptionMessage = "Returned if the method is an invalid or unexpected type (GET/POST/PUT/etc.).";
-                    break;
-                case REQUEST_ENTITY_TOO_LARGE:
-                    exceptionMessage = "Too many metrics were sent in one request, or too many components (instances) were specified in one request, or other single-request limits were reached.";
-                    break;
-                case INTERNAL_SERVER_ERROR:
-                    exceptionMessage = "Unexpected server error";
-                    break;
-                case BAD_GATEWAY:
-                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                    break;
-                case SERVICE_UNAVAIBLE:
-                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                    break;
-                case GATEWAY_TIMEOUT:
-                    exceptionMessage = "All 50X errors mean there is a transient problem in the server completing requests, and no data has been retained. Clients are expected to resend the data after waiting one minute. The data should be aggregated appropriately, combining multiple timeslice data values for the same metric into a single aggregate timeslice data value.";
-                    break;
 
-            }
-            if (exceptionMessage != null) {
-                throw new DynatraceStatException(exceptionMessage);
+            if (statusLine != null && isResponseOk(statusLine.getStatusCode())) {
+                throw new DynatraceStatException(statusLine.getReasonPhrase());
             }
         }
-        return httpCode;
+    }
+
+    private boolean isResponseOk(final int httpCode) {
+        return httpCode >= HttpStatus.SC_OK
+                && httpCode <= HttpStatus.SC_MULTI_STATUS;
     }
 
     @Override
-    public int hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
-        int httpCode;
+    public boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
         final String url = getApiUrl() + DYNATRACE_TIME_SERIES;
+        final Map<String, String> header = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        addTokenIngetParam(parameters);
+        parameters.put("Api-Token", dynatraceApiKey);
         parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
         parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, headerMap, parameters, proxy);
+        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
+        int httpCode;
         try {
             httpCode = httpGenerator.executeAndGetResponseCode();
         } finally {
             httpGenerator.closeHttpClient();
         }
 
-        return httpCode;
+        return isResponseOk(httpCode);
     }
 }
 
