@@ -7,16 +7,13 @@ import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
-import io.swagger.client.ApiException;
 import io.swagger.client.api.ResultsApi;
 import io.swagger.client.model.TestStatistics;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -90,7 +87,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         componentPort = uri.getPort();
     }
 
-    private void sendStatsToDynatrace() throws ApiException, DynatraceStatException, IOException, URISyntaxException {
+    private void sendStatsToDynatrace() throws Exception {
         TestStatistics statsResult;
         long utc = System.currentTimeMillis() / 1000;
 
@@ -106,7 +103,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
 
     public long sendData(final TestStatistics testStatistics)
-            throws DynatraceStatException, IOException, ApiException, URISyntaxException {
+            throws Exception {
         long utc = System.currentTimeMillis() / 1000;
 
         NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(testStatistics);
@@ -150,7 +147,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     public void run() {
         try {
             sendStatsToDynatrace();
-        } catch (ApiException | DynatraceStatException | IOException | URISyntaxException e) {
+        } catch (final Exception e) {
             context.getLogger().error("Error while sending stats to Dynatrace", e);
         }
     }
@@ -163,7 +160,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     @Override
-    public void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
+    public void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception {
         final Map<String, String> head = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
@@ -190,7 +187,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
 
     @Override
-    public void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException {
+    public void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws Exception {
         final Map<String, String> head = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
@@ -251,7 +248,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     @Override
-    public boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException {
+    public boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception {
         final String url = getApiUrl() + DYNATRACE_TIME_SERIES;
         final Map<String, String> header = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();

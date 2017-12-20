@@ -12,6 +12,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -30,6 +31,12 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +58,7 @@ class HTTPGeneratorUtils {
 		request.setURI(new URL(urlWithParameters).toURI());
 	}
 
-	static DefaultHttpClient newHttpClient(final boolean isHttps) {
+	static DefaultHttpClient newHttpClient(final boolean isHttps) throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		if (isHttps) {
 			return newHttpsClient();
 		} else {
@@ -62,13 +69,19 @@ class HTTPGeneratorUtils {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static DefaultHttpClient newHttpsClient() {
+	private static DefaultHttpClient newHttpsClient() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		final DefaultHttpClient Client = new DefaultHttpClient();
 		final HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		final TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
+			@Override
+			public boolean isTrusted(X509Certificate[] cert, String authType) throws CertificateException {
+				return true;
+			}
+		};
 
 		final SchemeRegistry registry = new SchemeRegistry();
-		final SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-		socketFactory.setHostnameVerifier((X509HostnameVerifier) hostnameVerifier);
+		final SSLSocketFactory socketFactory;
+		socketFactory = new SSLSocketFactory(acceptingTrustStrategy, (X509HostnameVerifier) hostnameVerifier);
 		registry.register(new Scheme("https", socketFactory, 443));
 		final SingleClientConnManager mgr = new SingleClientConnManager(Client.getParams(), registry);
 		// Set verifier

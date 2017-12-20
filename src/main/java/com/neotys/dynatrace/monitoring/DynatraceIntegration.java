@@ -18,14 +18,10 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static com.neotys.dynatrace.common.DynatraceUtils.getApplicationEntityId;
-import static com.neotys.dynatrace.common.DynatraceUtils.getDynatraceApiUrl;
-import static com.neotys.dynatrace.common.DynatraceUtils.getTags;
+import static com.neotys.dynatrace.common.DynatraceUtils.*;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
@@ -124,11 +120,6 @@ public class DynatraceIntegration {
 		getDynatraceData();
 	}
 
-	// TODO why is it not used?
-	private void configureHttpsfordynatrace() throws NoSuchAlgorithmException, KeyManagementException {
-		httpGenerator.setAllowHostnameSSL();
-	}
-
 	private void createAndAddEntry(final String entityName, final String metricName,
 								   final String metricValueName, final double value,
 								   final String unit, final long valueDate)
@@ -169,7 +160,7 @@ public class DynatraceIntegration {
 		return null;
 	}
 
-	private void getHosts() throws IOException, URISyntaxException {
+	private void getHosts() throws Exception {
 		final String tags = getTags(dynatraceApplication);
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
 		final Map<String, String> parameters = new HashMap<>();
@@ -196,7 +187,7 @@ public class DynatraceIntegration {
 		}
 	}
 
-	private void getHostsFromProcessGroup() throws IOException, NoSuchAlgorithmException, URISyntaxException {
+	private void getHostsFromProcessGroup() throws Exception {
 		final String tags = getTags(dynatraceApplication);
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
 		final Map<String, String> parameters = new HashMap<>();
@@ -282,7 +273,7 @@ public class DynatraceIntegration {
 
 	private List<DynatraceMetric> getTimeSeriesMetricData(final String timeSeries,
 														  final String aggregate, final List<String> listEntityId)
-			throws IOException, NoSuchAlgorithmException, URISyntaxException {
+			throws Exception {
 		JSONObject jsonApplication;
 
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_TIMESERIES;

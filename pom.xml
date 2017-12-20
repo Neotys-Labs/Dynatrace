@@ -40,21 +40,6 @@
             <version>4.1.1</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>${okhttp-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp</groupId>
-            <artifactId>logging-interceptor</artifactId>
-            <version>${okhttp-version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson-version}</version>

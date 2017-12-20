@@ -50,7 +50,7 @@ class DynatraceEventAPI {
 					  final Optional<String> dynatraceTags,
 					  final Optional<String> dynatraceManagedHostname,
 					  Optional<String> proxyName)
-			throws DynatraceException, IOException, URISyntaxException {
+			throws Exception {
 		this.dynatraceAccountID = dynatraceID;
 		this.dynatraceApiKey = dynatraceAPIKEY;
 		this.dynatraceManagedHostname = dynatraceManagedHostname;
@@ -60,7 +60,7 @@ class DynatraceEventAPI {
 		this.applicationEntityid = getApplicationEntityId(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName);
 	}
 
-	void sendStartTest() throws DynatraceException, IOException, URISyntaxException {
+	void sendStartTest() throws Exception {
 		long start;
 		start = System.currentTimeMillis() - context.getElapsedTime();
 		sendMetricToEventAPI(START_NL_TEST, start, System.currentTimeMillis());
@@ -71,7 +71,7 @@ class DynatraceEventAPI {
 		return context.getWebPlatformApiUrl() + NL_RUL_LAST + context.getTestId();
 	}
 
-	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws DynatraceException, IOException, URISyntaxException {
+	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws Exception {
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
 		parameters.put("Api-Token", dynatraceApiKey);

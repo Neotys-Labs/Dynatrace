@@ -2,8 +2,6 @@ package com.neotys.dynatrace.monitoring;
 
 import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -11,7 +9,7 @@ import java.util.List;
  */
 public interface DynatraceMonitoringApi {
 
-    void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException;
+    void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception;
 
     /**
      * displayName: The display name of the component that will be used within the UI.
@@ -30,11 +28,8 @@ public interface DynatraceMonitoringApi {
      * series: List of metric values that are reported for the custom component. A series object always contains the metric identifier, a timestamp in UTC milliseconds (reported as a number, for example: 1495520570871), and the metrics dimension information. The key of the metric dimension (for example, nic) must be defined earlier in the metric definition. The metrics are then sent for nic : ethernetcard1 and nic : ethernetcard2. One important constraint here is the fact that values can't be reported further than 2 hours into the past! A metric must be registered before you can report a metric value. Therefore, the timestamp for reporting a value must be after the registration time of the metric.
      * @param dynatraceCustomMetrics
      * @return
-     * @throws IOException
-     * @throws URISyntaxException
-     * @throws DynatraceStatException
      */
-    void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws IOException, URISyntaxException, DynatraceStatException;
+    void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws Exception;
 
-    boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws IOException, URISyntaxException;
+    boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception;
 }

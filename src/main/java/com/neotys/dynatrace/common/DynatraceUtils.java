@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +34,7 @@ public class DynatraceUtils {
 	}
 
 	public static List<String> getApplicationEntityId(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
-			throws DynatraceException, IOException, URISyntaxException {
+			throws Exception {
 		final String tags = getTags(dynatraceContext.getTags());
 		final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
 		final Map<String, String> parameters = new HashMap<>();

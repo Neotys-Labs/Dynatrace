@@ -10,22 +10,20 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.neotys.dynatrace.common.HTTPGeneratorUtils.*;
 
@@ -43,7 +41,7 @@ public class HTTPGenerator {
 						 final Map<String, String> headers,
 						 final Map<String, String> params,
 						 final Optional<Proxy> proxy)
-			throws MalformedURLException, URISyntaxException {
+			throws MalformedURLException, URISyntaxException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		this.request = generateHttpRequest(httpMethod, url);
 		final boolean isHttps = url.contains("https");
 		this.httpClient = newHttpClient(isHttps);
@@ -63,9 +61,9 @@ public class HTTPGenerator {
 													 final Map<String, String> params,
 													 final Optional<Proxy> proxy,
 													 final String jsonString)
-			throws MalformedURLException, URISyntaxException {
+			throws MalformedURLException, URISyntaxException, UnsupportedEncodingException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params, proxy);
-		final StringEntity requestEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+		final StringEntity requestEntity = new StringEntity(jsonString, "application/json","utf8");
 		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
 		return httpGenerator;
 	}
@@ -87,14 +85,6 @@ public class HTTPGenerator {
 
 	public void closeHttpClient() {
 		httpClient.getConnectionManager().shutdown();
-	}
-
-	public void setAllowHostnameSSL() throws NoSuchAlgorithmException, KeyManagementException {
-		final SSLContext sslContext = SSLContext.getInstance("TLS");
-		sslContext.init(null, null, null);
-		final SSLSocketFactory sf = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-		final Scheme sch = new Scheme("https", 443, sf);
-		httpClient.getConnectionManager().getSchemeRegistry().register(sch);
 	}
 
 	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
