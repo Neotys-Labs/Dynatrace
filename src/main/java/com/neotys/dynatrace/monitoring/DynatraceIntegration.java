@@ -147,8 +147,10 @@ public class DynatraceIntegration {
 	}
 
 	private HashMap<String, String> getEntityDefinition(final JSONObject entity) {
-		final HashMap<String, String>result = new HashMap<>();
-		for (Object key : entity.keySet()) {
+		final HashMap<String, String> result = new HashMap<>();
+		final Iterator keysIterator = entity.keys();
+		while (keysIterator.hasNext()) {
+			final Object key = keysIterator.next();
 			result.put((String) key, (String) entity.get((String) key));
 		}
 		return result;
