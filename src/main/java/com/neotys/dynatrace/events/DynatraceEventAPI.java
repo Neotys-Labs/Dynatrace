@@ -7,15 +7,11 @@ import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.neotys.dynatrace.common.DynatraceUtils.getApplicationEntityId;
-import static com.neotys.dynatrace.common.DynatraceUtils.getDynatraceApiUrl;
-import static com.neotys.dynatrace.common.DynatraceUtils.getProxy;
+import static com.neotys.dynatrace.common.DynatraceUtils.*;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
 

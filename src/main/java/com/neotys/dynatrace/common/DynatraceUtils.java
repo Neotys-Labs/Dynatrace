@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,7 +25,22 @@ public class DynatraceUtils {
 	private static final String DYNATRACE_APPLICATION = "entity/services";
 	private static final String DYNATRACE_PROTOCOL = "https://";
 
+	private static final ImageIcon DYNATRACE_ICON;
+
+	static {
+		final URL iconURL = DynatraceException.class.getResource("dynatrace.png");
+		if (iconURL != null) {
+			DYNATRACE_ICON = new ImageIcon(iconURL);
+		} else {
+			DYNATRACE_ICON = null;
+		}
+	}
+
 	private DynatraceUtils(){
+	}
+
+	public static ImageIcon getDynatraceIcon() {
+		return DYNATRACE_ICON;
 	}
 
 	public static List<String> getApplicationEntityId(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
@@ -43,12 +59,7 @@ public class DynatraceUtils {
 		try {
 			final JSONArray jsonArrayResponse = http.executeAndGetJsonArrayResponse();
 			if (jsonArrayResponse != null) {
-				for (int i = 0; i < jsonArrayResponse.length(); i++) {
-					final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
-					if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
-						applicationEntityId.add(jsonApplication.getString("entityId"));
-					}
-				}
+				extractApplicationEntityIdFromResponse(applicationEntityId, jsonArrayResponse);
 			} else {
 				throw new DynatraceException("No Application found in the Dynatrace Account with the name " + dynatraceContext.getTags().or(""));
 			}
@@ -61,6 +72,15 @@ public class DynatraceUtils {
 		}
 
 		return applicationEntityId;
+	}
+
+	private static void extractApplicationEntityIdFromResponse(final List<String> applicationEntityId, final JSONArray jsonArrayResponse) {
+		for (int i = 0; i < jsonArrayResponse.length(); i++) {
+			final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
+			if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
+				applicationEntityId.add(jsonApplication.getString("entityId"));
+			}
+		}
 	}
 
 	public static String getTags(final Optional<String> tags) {

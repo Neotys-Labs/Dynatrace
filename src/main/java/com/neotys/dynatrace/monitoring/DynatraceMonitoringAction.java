@@ -3,13 +3,12 @@ package com.neotys.dynatrace.monitoring;
 import com.google.common.base.Optional;
 import com.neotys.action.argument.Arguments;
 import com.neotys.action.argument.Option;
-import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.extensions.action.Action;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 
 import javax.swing.*;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -23,17 +22,6 @@ public final class DynatraceMonitoringAction implements Action {
 	@Override
 	public String getType() {
 		return "DynatraceMonitoringAction";
-	}
-
-	private static final ImageIcon LOGO_ICON;
-
-	static {
-		final URL iconURL = DynatraceException.class.getResource("dynatrace.png");
-		if (iconURL != null) {
-			LOGO_ICON = new ImageIcon(iconURL);
-		} else {
-			LOGO_ICON = null;
-		}
 	}
 
 	@Override
@@ -57,7 +45,7 @@ public final class DynatraceMonitoringAction implements Action {
 
 	@Override
 	public Icon getIcon() {
-		return LOGO_ICON;
+		return DynatraceUtils.getDynatraceIcon();
 	}
 
 	@Override
