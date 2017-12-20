@@ -243,7 +243,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                 insightHttp.closeHttpClient();
             }
 
-            if (statusLine != null && isSuccessHttpCode(statusLine.getStatusCode())) {
+            if (statusLine != null && !isSuccessHttpCode(statusLine.getStatusCode())) {
                 throw new DynatraceStatException(statusLine.getReasonPhrase());
             }
         }
