@@ -45,11 +45,11 @@ Once installed, how to use in a given NeoLoad project:
 
 | Name             | Description |
 | -----            | ----- |
-| dynatraceId      |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
-| dynatraceApiKey  |  API key of your dynatrace account |
-| tags (optional)  |  Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2) |
+| dynatraceId      |  Id of your saas Dynatrace environment (http://<id>.live.dynatrace.com) |
+| dynatraceApiKey  |  API key of your Dynatrace account |
+| tags (optional)  |  Dynatrace tags. Link the sending monitoring data to Dynatrace tags (format: tag1,tag2) |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
-| dynatraceManagedHostname (Optional) | Hostname of your dynatrace managed environment |
+| dynatraceManagedHostname (Optional) | Hostname of your Dynatrace managed environment |
 
 ## Parameters for Dynatrace Monitoring
 
@@ -60,7 +60,7 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dynatraceId      |  Id of your saas dynatrace environment (http://<id>.live.dynatrace.com) |
 | dynatraceApiKey  | API key of your dynatrace account |
 | tags (optional)  | Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2) |
-| dynatraceManagedHostname (Optional) | Hostname of your dynatrace managed environment |
+| dynatraceManagedHostname (Optional) | Hostname of your Dynatrace managed environment |
 | dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
 | dataExchangeApiKey  (Optional)  | API key of the DataExchange API   |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |

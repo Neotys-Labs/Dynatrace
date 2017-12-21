@@ -18,7 +18,7 @@ import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
  */
 public enum DynatraceMonitoringOption implements Option {
     DynatraceId("dynatraceId", Required, True, TEXT,
-            "Dynatrace ID ( part of the url of your dynatace saas)",
+            "Dynatrace ID ( part of the url of your Dynatace saas)",
             "Dynatrace id",
             NON_EMPTY),
 
@@ -29,7 +29,7 @@ public enum DynatraceMonitoringOption implements Option {
 
     DynatraceTags("tags", Optional, True, TEXT,
             "tag1,tag2",
-            "Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2)",
+            "Dynatrace tags. Link the sending monitoring data to Dynatrace tags (format: tag1,tag2)",
             ALWAYS_VALID),
 
     DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
