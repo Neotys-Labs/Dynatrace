@@ -33,7 +33,6 @@ public class DynatraceIntegration {
 
     private static final Map<String, String> TIMESERIES_INFRA_MAP = new HashMap<>();
     private static final Map<String, String> TIMESERIES_SERVICES_MAP = new HashMap<>();
-    ;
 
     static {
         ///------requesting only infrastructure and services metrics-------------//
@@ -226,26 +225,30 @@ public class DynatraceIntegration {
         param.put("Api-Token", dynatraceApiKey);
     }
 
-    private void getDynatraceData() throws Exception {
-        if (isRunning) {
-            ///---Send the service data of this entity-----
-            for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
-                if (isRunning) {
-                    final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationServiceIds);
-                    sendDynatraceMetricEntity(data);
-                }
-            }
-            //---------------------------------
+	private void getDynatraceData() throws Exception {
+		if (isRunning) {
+			///---Send the service data of this entity-----
+			if (dynatraceApplicationServiceIds != null && !dynatraceApplicationServiceIds.isEmpty()) {
+				for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
+					if (isRunning) {
+						final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationServiceIds);
+						sendDynatraceMetricEntity(data);
+					}
+				}
+			}
+			//---------------------------------
 
-            //----send the infrastructure entity---------------
-            for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
-                if (isRunning) {
-                    final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationHostIds);
-                    sendDynatraceMetricEntity(data);
-                }
-            }
-        }
-    }
+			//----send the infrastructure entity---------------
+			if (dynatraceApplicationHostIds != null && !dynatraceApplicationHostIds.isEmpty()) {
+				for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
+					if (isRunning) {
+						final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationHostIds);
+						sendDynatraceMetricEntity(data);
+					}
+				}
+			}
+		}
+	}
 
     private void sendDynatraceMetricEntity(final List<DynatraceMetric> metric)
             throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException {
