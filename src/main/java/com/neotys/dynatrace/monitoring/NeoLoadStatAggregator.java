@@ -2,6 +2,7 @@ package com.neotys.dynatrace.monitoring;
 
 
 import com.google.common.base.Optional;
+import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
@@ -83,41 +84,38 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         componentPort = uri.getPort();
     }
 
-    private void sendStatsToDynatrace() throws Exception {
+    private void runTask() throws Exception {
         TestStatistics statsResult;
         long utc = System.currentTimeMillis() / 1000;
 
         if (lastDuration == 0 || (utc - lastDuration) >= MIN_DYNATRACE_DURATION) {
+            //Get stats from nlweb
             statsResult = nlWebResult.getTestStatistics(testId);
             if (statsResult != null) {
-                lastDuration = sendData(statsResult);
+                lastDuration = System.currentTimeMillis() / 1000;
+
+                //Update metrics to send
+                NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(statsResult);
+
+                if (!timeSeriesConfigured) {
+                    //Check if metric are created
+                    if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
+                        for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
+                            //Create Metric
+                            registerCustomMetric(dynatraceTimeseries);
+                        }
+                    }
+                    timeSeriesConfigured = true;
+                }
+
+                //Report activity
+                reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
             } else {
                 context.getLogger().debug("No stats found in NeoLoad web API.");
             }
         }
     }
 
-
-    public long sendData(final TestStatistics testStatistics)
-            throws Exception {
-        long utc = System.currentTimeMillis() / 1000;
-
-        NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(testStatistics);
-
-        if (!timeSeriesConfigured) {
-            if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
-                for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
-                    registerCustomMetric(dynatraceTimeseries);
-                }
-            }
-            timeSeriesConfigured = true;
-        }
-
-        //Report activity
-        reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
-
-        return utc;
-    }
 
     private long getUtcDate() {
         long timeInMillisSinceEpoch123 = System.currentTimeMillis();
@@ -142,7 +140,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     @Override
     public void run() {
         try {
-            sendStatsToDynatrace();
+            runTask();
         } catch (final Exception e) {
             context.getLogger().error("Error while sending stats to Dynatrace", e);
         }
@@ -244,7 +242,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             }
 
             if (statusLine != null && !isSuccessHttpCode(statusLine.getStatusCode())) {
-                throw new DynatraceStatException(statusLine.getReasonPhrase());
+                throw new DynatraceException(statusLine.getReasonPhrase());
             }
         }
     }
