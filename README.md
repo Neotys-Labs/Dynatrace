@@ -22,7 +22,7 @@ This bundle has the following actions:
 | Author   | Neotys Partner Team |
 | License  | [BSD Simplified](https://www.neotys.com/documents/legal/bsd-neotys.txt) |
 | NeoLoad  | 6.3 (Enterprise or Professional Edition w/ Integration & Advanced Usage and NeoLoad Web option required)|
-| Requirements | NeoLoad Web SaaS subscription |
+| Requirements | NeoLoad Web |
 | Bundled in NeoLoad | No
 | Download Binaries | See the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest)
 
@@ -40,6 +40,7 @@ Once installed, how to use in a given NeoLoad project:
 1. Insert DynatraceMonitoring in the ‘Actions’ block.
 1. Create a Population “Dynatrace” that contains 100% of User Path “Dynatrace”
 1. In the Runtime section, select your scenario, select the “Dynatrace” population and define a constant load of 1 user.
+   Do not use multiple load generator, good practice should be to keep only the local one.
 
 ## Parameters for Dynatrace Events
 

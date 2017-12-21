@@ -59,7 +59,7 @@ class DynatraceEventAPI {
 		return context.getWebPlatformApiUrl() + NL_RUL_LAST + context.getTestId();
 	}
 
-	private void sendMetricToEventAPI(final String message, final long startDuration, final long endDuration) throws Exception {
+	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
 		parameters.put("Api-Token", dynatraceApiKey);
@@ -70,8 +70,8 @@ class DynatraceEventAPI {
 		}
 		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length() - 1);
 
-		final String jsonString = "{\"start\":" + startDuration + ","
-				+ "\"end\":" + endDuration + ","
+		final String jsonString = "{\"start\":" + startTime + ","
+				+ "\"end\":" + endTime + ","
 				+ "\"eventType\": \"CUSTOM_ANNOTATION\","
 				+ "\"annotationType\": \"NeoLoad Test" + context.getTestName() + "\","
 				+ "\"annotationDescription\": \"" + message + " " + context.getTestName() + "\","
