@@ -115,6 +115,7 @@ public class DynatraceIntegration {
         this.dataExchangeApiClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl, contextBuilder.build(), dataExchangeApiKey.orNull());
         initHttpClient();
         this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityId(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
+        this.dynatraceApplicationHostIds = new ArrayList<>();
         getHostsFromProcessGroup();
         getHosts();
         getDynatraceData();
@@ -180,6 +181,9 @@ public class DynatraceIntegration {
                     }
                 }
             }
+            if(dynatraceApplicationHostIds.isEmpty()){
+                context.getLogger().debug("No host found.");
+            }
         } finally {
             httpGenerator.closeHttpClient();
         }
@@ -198,7 +202,6 @@ public class DynatraceIntegration {
         try {
             final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
             if (jsonObj != null) {
-                dynatraceApplicationHostIds = new ArrayList<>();
                 for (int i = 0; i < jsonObj.length(); i++) {
                     final JSONObject jsonApplication = jsonObj.getJSONObject(i);
                     if (jsonApplication.has("entityId")) {
@@ -215,6 +218,9 @@ public class DynatraceIntegration {
                         }
                     }
                 }
+            }
+            if(dynatraceApplicationHostIds.isEmpty()){
+                context.getLogger().debug("No host found in process group");
             }
         } finally {
             httpGenerator.closeHttpClient();
@@ -305,23 +311,25 @@ public class DynatraceIntegration {
             if (HttpResponseUtils.isSuccessHttpCode(statusCode)) {
                 jsonApplication = HttpResponseUtils.getJsonResponse(httpResponse);
                 if (jsonApplication == null || !jsonApplication.has("result")) {
+                    context.getLogger().debug("No timeseries found.");
                     return Collections.emptyList();
                 }
                 jsonApplication = jsonApplication.getJSONObject("result");
-                if (jsonApplication.has("dataPoints")) {
-                    if (jsonApplication.has("entities")) {
-                        final JSONObject jsonEntity = jsonApplication.getJSONObject("entities");
-                        final Map<String, String> entities = getEntityDefinition(jsonEntity);
+                if (jsonApplication.has("dataPoints") && jsonApplication.has("entities")) {
+                    final JSONObject jsonEntity = jsonApplication.getJSONObject("entities");
+                    final Map<String, String> entities = getEntityDefinition(jsonEntity);
 
-                        final JSONObject jsonDataPoint = jsonApplication.getJSONObject("dataPoints");
-                        final Iterator<?> keysIterator = jsonDataPoint.keys();
-                        while (keysIterator.hasNext()) {
-                            final String entity = (String) keysIterator.next();
-                            final String displayName = getEntityDisplayName(entities, entity);
-                            final JSONArray arr = jsonDataPoint.getJSONArray(entity);
-                            addDataMetrics(metrics, jsonApplication, entity, displayName, arr);
-                        }
+                    final JSONObject jsonDataPoint = jsonApplication.getJSONObject("dataPoints");
+                    final Iterator<?> keysIterator = jsonDataPoint.keys();
+                    while (keysIterator.hasNext()) {
+                        final String entity = (String) keysIterator.next();
+                        final String displayName = getEntityDisplayName(entities, entity);
+                        final JSONArray arr = jsonDataPoint.getJSONArray(entity);
+                        addDataMetrics(metrics, jsonApplication, entity, displayName, arr);
                     }
+                }
+                if(metrics.isEmpty()){
+                    context.getLogger().debug("No timeseries found.");
                 }
             }
             else if(statusCode != HttpStatus.SC_BAD_REQUEST && statusCode != HttpStatus.SC_NOT_FOUND){
