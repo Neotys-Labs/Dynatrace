@@ -40,7 +40,7 @@ public class HTTPGenerator {
 		this.httpClient = newHttpClient(isHttps);
 
 		if (proxy.isPresent()) {
-			initProxy(proxy.get(), url);
+			initProxy(proxy.get());
 		}
 		addHeaders(request, headers);
 		if (params != null && !params.isEmpty()) {
@@ -61,13 +61,8 @@ public class HTTPGenerator {
 		return httpGenerator;
 	}
 
-	private void initProxy(final Proxy proxy, final String url) {
-		final HttpHost proxyHttpHost;
-		if (url.startsWith("https")) {
-			proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "https");
-		} else {
-			proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "http");
-		}
+	private void initProxy(final Proxy proxy) {
+		final HttpHost proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "http");
 		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHttpHost);
 		if (Strings.isNullOrEmpty(proxy.getLogin())) {
 			httpClient.getCredentialsProvider().setCredentials(

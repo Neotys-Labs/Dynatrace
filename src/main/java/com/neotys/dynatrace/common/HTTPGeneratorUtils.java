@@ -75,7 +75,7 @@ class HTTPGeneratorUtils {
 			}
 		};
 
-		final SchemeRegistry registry = new SchemeRegistry();
+		final SchemeRegistry registry = client.getConnectionManager().getSchemeRegistry();
 		final SSLSocketFactory socketFactory;
 		socketFactory = new SSLSocketFactory(acceptingTrustStrategy, (X509HostnameVerifier) hostnameVerifier);
 		registry.register(new Scheme("https", socketFactory, 443));
