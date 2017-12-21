@@ -4,6 +4,7 @@ package com.neotys.dynatrace.monitoring;
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.dynatrace.common.HttpResponseUtils;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
 import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
 import com.neotys.extensions.action.engine.Context;
@@ -18,7 +19,6 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 
-import static com.neotys.dynatrace.common.DynatraceUtils.isSuccessHttpCode;
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
@@ -241,7 +241,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                 insightHttp.closeHttpClient();
             }
 
-            if (statusLine != null && !isSuccessHttpCode(statusLine.getStatusCode())) {
+            if (statusLine != null && !HttpResponseUtils.isSuccessHttpCode(statusLine.getStatusCode())) {
                 throw new DynatraceException(statusLine.getReasonPhrase());
             }
         }
@@ -269,7 +269,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             httpGenerator.closeHttpClient();
         }
 
-        return isSuccessHttpCode(httpCode);
+        return HttpResponseUtils.isSuccessHttpCode(httpCode);
     }
 }
 

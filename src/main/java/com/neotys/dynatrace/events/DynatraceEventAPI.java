@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.HTTPGenerator;
+import com.neotys.dynatrace.common.HttpResponseUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.StatusLine;
@@ -100,7 +101,7 @@ class DynatraceEventAPI {
 			insightHttp.closeHttpClient();
 		}
 
-		if (statusLine != null && !isSuccessHttpCode(statusLine.getStatusCode())) {
+		if (statusLine != null && !HttpResponseUtils.isSuccessHttpCode(statusLine.getStatusCode())) {
 			throw new DynatraceException(statusLine.getReasonPhrase());
 		}
 	}

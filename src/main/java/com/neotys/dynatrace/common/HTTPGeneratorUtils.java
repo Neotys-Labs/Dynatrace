@@ -180,13 +180,5 @@ class HTTPGeneratorUtils {
 		return null;
 	}
 
-	public static JSONArray getJsonArrayResponse(HttpResponse httpResponse) throws IOException {
-		if (isJsonContent(httpResponse)) {
-			final String stringResponse = getStringResponse(httpResponse);
-			if (stringResponse != null) {
-				return new JSONArray(stringResponse);
-			}
-		}
-		return null;
-	}
+
 }

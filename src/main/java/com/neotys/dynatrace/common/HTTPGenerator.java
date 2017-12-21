@@ -13,7 +13,6 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Map;
@@ -81,19 +80,7 @@ public class HTTPGenerator {
 
 	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
-		return getJsonArrayResponse(response);
-	}
-
-	public JSONObject executeAnGetJsonResponse() throws IOException {
-		final HttpResponse response = httpClient.execute(request);
-		final int statusCode = response.getStatusLine().getStatusCode();
-		if (statusCode == 200 && isJsonContent(response)) {
-			final String stringResponse = getStringResponse(response);
-			if (stringResponse != null) {
-				return new JSONObject(stringResponse);
-			}
-		}
-		return null;
+		return HttpResponseUtils.getJsonArrayResponse(response);
 	}
 
 	public int executeAndGetResponseCode() throws IOException {

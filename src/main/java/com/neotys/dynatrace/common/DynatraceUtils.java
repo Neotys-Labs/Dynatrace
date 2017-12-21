@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
-import static com.neotys.dynatrace.common.HTTPGeneratorUtils.getJsonArrayResponse;
+import static com.neotys.dynatrace.common.HttpResponseUtils.getJsonArrayResponse;
 
 /**
  * Created by anouvel on 20/12/2017.
@@ -61,7 +61,7 @@ public class DynatraceUtils {
         try {
             final HttpResponse httpResponse = http.execute();
 
-            if (isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+            if (HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
                 final JSONArray jsonArrayResponse = getJsonArrayResponse(httpResponse);
                 if (jsonArrayResponse != null) {
                     extractApplicationEntityIdFromResponse(applicationEntityId, jsonArrayResponse);
@@ -122,10 +122,5 @@ public class DynatraceUtils {
         } else {
             return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
         }
-    }
-
-    public static boolean isSuccessHttpCode(final int httpCode) {
-        return httpCode >= HttpStatus.SC_OK
-                && httpCode <= HttpStatus.SC_MULTI_STATUS;
     }
 }
