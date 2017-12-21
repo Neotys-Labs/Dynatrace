@@ -21,6 +21,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -174,6 +175,16 @@ class HTTPGeneratorUtils {
 				} else {
 					return result;
 				}
+			}
+		}
+		return null;
+	}
+
+	public static JSONArray getJsonArrayResponse(HttpResponse httpResponse) throws IOException {
+		if (isJsonContent(httpResponse)) {
+			final String stringResponse = getStringResponse(httpResponse);
+			if (stringResponse != null) {
+				return new JSONArray(stringResponse);
 			}
 		}
 		return null;

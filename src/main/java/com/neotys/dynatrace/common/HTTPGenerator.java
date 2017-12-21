@@ -75,15 +75,13 @@ public class HTTPGenerator {
 		httpClient.getConnectionManager().shutdown();
 	}
 
+	public HttpResponse execute() throws IOException {
+		return httpClient.execute(request);
+	}
+
 	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
-		if (isJsonContent(response)) {
-			final String stringResponse = getStringResponse(response);
-			if (stringResponse != null) {
-				return new JSONArray(stringResponse);
-			}
-		}
-		return null;
+		return getJsonArrayResponse(response);
 	}
 
 	public JSONObject executeAnGetJsonResponse() throws IOException {
