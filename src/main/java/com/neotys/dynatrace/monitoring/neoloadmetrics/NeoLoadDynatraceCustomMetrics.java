@@ -2,9 +2,11 @@ package com.neotys.dynatrace.monitoring.neoloadmetrics;
 
 import io.swagger.client.model.TestStatistics;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric.of;
+import static java.util.Arrays.asList;
 
 /**
  * Handle time series from nlweb to send to dynatrace
@@ -36,30 +38,30 @@ public class NeoLoadDynatraceCustomMetrics {
 
 
     private static Map<String, DynatraceCustomMetric> initTimeseries() {
-        Map<String, DynatraceCustomMetric> timeserieMap = new HashMap<>();
+        Map<String, DynatraceCustomMetric> map = new HashMap<>();
 
-        timeserieMap.put(REQUEST_DURATION, DynatraceCustomMetric.of(REQUEST_DURATION, "Request duration", "Second", Arrays.asList("Request.duration")));
-        timeserieMap.put(REQUEST_COUNT, DynatraceCustomMetric.of(REQUEST_COUNT, "Request Count", "Request/Second", Arrays.asList("Request.Count")));
-        timeserieMap.put(TRANSACTION_AVG_DURATION, DynatraceCustomMetric.of(TRANSACTION_AVG_DURATION, "AverageTransactionDuration", "Second", Arrays.asList("Transaction.Average.Duration")));
-        timeserieMap.put(USER_LOAD, DynatraceCustomMetric.of(TRANSACTION_AVG_DURATION, "User Load", "Count", Arrays.asList("User.Load")));
-        timeserieMap.put(COUNT_AVG_FAILURE, DynatraceCustomMetric.of(COUNT_AVG_FAILURE, "Number of Failure", "Count", Arrays.asList("Count.Average.Failure")));
-        timeserieMap.put(DOWNLOADED_BYTES, DynatraceCustomMetric.of(DOWNLOADED_BYTES, "Downloaded Bytes", "Bytes", Arrays.asList("DowLoaded.Average.Bytes")));
-        timeserieMap.put(DOWNLOADED_BYTES_RATE, DynatraceCustomMetric.of(DOWNLOADED_BYTES_RATE, "Downloaded Bytes Rate", "Bytes/Second", Arrays.asList("Downloaded.Average.Bytes.PerSecond")));
-        timeserieMap.put(ITERATION_FAILURE, DynatraceCustomMetric.of(ITERATION_FAILURE, "Iteration in Failure", "Count", Arrays.asList("Iteration.Average.Failure")));
-        timeserieMap.put(ITERATION_SUCCESS, DynatraceCustomMetric.of(ITERATION_SUCCESS, "Iteration in Success", "Count", Arrays.asList("Iteration.Average.Success")));
-        timeserieMap.put(REQUESTS, DynatraceCustomMetric.of(REQUESTS, "Number of request", "Request/Second", Arrays.asList("Request.Average.Count")));
-        timeserieMap.put(REQUEST_SUCCESS, DynatraceCustomMetric.of(REQUEST_SUCCESS, "Request in Success", "Count", Arrays.asList("Request.Average.Success")));
-        timeserieMap.put(REQUEST_FAILURE, DynatraceCustomMetric.of(REQUEST_FAILURE, "Request in Failure", "Count", Arrays.asList("Request.Average.Failure")));
-        timeserieMap.put(REQUEST_RATE, DynatraceCustomMetric.of(REQUEST_RATE, "Request in Success Per second", "Request/Second", Arrays.asList("Request.Sucess.PerSecond")));
-        timeserieMap.put(REQUEST_FAILURE_RATE, DynatraceCustomMetric.of(REQUEST_FAILURE_RATE, "Request in Failure Per Second", "Count", Arrays.asList("Request.Failure.PerSeconds")));
-        timeserieMap.put(TRANSACTION_FAILURE, DynatraceCustomMetric.of(TRANSACTION_FAILURE, "Transaction in Failure", "Count", Arrays.asList("Transaction.Average.Failure")));
-        timeserieMap.put(TRANSACTION_SUCCESS, DynatraceCustomMetric.of(TRANSACTION_SUCCESS, "Transaction in Success", "Count", Arrays.asList("Iteration.Average.Success")));
-        timeserieMap.put(TRANSACTION_FAILURE_RATE, DynatraceCustomMetric.of(TRANSACTION_FAILURE_RATE, "Transaction in Failure Per Second", "Transaction/Second", Arrays.asList("Transaction.Failure.PerSecond")));
-        timeserieMap.put(TRANSACTION_SUCCESS_RATE, DynatraceCustomMetric.of(TRANSACTION_SUCCESS_RATE, "Transaction in Success Per Second", "Transaction/Second", Arrays.asList("Iteration.Average.Success")));
-        timeserieMap.put(TRANSACTIONS, DynatraceCustomMetric.of(TRANSACTIONS, "Number of Transaction", "Count", Arrays.asList("Transaction.Average.Count")));
-        timeserieMap.put(FAILURE_RATE, DynatraceCustomMetric.of(FAILURE_RATE, "Failure Rate", "Percentage", Arrays.asList("Failure.Rate")));
+        map.put(REQUEST_DURATION, of(REQUEST_DURATION, "Request duration", "Second", asList("Request.duration")));
+        map.put(REQUEST_COUNT, of(REQUEST_COUNT, "Request Count", "Request/Second", asList("Request.Count")));
+        map.put(TRANSACTION_AVG_DURATION, of(TRANSACTION_AVG_DURATION, "AverageTransactionDuration", "Second", asList("Transaction.Average.Duration")));
+        map.put(USER_LOAD, of(TRANSACTION_AVG_DURATION, "User Load", "Count", asList("User.Load")));
+        map.put(COUNT_AVG_FAILURE, of(COUNT_AVG_FAILURE, "Number of Failure", "Count", asList("Count.Average.Failure")));
+        map.put(DOWNLOADED_BYTES, of(DOWNLOADED_BYTES, "Downloaded Bytes", "Bytes", asList("DowLoaded.Average.Bytes")));
+        map.put(DOWNLOADED_BYTES_RATE, of(DOWNLOADED_BYTES_RATE, "Downloaded Bytes Rate", "Bytes/Second", asList("Downloaded.Average.Bytes.PerSecond")));
+        map.put(ITERATION_FAILURE, of(ITERATION_FAILURE, "Iteration in Failure", "Count", asList("Iteration.Average.Failure")));
+        map.put(ITERATION_SUCCESS, of(ITERATION_SUCCESS, "Iteration in Success", "Count", asList("Iteration.Average.Success")));
+        map.put(REQUESTS, of(REQUESTS, "Number of request", "Request/Second", asList("Request.Average.Count")));
+        map.put(REQUEST_SUCCESS, of(REQUEST_SUCCESS, "Request in Success", "Count", asList("Request.Average.Success")));
+        map.put(REQUEST_FAILURE, of(REQUEST_FAILURE, "Request in Failure", "Count", asList("Request.Average.Failure")));
+        map.put(REQUEST_RATE, of(REQUEST_RATE, "Request in Success Per second", "Request/Second", asList("Request.Sucess.PerSecond")));
+        map.put(REQUEST_FAILURE_RATE, of(REQUEST_FAILURE_RATE, "Request in Failure Per Second", "Count", asList("Request.Failure.PerSeconds")));
+        map.put(TRANSACTION_FAILURE, of(TRANSACTION_FAILURE, "Transaction in Failure", "Count", asList("Transaction.Average.Failure")));
+        map.put(TRANSACTION_SUCCESS, of(TRANSACTION_SUCCESS, "Transaction in Success", "Count", asList("Iteration.Average.Success")));
+        map.put(TRANSACTION_FAILURE_RATE, of(TRANSACTION_FAILURE_RATE, "Transaction in Failure Per Second", "Transaction/Second", asList("Transaction.Failure.PerSecond")));
+        map.put(TRANSACTION_SUCCESS_RATE, of(TRANSACTION_SUCCESS_RATE, "Transaction in Success Per Second", "Transaction/Second", asList("Iteration.Average.Success")));
+        map.put(TRANSACTIONS, of(TRANSACTIONS, "Number of Transaction", "Count", asList("Transaction.Average.Count")));
+        map.put(FAILURE_RATE, of(FAILURE_RATE, "Failure Rate", "Percentage", asList("Failure.Rate")));
 
-        return timeserieMap;
+        return map;
     }
 
     public static Map<String, DynatraceCustomMetric> getTimeseriesToSend() {

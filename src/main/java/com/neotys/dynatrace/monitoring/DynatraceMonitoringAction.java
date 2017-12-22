@@ -51,7 +51,8 @@ public final class DynatraceMonitoringAction implements Action {
 	@Override
 	public String getDescription() {
 		final StringBuilder description = new StringBuilder();
-		description.append("DynatraceMonitoring Action will retrieve all the counters measured by Dynatrace \n")
+		description.append("DynatraceMonitoring Action will get metrics from Dynatrace and send custom ones\n")
+				.append("The list at: https://github.com/Neotys-Labs/Dynatrace\n\n")
 				.append(Arguments.getArgumentDescriptions(DynatraceMonitoringOption.values()));
 
 		return description.toString();
