@@ -20,9 +20,7 @@ import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 class DynatraceEventAPI {
 
 	private static final String DYNATRACE_EVENTS_API_URL = "events";
-	private static final String NL_RUL_LAST = "/#!result/overview/?benchId=";
-	private static final String START_NL_TEST = "Start NeoLoad Test";
-	private static final String STOP_NL_TEST = "Stop NeoLoad Test";
+	private static final String MESSAGE_NL_TEST = "Start/Stop NeoLoad Test";
 
 	private final Map<String, String> headers;
 	private final String dynatraceApiKey;
@@ -48,15 +46,15 @@ class DynatraceEventAPI {
 		this.applicationEntityid = getApplicationEntityId(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName);
 	}
 
-	void sendStartTest() throws Exception {
+	void sendMessage() throws Exception {
 		long start;
 		start = System.currentTimeMillis() - context.getElapsedTime();
-		sendMetricToEventAPI(START_NL_TEST, start, System.currentTimeMillis());
+		sendMetricToEventAPI(MESSAGE_NL_TEST, start, System.currentTimeMillis());
 	}
 
 	private static String getTestUrlInNlWeb(final Context context) {
 		// TODO get neoload web front URL
-		return context.getWebPlatformApiUrl() + NL_RUL_LAST + context.getTestId();
+		return context.getWebPlatformApiUrl() + context.getTestId();
 	}
 
 	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {
