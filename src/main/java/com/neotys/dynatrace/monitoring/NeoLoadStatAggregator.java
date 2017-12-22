@@ -131,12 +131,6 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         }
     }
 
-    private String getNlUrl() {
-        // TODO get nl web front URL from context.
-        return HTTPS + NEOLOAD_SAAS_NEOTYS_COM + NEOLOAD_URL_LAST;
-    }
-
-
     @Override
     public void run() {
         try {
@@ -199,7 +193,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                 + "\"listenPorts\" : [\"" + componentPort + "\"],"
                 + "\"type\" : \"" + NEOLOAD_TYPE + "\","
                 + "\"favicon\" : \"" + NL_PICTURE_URL + "\","
-                + "\"configUrl\" : \"" + getNlUrl() + testId + "\","
+                + "\"configUrl\" : \"" + context.getWebPlatformRunningTestUrl() + "\","
                 + "\"tags\": [\"Loadtest\", \"NeoLoad\"],"
                 + "\"properties\" : { \"TestName\" : \"" + testName + "\" ,\"ScenarioName\" : \"" + scenarioName + "\"  },"
                 + "\"series\" : [";

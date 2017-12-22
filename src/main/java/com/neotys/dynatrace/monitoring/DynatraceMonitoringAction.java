@@ -69,7 +69,7 @@ public final class DynatraceMonitoringAction implements Action {
 
 	@Override
 	public Optional<String> getMinimumNeoLoadVersion() {
-		return Optional.of("6.2");
+		return Optional.of("6.3");
 	}
 
 	@Override

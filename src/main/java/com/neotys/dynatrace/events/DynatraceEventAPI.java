@@ -52,11 +52,6 @@ class DynatraceEventAPI {
 		sendMetricToEventAPI(MESSAGE_NL_TEST, start, System.currentTimeMillis());
 	}
 
-	private static String getTestUrlInNlWeb(final Context context) {
-		// TODO get neoload web front URL
-		return context.getWebPlatformApiUrl() + context.getTestId();
-	}
-
 	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
@@ -83,8 +78,7 @@ class DynatraceEventAPI {
 				+ "\"customProperties\":"
 				+ "{ \"ScriptName\": \"" + context.getProjectName() + "\","
 				+ "\"NeoLoad_TestName\":\"" + context.getTestName() + "\","
-				// TODO get neoload web front URL
-				/*+ "\"NeoLoad_URL\":\"" + getTestUrlInNlWeb(context) + "\","*/
+				+ "\"NeoLoad_URL\":\"" + context.getWebPlatformRunningTestUrl() + "\","
 				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
