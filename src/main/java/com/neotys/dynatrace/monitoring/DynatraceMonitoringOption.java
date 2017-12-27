@@ -18,38 +18,38 @@ import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
  */
 public enum DynatraceMonitoringOption implements Option {
     DynatraceId("dynatraceId", Required, True, TEXT,
-            "Dynatrace ID ( part of the url of your Dynatace saas)",
-            "Dynatrace id",
+            "Dynatrace ID",
+            "Dynatrace ID (section of your Dynatrace saas url).",
             NON_EMPTY),
 
     DynatraceApiKey("dynatraceApiKey", Required, True, TEXT,
-            "Dynatrace API key",
+            "Dynatrace API key.",
             "Dynatrace API key",
             NON_EMPTY),
 
     DynatraceTags("tags", Optional, True, TEXT,
             "tag1,tag2",
-            "Dynatrace tags. Link the sending monitoring data to Dynatrace tags (format: tag1,tag2)",
+            "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: \"tag1,tag2\").",
             ALWAYS_VALID),
 
     DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
             "",
-            "Hostname of your managed Dynatrace environement",
+            "Hostname of your managed Dynatrace environment.",
             ALWAYS_VALID),
 
     NeoLoadDataExchangeApiUrl("dataExchangeApiUrl", Required, True, TEXT,
             "http://localhost:7400/DataExchange/v1/Service.svc/",
-            "where the DataExchange server is located. Typically the NeoLoad controller. For example, http://localhost:7400/DataExchange/v1/Service.svc/",
+            "Where the DataExchange server is located. Typically the NeoLoad controller.",
             NON_EMPTY),
 
     NeoLoadDataExchangeApiKey("dataExchangeApiKey", Optional, True, TEXT,
             "",
-            "identification key specified in NeoLoad",
+            "Identification key specified in NeoLoad.",
             ALWAYS_VALID),
 
     NeoLoadProxy("proxyName", Optional, False, TEXT,
             "",
-            "The name of the NeoLoad proxy to access to Dynatrace.",
+            "The NeoLoad proxy name to access Dynatrace.",
             ALWAYS_VALID);
 
 

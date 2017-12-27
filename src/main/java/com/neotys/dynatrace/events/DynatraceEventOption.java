@@ -17,28 +17,28 @@ import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
  */
 public enum DynatraceEventOption implements Option {
 	DynatraceId("dynatraceId", Required, True, TEXT,
-			"Dynatrace ID ( part of the url of your Dynatace saas)",
-			"Dynatrace id.",
+			"Dynatrace ID",
+			"Dynatrace ID (section of your Dynatrace saas url).",
 			NON_EMPTY),
 
 	DynatraceApiKey("dynatraceApiKey", Required, True, TEXT,
 			"Dynatrace API key",
-			"Dynatrace API key",
+			"Dynatrace API key.",
 			NON_EMPTY),
 
 	DynatraceTags("tags", Optional, True, TEXT,
 			"tag1,tag2",
-			"Dynatrace tags. link the event to all services having the specific tags (format: tag1,tag2)",
+			"Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: \"tag1,tag2\").",
 			ALWAYS_VALID),
 
 	NeoLoadProxy("proxyName", Optional, False, TEXT,
 			"",
-			"The name of the NeoLoad proxy to access to Dynatrace.",
+			"The NeoLoad proxy name to access Dynatrace.",
 			ALWAYS_VALID),
 
 	DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
 			"",
-			"Hostname of your managed Dynatrace environement",
+			"Hostname of your managed Dynatrace environment.",
 			ALWAYS_VALID);
 
 	private final String name;

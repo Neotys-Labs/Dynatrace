@@ -50,7 +50,7 @@ public final class DynatraceEventAction implements Action {
 
 	@Override
 	public String getDescription() {
-		return "Links a load testing event to all services used by an Application monitored by Dynatrace.\n\n" + Arguments.getArgumentDescriptions(DynatraceEventOption.values());
+		return "Links a load testing event to all services used by an application monitored by Dynatrace.\n\n" + Arguments.getArgumentDescriptions(DynatraceEventOption.values());
 	}
 
 	@Override
