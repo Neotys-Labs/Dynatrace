@@ -2,7 +2,6 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
-import com.neotys.dynatrace.events.DynatraceEventOption;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -32,7 +31,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
         final Map<String, Optional<String>> parsedArgs;
         try {
-            parsedArgs = parseArguments(parameters, DynatraceEventOption.values());
+            parsedArgs = parseArguments(parameters, DynatraceMonitoringOption.values());
         } catch (final IllegalArgumentException iae) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Could not parse arguments: ", iae);
         }
@@ -40,7 +39,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Logger logger = context.getLogger();
         if (logger.isDebugEnabled()) {
             logger.debug("Executing " + this.getClass().getName() + " with parameters: "
-                    + getArgumentLogString(parsedArgs, DynatraceEventOption.values()));
+                    + getArgumentLogString(parsedArgs, DynatraceMonitoringOption.values()));
         }
 
         final String dynatraceId = parsedArgs.get(DynatraceMonitoringOption.DynatraceId.getName()).get();

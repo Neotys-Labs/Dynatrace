@@ -3,7 +3,6 @@ package com.neotys.dynatrace.monitoring;
 import com.neotys.action.argument.ArgumentValidator;
 import com.neotys.action.argument.Option;
 import com.neotys.extensions.action.ActionParameter;
-import com.neotys.extensions.action.network.HostnameHolder;
 
 import static com.neotys.action.argument.DefaultArgumentValidator.ALWAYS_VALID;
 import static com.neotys.action.argument.DefaultArgumentValidator.NON_EMPTY;
