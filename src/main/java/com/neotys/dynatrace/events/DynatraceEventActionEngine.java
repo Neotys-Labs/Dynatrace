@@ -2,6 +2,7 @@ package com.neotys.dynatrace.events;
 
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
+import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -18,6 +19,7 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 
 	private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_EVENT_ACTION-01";
 	private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_EVENT_ACTION-02";
+	private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_EVENT_ACTION-03";
 
 	@Override
 	public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
@@ -28,6 +30,10 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 			parsedArgs = parseArguments(parameters, DynatraceEventOption.values());
 		} catch (final IllegalArgumentException iae) {
 			return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Could not parse arguments: ", iae);
+		}
+
+		if (context.getWebPlatformRunningTestUrl() == null) {
+			return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: ", new DynatraceException("No NeoLoad Web test is running"));
 		}
 
 		final Logger logger = context.getLogger();

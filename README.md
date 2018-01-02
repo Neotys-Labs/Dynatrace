@@ -90,10 +90,19 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
 | dataExchangeApiKey  (Optional)  | API key of the DataExchange API |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
-  
+
+## Check User Path
+
+This bundle does not work with Check User Path mode.
+A Bad context error should be raised.
+
 ## Status Codes
 
-* NL-DYNATRACE_EVENT_ACTION-01: Could not parse arguments on dynatrace event
-* NL-DYNATRACE_EVENT_ACTION-02: Technical Error encouter on dynatrace event
-* NL-DYNATRACE_MONITORING_ACTION-01: Could not parse arguments on dynatrace monitoring
-* NL-DYNATRACE_MONITORING_ACTION-02: Technical Error encouter on dynatrace monitoring
+* Dynatrace event
+    * NL-DYNATRACE_EVENT_ACTION-01: Could not parse arguments
+    * NL-DYNATRACE_EVENT_ACTION-02: Technical Error
+    * NL-DYNATRACE_EVENT_ACTION-03: Bad context
+* Dynatrace monitoring
+    * NL-DYNATRACE_MONITORING_ACTION-01: Could not parse arguments
+    * NL-DYNATRACE_MONITORING_ACTION-02: Technical Error
+    * NL-DYNATRACE_MONITORING_ACTION-03: Bad context

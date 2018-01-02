@@ -2,6 +2,7 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
+import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -18,6 +19,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
     private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_MONITORING_ACTION-01";
     private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_MONITORING_ACTION-02";
+    private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_MONITORING_ACTION-03";
 
     private DynatraceIntegration dynatraceIntegration;
     private DynatracePluginData dynatracePluginData;
@@ -34,6 +36,10 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             parsedArgs = parseArguments(parameters, DynatraceMonitoringOption.values());
         } catch (final IllegalArgumentException iae) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Could not parse arguments: ", iae);
+        }
+
+        if (context.getWebPlatformRunningTestUrl() == null) {
+            return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: ", new DynatraceException("No NeoLoad Web test is running"));
         }
 
         final Logger logger = context.getLogger();
@@ -73,8 +79,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             sampleResult.sampleEnd();
             dynatracePluginData.stopTimer();
 
-            //---check if aggregator exists
-            // startimer
         } catch (Exception e) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
         }
