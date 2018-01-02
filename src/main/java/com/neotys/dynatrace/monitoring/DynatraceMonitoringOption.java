@@ -15,7 +15,7 @@ import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 /**
  *
  */
-public enum DynatraceMonitoringOption implements Option {
+enum DynatraceMonitoringOption implements Option {
     DynatraceId("dynatraceId", Required, True, TEXT,
             "Dynatrace ID",
             "Dynatrace ID (section of your Dynatrace saas url).",
