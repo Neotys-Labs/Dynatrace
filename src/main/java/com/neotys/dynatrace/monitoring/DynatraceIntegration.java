@@ -29,10 +29,17 @@ public class DynatraceIntegration {
     private static final String DYNATRACE_API_PROCESS_GROUP = "entity/infrastructure/process-groups";
     private static final String DYNATRACE_HOSTS = "entity/infrastructure/hosts";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
-    private static final String NEOLOAD_LOCATION = "Dynatrace";
+
+    private static final String COUNT = "COUNT";
+
+    private static final String ENTITY_ID = "entityId";
+    private static final String DISPLAY_NAME = "displayName";
+    private static final String TAG = "tag";
+    private static final String DYNATRACE = "Dynatrace";
 
     private static final Map<String, String> TIMESERIES_INFRA_MAP = new HashMap<>();
     private static final Map<String, String> TIMESERIES_SERVICES_MAP = new HashMap<>();
+
 
     static {
         ///------requesting only infrastructure and services metrics-------------//
@@ -70,10 +77,10 @@ public class DynatraceIntegration {
         TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", "AVG");
 
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.clientsidefailurerate", "AVG");
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp4xx", "COUNT");
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp5xx", "COUNT");
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp4xx", COUNT);
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp5xx", COUNT);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.failurerate", "AVG");
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.requestspermin", "COUNT");
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.requestspermin", COUNT);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.responsetime", "AVG");
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.serversidefailurerate", "AVG");
     }
@@ -110,7 +117,7 @@ public class DynatraceIntegration {
         this.dynatraceManagedHostname = dynatraceManagedHostname;
         this.isRunning = true;
         this.proxyName = proxyName;
-        final ContextBuilder contextBuilder = new ContextBuilder().hardware("Dynatrace").location(NEOLOAD_LOCATION).software("OneAgent")
+        final ContextBuilder contextBuilder = new ContextBuilder().hardware(DYNATRACE).location(DYNATRACE).software("OneAgent")
                 .script("DynatraceMonitoring" + System.currentTimeMillis());
         this.dataExchangeApiClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl, contextBuilder.build(), dataExchangeApiKey.orNull());
         initHttpClient();
@@ -118,14 +125,14 @@ public class DynatraceIntegration {
         this.dynatraceApplicationHostIds = new ArrayList<>();
         getHostsFromProcessGroup();
         getHosts();
-        getDynatraceData();
+        initDynatraceData();
     }
 
     private void createAndAddEntry(final String entityName, final String metricName,
                                    final String metricValueName, final double value,
                                    final String unit, final long valueDate)
             throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException {
-        final EntryBuilder entryBuilder = new EntryBuilder(Arrays.asList("Dynatrace", entityName, metricName, metricValueName), valueDate);
+        final EntryBuilder entryBuilder = new EntryBuilder(Arrays.asList(DYNATRACE, entityName, metricName, metricValueName), valueDate);
         entryBuilder.unit(unit);
         entryBuilder.value(value);
         dataExchangeApiClient.addEntry(entryBuilder.build());
@@ -165,7 +172,7 @@ public class DynatraceIntegration {
         final String tags = DynatraceUtils.getTags(dynatraceApplication);
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put("tag", tags);
+        parameters.put(TAG, tags);
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
@@ -176,8 +183,8 @@ public class DynatraceIntegration {
             if (jsonArray != null) {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     final JSONObject jsonApplication = jsonArray.getJSONObject(i);
-                    if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
-                        dynatraceApplicationHostIds.add(jsonApplication.getString("entityId"));
+                    if (jsonApplication.has(ENTITY_ID) && jsonApplication.has(DISPLAY_NAME)) {
+                        dynatraceApplicationHostIds.add(jsonApplication.getString(ENTITY_ID));
                     }
                 }
             }
@@ -193,7 +200,7 @@ public class DynatraceIntegration {
         final String tags = DynatraceUtils.getTags(dynatraceApplication);
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put("tag", tags);
+        parameters.put(TAG, tags);
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
@@ -204,15 +211,13 @@ public class DynatraceIntegration {
             if (jsonObj != null) {
                 for (int i = 0; i < jsonObj.length(); i++) {
                     final JSONObject jsonApplication = jsonObj.getJSONObject(i);
-                    if (jsonApplication.has("entityId")) {
-                        if (jsonApplication.has("fromRelationships")) {
-                            final JSONObject jsonFromRelation = jsonApplication.getJSONObject("fromRelationships");
-                            if (jsonFromRelation.has("runsOn")) {
-                                final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
-                                if (jsonRunOn != null) {
-                                    for (int j = 0; j < jsonRunOn.length(); j++) {
-                                        dynatraceApplicationHostIds.add(jsonRunOn.getString(j));
-                                    }
+                    if (jsonApplication.has(ENTITY_ID) && jsonApplication.has("fromRelationships")) {
+                        final JSONObject jsonFromRelation = jsonApplication.getJSONObject("fromRelationships");
+                        if (jsonFromRelation.has("runsOn")) {
+                            final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
+                            if (jsonRunOn != null) {
+                                for (int j = 0; j < jsonRunOn.length(); j++) {
+                                    dynatraceApplicationHostIds.add(jsonRunOn.getString(j));
                                 }
                             }
                         }
@@ -231,32 +236,39 @@ public class DynatraceIntegration {
         param.put("Api-Token", dynatraceApiKey);
     }
 
-	private void getDynatraceData() throws Exception {
+	private void initDynatraceData() throws Exception {
 		if (isRunning) {
 			///---Send the service data of this entity-----
-			if (dynatraceApplicationServiceIds != null && !dynatraceApplicationServiceIds.isEmpty()) {
-				for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
-					if (isRunning) {
-						final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationServiceIds);
-						sendDynatraceMetricEntity(data);
-					}
-				}
-			}
-			//---------------------------------
+            initDynatraceServiceData(dynatraceApplicationServiceIds);
 
 			//----send the infrastructure entity---------------
-			if (dynatraceApplicationHostIds != null && !dynatraceApplicationHostIds.isEmpty()) {
-				for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
-					if (isRunning) {
-						final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationHostIds);
-						sendDynatraceMetricEntity(data);
-					}
-				}
-			}
+            initDynatraceInfraData(dynatraceApplicationHostIds);
 		}
 	}
 
-    private void sendDynatraceMetricEntity(final List<DynatraceMetric> metric)
+    private void initDynatraceServiceData(final List<String> dynatraceApplicationIds) throws Exception {
+        if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
+            for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
+                if (isRunning) {
+                    final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds);
+                    initDynatraceMetricEntity(data);
+                }
+            }
+        }
+    }
+
+    private void initDynatraceInfraData(final List<String> dynatraceApplicationIds) throws Exception {
+        if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
+            for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
+                if (isRunning) {
+                    final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds);
+                    initDynatraceMetricEntity(data);
+                }
+            }
+        }
+    }
+
+    private void initDynatraceMetricEntity(final List<DynatraceMetric> metric)
             throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException {
         for (DynatraceMetric data : metric) {
             String timeseries = data.getTimeseries();
@@ -361,8 +373,5 @@ public class DynatraceIntegration {
 
     private void initHttpClient() {
         header = new HashMap<>();
-
-        //	header.put("Authorization", "Api‐Token "+dynatraceApiKey);
-        //header.put("Content-Type", "application/json");
     }
 }

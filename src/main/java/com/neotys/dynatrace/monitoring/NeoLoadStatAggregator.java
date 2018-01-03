@@ -30,10 +30,9 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final String DYNATRACE_NEW_DATA = "entity/infrastructure/custom/";
     private static final String DYNATRACE_TIME_SERIES = "timeseries";
     private static final String HTTPS = "https://";
-    private static final String NEOLOAD_SAAS_NEOTYS_COM = "neoload.saas.neotys.com";
-    private static final String NEOLOAD_URL_LAST = "/#!result/overview/?benchId=";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
     private static final String NEOLOAD_TYPE = "NeoLoad";
+    private static final String API_TOKEN = "Api-Token";
 
     private static final int MIN_DYNATRACE_DURATION = 30;
 
@@ -153,7 +152,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
         final String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
-        parameters.put("Api-Token", dynatraceApiKey);
+        parameters.put(API_TOKEN, dynatraceApiKey);
 
         final String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
@@ -183,7 +182,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Map<String, String> parameters = new HashMap<>();
         HTTPGenerator insightHttp;
 
-        parameters.put("Api-Token", dynatraceApiKey);
+        parameters.put(API_TOKEN, dynatraceApiKey);
 
         String url = getApiUrl() + DYNATRACE_NEW_DATA + "NeoLoadData";
         long time = System.currentTimeMillis();
@@ -247,7 +246,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Map<String, String> header = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        parameters.put("Api-Token", dynatraceApiKey);
+        parameters.put(API_TOKEN, dynatraceApiKey);
         parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
         parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));

@@ -57,7 +57,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
 
         sampleResult.sampleStart();
-        //TODO Add logs
         try {
             dynatracePluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
             if (dynatracePluginData == null) {
