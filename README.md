@@ -6,7 +6,7 @@ This bundle of advanced actions allows you to integrate [NeoLoad](https://www.ne
 
 This bundle has the following actions:  
 
-* **DynatraceEvents**
+* **DynatraceEvents:**
   Links a load testing event to all services used by an Application monitored by Dynatrace.
   Data sent: Neoload Project, Test and Scenario Name.
              NeoLoadWeb Frontend Url.
@@ -30,7 +30,7 @@ This bundle has the following actions:
           service.responsetime, service.serversidefailurerate
           ```
 
-    * **NeoLoad -> Dynatrace**: Send the global statistics of the test to Dynatrace OneAgent so that it can be used as custom metrics 
+    * **NeoLoad -> Dynatrace**: Sends the global statistics of the test to Dynatrace OneAgent so they can be used as custom metrics 
       in Dynatrace dashboards.
       * Custom metrics:
            ```shell
