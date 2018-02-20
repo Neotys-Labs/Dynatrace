@@ -79,7 +79,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             dynatracePluginData.stopTimer();
 
         } catch (Exception e) {
-            return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
+            return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Error encountered :", e);
         }
 
         sampleResult.setRequestContent(requestBuilder.toString());

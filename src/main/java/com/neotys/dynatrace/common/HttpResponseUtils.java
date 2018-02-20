@@ -28,8 +28,7 @@ public class HttpResponseUtils {
     }
 
     public static JSONObject getJsonResponse(final HttpResponse response) throws IOException {
-        final int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == 200 && isJsonContent(response)) {
+        if (isJsonContent(response)) {
             final String stringResponse = getStringResponse(response);
             if (stringResponse != null) {
                 return new JSONObject(stringResponse);

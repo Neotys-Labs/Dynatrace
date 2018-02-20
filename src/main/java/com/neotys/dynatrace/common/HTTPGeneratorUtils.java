@@ -163,17 +163,12 @@ class HTTPGeneratorUtils {
 		return contentTypeHeader.getValue().contains("application/json");
 	}
 
-	static String getStringResponse(final HttpResponse resp) throws IOException {
+	public static String getStringResponse(final HttpResponse resp) throws IOException {
 		final HttpEntity entity = resp.getEntity();
 		if (entity != null) {
 			// A Simple JSON Response Read
 			try (final InputStream inputStream = entity.getContent()) {
-				final String result = convertStreamToString(inputStream);
-				if (resp.getStatusLine().getStatusCode() != 200) {
-					return null;
-				} else {
-					return result;
-				}
+				return convertStreamToString(inputStream);
 			}
 		}
 		return null;

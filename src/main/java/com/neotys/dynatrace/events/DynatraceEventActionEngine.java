@@ -54,7 +54,7 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 			eventAPI.sendMessage();
 			logger.debug("Start test sent");
 		} catch (Exception e) {
-			return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error encouter :", e);
+			return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Error encountered :", e);
 		}
 		sampleResult.sampleEnd();
 		sampleResult.setResponseContent("Event sent");
