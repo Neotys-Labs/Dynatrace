@@ -1,6 +1,7 @@
 package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Strings;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
@@ -50,7 +51,9 @@ public class DynatraceUtils {
         final String tags = getTags(dynatraceContext.getTags());
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put("tag", tags);
+        if(!Strings.isNullOrEmpty(tags)) {
+            parameters.put("tag", tags);
+        }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         context.getLogger().debug("Getting application...");
@@ -69,7 +72,8 @@ public class DynatraceUtils {
             } else if (HttpStatus.SC_NOT_FOUND == httpResponse.getStatusLine().getStatusCode()) {
                 throw new DynatraceException("No Application found in the Dynatrace Account with the name " + dynatraceContext.getTags().or(""));
             } else {
-                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase());
+                final String stringResponse = HTTPGeneratorUtils.getStringResponse(httpResponse);
+                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " "+ stringResponse);
             }
         } finally {
             http.closeHttpClient();
