@@ -159,6 +159,7 @@
                             <artifactSet>
                                 <excludes>
                                     <exclude>*:neotys-custom-action-api</exclude>
+                                    <exclude>*:neotys-custom-action-util</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
