@@ -21,16 +21,18 @@ import java.security.cert.CertificateException;
 import java.util.Timer;
 
 public class DynatracePluginData {
+    private static DynatracePluginData instance;
     private static final String NLWEB_VERSION = "v1";
 
-    private static final int TIMER_FREQUENCY = 30000;
+    private static final int TIMER_FREQUENCY = 10000;
     private static final int TIMER_DELAY = 0;
+    private final String virtualUserId;
 
     private Context neoLoadContext;
     private ApiClient neoLoadWebApiClient;
     private ResultsApi nlWebResult;
     private NeoLoadStatAggregator neoLoadAggregator = null;
-    Timer timerDynatrace = null;
+    private Timer timerDynatrace = null;
 
     private final String dataExchangeApiUrl;
 
@@ -39,16 +41,17 @@ public class DynatracePluginData {
     private Optional<String> dynatraceManagedHostname = null;
     private final Optional<String> proxyName;
 
-    public DynatracePluginData(final String dynataceApiKey, final String neoLoadWebApiKey,
+    private DynatracePluginData(final String dynataceApiKey,
                                final Optional<String> proxyName, final Context context, final String dynatraceId,
                                final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname) throws Exception {
 
         this.dynataceApiKey = dynataceApiKey;
         dynatraceAccountId = dynatraceId;
+        virtualUserId = context.getCurrentVirtualUser().getId();
 
         //----define  the NLWEB API-----
         neoLoadWebApiClient = new ApiClient();
-        neoLoadWebApiClient.setApiKey(neoLoadWebApiKey);
+        neoLoadWebApiClient.setApiKey(context.getAccountToken());
         final String basePath = getBasePath(context);
         neoLoadWebApiClient.setBasePath(basePath);
         final Optional<Proxy> proxyOptional = DynatraceUtils.getProxy(context, proxyName, basePath);
@@ -63,6 +66,25 @@ public class DynatracePluginData {
         this.dataExchangeApiUrl = dataExchangeApiUrl;
         neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, dynatraceAccountId, nlWebResult,
                 context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName);
+
+        startTimer();
+    }
+
+    public synchronized static DynatracePluginData getInstance(final Context context, final String dynatraceId, final String dynatraceApiKey, final Optional<String> dynatraceManagedHostname, final String dataExchangeApiUrl, final Optional<String> proxyName) throws Exception {
+            if (instance == null) {
+                instance = new DynatracePluginData(
+                        dynatraceApiKey,
+                        proxyName,
+                        context,
+                        dynatraceId,
+                        dataExchangeApiUrl,
+                        dynatraceManagedHostname);
+            }
+        return instance;
+    }
+
+    public static DynatracePluginData getInstance() {
+        return instance;
     }
 
     private void initProxyForNeoloadWebApiClient(final Proxy proxy) throws KeyManagementException, NoSuchAlgorithmException {
@@ -134,6 +156,10 @@ public class DynatracePluginData {
         return basePathBuilder.toString();
     }
 
+    public String getVirtualUserId() {
+        return virtualUserId;
+    }
+
     public void startTimer() {
         timerDynatrace = new Timer();
         timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
@@ -141,13 +167,6 @@ public class DynatracePluginData {
 
     public void stopTimer() {
         timerDynatrace.cancel();
-    }
-
-    public void resumeTimer() {
-        timerDynatrace = new Timer();
-        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, dynatraceAccountId, nlWebResult, neoLoadContext,
-                dataExchangeApiUrl, dynatraceManagedHostname, proxyName);
-        timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
     }
 
     private void initNeoLoadApi() {

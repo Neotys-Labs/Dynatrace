@@ -51,7 +51,6 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private Optional<String> dynatraceManagedHostName;
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
-    private long lastDuration = 0;
 
     public NeoLoadStatAggregator(final String dynatraceApiKey,
                                  final String dynatraceAccountId,
@@ -85,36 +84,30 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
 
     private void runTask() throws Exception {
         TestStatistics statsResult;
-        long utc = System.currentTimeMillis() / 1000;
+        //Get stats from nlweb
 
-        if (lastDuration == 0 || (utc - lastDuration) >= MIN_DYNATRACE_DURATION) {
-            //Get stats from nlweb
-            statsResult = nlWebResult.getTestStatistics(testId);
-            if (statsResult != null) {
-                lastDuration = System.currentTimeMillis() / 1000;
+        statsResult = nlWebResult.getTestStatistics(testId);
+        if (statsResult != null) {
+            //Update metrics to send
+            NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(statsResult);
 
-                //Update metrics to send
-                NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(statsResult);
-
-                if (!timeSeriesConfigured) {
-                    //Check if metric are created
-                    if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
-                        for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
-                            //Create Metric
-                            registerCustomMetric(dynatraceTimeseries);
-                        }
+            if (!timeSeriesConfigured) {
+                //Check if metric are created
+                if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
+                    for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
+                        //Create Metric
+                        registerCustomMetric(dynatraceTimeseries);
                     }
-                    timeSeriesConfigured = true;
                 }
-
-                //Report activity
-                reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
-            } else {
-                context.getLogger().debug("No stats found in NeoLoad web API.");
+                timeSeriesConfigured = true;
             }
+
+            //Report activity
+            reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
+        } else {
+            context.getLogger().debug("No stats found in NeoLoad web API.");
         }
     }
-
 
     private long getUtcDate() {
         long timeInMillisSinceEpoch123 = System.currentTimeMillis();
