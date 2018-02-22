@@ -281,10 +281,6 @@ public class DynatraceIntegration {
         isRunning = false;
     }
 
-    public void setTestRunning() {
-        isRunning = true;
-    }
-
     private long getUtcDate() {
         long timeInMillisSinceEpoch123 = System.currentTimeMillis();
         timeInMillisSinceEpoch123 -= 120000;

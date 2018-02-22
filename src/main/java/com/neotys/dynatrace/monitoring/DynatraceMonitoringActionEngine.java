@@ -22,7 +22,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_MONITORING_ACTION-03";
 
     private DynatraceIntegration dynatraceIntegration;
-    private DynatracePluginData dynatracePluginData;
 
     @Override
     public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
@@ -56,28 +55,22 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Optional<String> dataExchangeApiKey = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiKey.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
 
-        sampleResult.sampleStart();
         try {
-            dynatracePluginData = (DynatracePluginData) context.getCurrentVirtualUser().get("PLUGINDATA");
-            if (dynatracePluginData == null) {
-                // Delay by two seconds to ensure no conflicts in re-establishing connection
-                    dynatracePluginData = new DynatracePluginData(dynatraceApiKey, context.getAccountToken(), proxyName,
-                            context, dynatraceId, dataExchangeApiUrl, dynatraceManagedHostname);
+            final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName);
 
-                    context.getCurrentVirtualUser().put("PLUGINDATA", dynatracePluginData);
-                dynatracePluginData.startTimer();
-            } else {
-                dynatracePluginData.resumeTimer();
+            final String virtualUserId = context.getCurrentVirtualUser().getId();
+            // if therer is multiple virtual user handling the action return error
+            if (pluginData != null && !pluginData.getVirtualUserId().equals(virtualUserId)) {
+                return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: ", new DynatraceException("Multiple VU on action"));
             }
 
+            sampleResult.sampleStart();
             long startTs = System.currentTimeMillis() - context.getElapsedTime();
             logger.debug("Sending start test...");
             dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
-            dynatracePluginData.stopTimer();
-
         } catch (Exception e) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Error encountered :", e);
         }
@@ -89,8 +82,9 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
     @Override
     public void stopExecute() {
-        if (dynatracePluginData != null)
-            dynatracePluginData.stopTimer();
+        final DynatracePluginData pluginData = DynatracePluginData.getInstance();
+        if (pluginData != null)
+            pluginData.stopTimer();
 
         if (dynatraceIntegration != null)
             dynatraceIntegration.setTestToStop();
