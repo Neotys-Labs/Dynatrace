@@ -121,7 +121,7 @@ public class DynatraceIntegration {
                 .script("DynatraceMonitoring" + System.currentTimeMillis());
         this.dataExchangeApiClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl, contextBuilder.build(), dataExchangeApiKey.orNull());
         initHttpClient();
-        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityId(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
+        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
         this.dynatraceApplicationHostIds = new ArrayList<>();
         getHostsFromProcessGroup();
         getHosts();

@@ -46,7 +46,7 @@ public class DynatraceUtils {
         return DYNATRACE_ICON;
     }
 
-    public static List<String> getApplicationEntityId(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
+    public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
             throws Exception {
         final String tags = getTags(dynatraceContext.getTags());
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
@@ -60,14 +60,14 @@ public class DynatraceUtils {
 
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
-        final List<String> applicationEntityId = new ArrayList<>();
+        final List<String> applicationEntityIds = new ArrayList<>();
         try {
             final HttpResponse httpResponse = http.execute();
 
             if (HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
                 final JSONArray jsonArrayResponse = getJsonArrayResponse(httpResponse);
                 if (jsonArrayResponse != null) {
-                    extractApplicationEntityIdFromResponse(applicationEntityId, jsonArrayResponse);
+                    extractApplicationEntityIdsFromResponse(applicationEntityIds, jsonArrayResponse);
                 }
             } else if (HttpStatus.SC_NOT_FOUND == httpResponse.getStatusLine().getStatusCode()) {
                 throw new DynatraceException("No Application found in the Dynatrace Account with the name " + dynatraceContext.getTags().or(""));
@@ -80,14 +80,14 @@ public class DynatraceUtils {
         }
 
         if (context.getLogger().isDebugEnabled()) {
-            context.getLogger().debug("Found applications: " + applicationEntityId);
+            context.getLogger().debug("Found applications: " + applicationEntityIds);
         }
 
-        return applicationEntityId;
+        return applicationEntityIds;
     }
 
 
-    private static void extractApplicationEntityIdFromResponse(final List<String> applicationEntityId, final JSONArray jsonArrayResponse) {
+    private static void extractApplicationEntityIdsFromResponse(final List<String> applicationEntityId, final JSONArray jsonArrayResponse) {
         for (int i = 0; i < jsonArrayResponse.length(); i++) {
             final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
             if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
