@@ -70,7 +70,7 @@ class DynatraceEventAPI {
 				+ "\"annotationDescription\": \"" + message + " " + context.getTestName() + "\","
 				+ "\"attachRules\":"
 				+ "{ \"entityIds\":[" + entities + "] ,"
-				+ "{ \"tagRule\" : {"
+				+ "\"tagRule\" : {"
 				+ "\"meTypes\": \"SERVICE\","
 				+ "\"tags\": [\"Loadtest\", \"NeoLoad\"]"
 				+ "}},"
