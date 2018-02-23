@@ -21,7 +21,6 @@ class DynatraceEventAPI {
 
 	private static final String DYNATRACE_EVENTS_API_URL = "events";
 	private static final String MESSAGE_NL_TEST = "Start/Stop NeoLoad Test";
-	private static final String NEOLOAD_DATA_APPLICATION_ID = "NeoLoad Data";
 
 	private final Map<String, String> headers;
 	private final String dynatraceApiKey;
@@ -62,11 +61,7 @@ class DynatraceEventAPI {
 		for (String service : applicationEntityIds) {
 			entitiesBuilder.append("\"").append(service).append("\",");
 		}
-		// add default application "NeoLoad Data"
-		if (!applicationEntityIds.contains(NEOLOAD_DATA_APPLICATION_ID)) {
-			entitiesBuilder.append(NEOLOAD_DATA_APPLICATION_ID);
-		}
-		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length() - 1);
+		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length());
 
 		final String jsonString = "{\"start\":" + startTime + ","
 				+ "\"end\":" + endTime + ","
@@ -75,7 +70,7 @@ class DynatraceEventAPI {
 				+ "\"annotationDescription\": \"" + message + " " + context.getTestName() + "\","
 				+ "\"attachRules\":"
 				+ "{ \"entityIds\":[" + entities + "] ,"
-				+ "\"tagRule\" : {"
+				+ "{ \"tagRule\" : {"
 				+ "\"meTypes\": \"SERVICE\","
 				+ "\"tags\": [\"Loadtest\", \"NeoLoad\"]"
 				+ "}},"
