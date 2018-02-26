@@ -7,7 +7,7 @@ import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.HttpResponseUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
-import org.apache.http.StatusLine;
+import org.apache.http.HttpResponse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,15 +86,16 @@ class DynatraceEventAPI {
 
 		final Optional<Proxy> proxy = getProxy(context, proxyName, url);
 		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, jsonString);
-		StatusLine statusLine;
+		HttpResponse response;
 		try {
-			statusLine = insightHttp.executeAndGetStatusLine();
+			response = insightHttp.execute();
 		} finally {
 			insightHttp.closeHttpClient();
 		}
 
-		if (statusLine != null && !HttpResponseUtils.isSuccessHttpCode(statusLine.getStatusCode())) {
-			throw new DynatraceException(statusLine.getReasonPhrase());
+		if (response != null && !HttpResponseUtils.isSuccessHttpCode(response.getStatusLine().getStatusCode())) {
+			final String stringResponse = HttpResponseUtils.getStringResponse(response);
+			throw new DynatraceException(response.getStatusLine().getReasonPhrase() + " " + stringResponse);
 		}
 	}
 }
