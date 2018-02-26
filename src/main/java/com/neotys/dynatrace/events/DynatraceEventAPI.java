@@ -61,7 +61,7 @@ class DynatraceEventAPI {
 		for (String service : applicationEntityIds) {
 			entitiesBuilder.append("\"").append(service).append("\",");
 		}
-		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length());
+		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length() - 1);
 
 		final String jsonString = "{\"start\":" + startTime + ","
 				+ "\"end\":" + endTime + ","
