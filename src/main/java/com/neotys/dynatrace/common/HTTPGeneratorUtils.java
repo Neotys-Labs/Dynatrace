@@ -1,7 +1,6 @@
 package com.neotys.dynatrace.common;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -147,7 +146,7 @@ class HTTPGeneratorUtils {
 		return urlBuilder.toString();
 	}
 
-	private static String convertStreamToString(final InputStream is) throws IOException {
+	static String convertStreamToString(final InputStream is) throws IOException {
 		final StringBuilder sb = new StringBuilder();
 		try (final InputStreamReader in = new InputStreamReader(is); final BufferedReader reader = new BufferedReader(in)) {
 			String line;
@@ -162,17 +161,5 @@ class HTTPGeneratorUtils {
 		final Header contentTypeHeader = resp.getFirstHeader("Content-Type");
 		return contentTypeHeader.getValue().contains("application/json");
 	}
-
-	public static String getStringResponse(final HttpResponse resp) throws IOException {
-		final HttpEntity entity = resp.getEntity();
-		if (entity != null) {
-			// A Simple JSON Response Read
-			try (final InputStream inputStream = entity.getContent()) {
-				return convertStreamToString(inputStream);
-			}
-		}
-		return null;
-	}
-
 
 }
