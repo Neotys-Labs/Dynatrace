@@ -9,6 +9,8 @@ import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,8 +50,9 @@ class DynatraceEventAPI {
 
 	void sendMessage() throws Exception {
 		long start;
-		start = System.currentTimeMillis() - context.getElapsedTime();
-		sendMetricToEventAPI(MESSAGE_NL_TEST, start, System.currentTimeMillis());
+		final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+		start = now.toInstant().toEpochMilli() - context.getElapsedTime();
+		sendMetricToEventAPI(MESSAGE_NL_TEST, start, now.toInstant().toEpochMilli());
 	}
 
 	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {

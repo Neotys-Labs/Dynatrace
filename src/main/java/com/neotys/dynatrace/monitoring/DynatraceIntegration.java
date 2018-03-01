@@ -11,6 +11,8 @@ import com.neotys.rest.dataexchange.model.EntryBuilder;
 import com.neotys.rest.error.NeotysAPIException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -19,6 +21,9 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -104,7 +109,7 @@ public class DynatraceIntegration {
                                 final String dynatraceApiKey,
                                 final String dynatraceId,
                                 final Optional<String> dynatraceTags,
-                                final String dataExchangeApiUrl,
+                                final DataExchangeAPIClient dataExchangeApiUrl,
                                 final Optional<String> dataExchangeApiKey,
                                 final Optional<String> proxyName,
                                 final Optional<String> dynatraceManagedHostname,
@@ -117,9 +122,8 @@ public class DynatraceIntegration {
         this.dynatraceManagedHostname = dynatraceManagedHostname;
         this.isRunning = true;
         this.proxyName = proxyName;
-        final ContextBuilder contextBuilder = new ContextBuilder().hardware(DYNATRACE).location(DYNATRACE).software("OneAgent")
-                .script("DynatraceMonitoring" + System.currentTimeMillis());
-        this.dataExchangeApiClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl, contextBuilder.build(), dataExchangeApiKey.orNull());
+
+        this.dataExchangeApiClient = dataExchangeApiUrl;
         initHttpClient();
         this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
         this.dynatraceApplicationHostIds = new ArrayList<>();
@@ -127,6 +131,8 @@ public class DynatraceIntegration {
         getHosts();
         initDynatraceData();
     }
+
+
 
     private void createAndAddEntry(final String entityName, final String metricName,
                                    final String metricValueName, final double value,
@@ -282,7 +288,8 @@ public class DynatraceIntegration {
     }
 
     private long getUtcDate() {
-        long timeInMillisSinceEpoch123 = System.currentTimeMillis();
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        long timeInMillisSinceEpoch123 = now.toInstant().toEpochMilli();
         timeInMillisSinceEpoch123 -= 120000;
         return timeInMillisSinceEpoch123;
     }
@@ -296,10 +303,12 @@ public class DynatraceIntegration {
         final Map<String, String> parameters = new HashMap<>();
         sendTokenIngetParam(parameters);
 
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+
         final StringBuilder jsonEntitiesBuilder = new StringBuilder().append("{")
                 .append("\"aggregationType\": \"").append(aggregate.toLowerCase()).append("\",")
                 .append("\"timeseriesId\" : \"").append(timeSeries).append("\",")
-                .append("\"endTimestamp\":\"").append(String.valueOf(System.currentTimeMillis())).append("\",")
+                .append("\"endTimestamp\":\"").append(String.valueOf(now.toInstant().toEpochMilli())).append("\",")
                 .append("\"startTimestamp\":\"").append(String.valueOf(getUtcDate())).append("\",")
                 .append("\"entities\":[");
 
@@ -355,11 +364,14 @@ public class DynatraceIntegration {
             final JSONArray data = jsonArray.getJSONArray(i);
             if (data.get(1) instanceof Double) {
                 final long time = data.getLong(0);
+                DateTime utcTime = new DateTime(time, DateTimeZone.UTC);
+                final DateTime localTime = utcTime.withZone(DateTimeZone.getDefault());
+
                 if (time >= startTS) {
                     final String unit = jsonApplication.getString("unit");
                     final double value = data.getDouble(1);
                     final String timeseriesId = jsonApplication.getString("timeseriesId");
-                    final DynatraceMetric metric = new DynatraceMetric(unit, value, time, displayName, timeseriesId, entity);
+                    final DynatraceMetric metric = new DynatraceMetric(unit, value, localTime.getMillis(), displayName, timeseriesId, entity);
                     metrics.add(metric);
                 }
             }

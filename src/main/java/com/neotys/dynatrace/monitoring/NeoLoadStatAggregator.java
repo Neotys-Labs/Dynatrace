@@ -17,6 +17,8 @@ import org.apache.http.StatusLine;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
@@ -110,9 +112,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     }
 
     private long getUtcDate() {
-        long timeInMillisSinceEpoch123 = System.currentTimeMillis();
-        timeInMillisSinceEpoch123 -= 200000;
-        return timeInMillisSinceEpoch123;
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        return now.toInstant().toEpochMilli() - 200000;
     }
 
     private String getApiUrl() {
@@ -178,7 +179,10 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         parameters.put(API_TOKEN, dynatraceApiKey);
 
         String url = getApiUrl() + DYNATRACE_NEW_DATA + "NeoLoadData";
-        long time = System.currentTimeMillis();
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        long time = now.toInstant().toEpochMilli();
+
 
         String jsonString = "{\"displayName\" : \"NeoLoad Data\","
                 + "\"ipAddresses\" : [\"" + componentIpAdresse + "\"],"
@@ -242,7 +246,8 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         parameters.put(API_TOKEN, dynatraceApiKey);
         parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
-        parameters.put("endTimestamp", String.valueOf(System.currentTimeMillis()));
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        parameters.put("endTimestamp", String.valueOf(now.toInstant().toEpochMilli()));
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);

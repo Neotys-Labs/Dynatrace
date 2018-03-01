@@ -62,6 +62,7 @@ Once installed, how to use in a given NeoLoad project:
 
 1. Create a “Dynatrace” User Path.
 1. Insert "DynatraceEvents" in the ‘End’ block.
+1. Define a 30 seconds pacing on the ‘Actions’ block.
 1. Insert "DynatraceMonitoring" in the ‘Actions’ block.
 1. Create a “Dynatrace” Population that contains 100% of “Dynatrace” User Path.
 1. In the **Runtime** section, select your scenario, select the “Dynatrace” population and define a constant load of 1 user.

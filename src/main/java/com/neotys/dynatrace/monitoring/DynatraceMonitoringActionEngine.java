@@ -2,13 +2,24 @@ package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
+import com.neotys.dynatrace.common.Constants;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Logger;
 import com.neotys.extensions.action.engine.SampleResult;
+import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
+import com.neotys.rest.dataexchange.client.DataExchangeAPIClientFactory;
+import com.neotys.rest.dataexchange.model.ContextBuilder;
+import com.neotys.rest.error.NeotysAPIException;
+import org.apache.olingo.odata2.api.exception.ODataException;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +67,22 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
 
         try {
+
+            // Check last execution time (and fail if called less than 45 seconds ago).
+            final Object dynatraceLastExecutionTime = context.getCurrentVirtualUser().get(Constants.DYNATRACE_LAST_EXECUTION_TIME);
+            final Long dynatraceCurrentExecution = System.currentTimeMillis();
+
+            if(!(dynatraceLastExecutionTime instanceof Long)){
+                requestBuilder.append("(first execution).\n");
+            } else if((Long)dynatraceLastExecutionTime + 25*1000 > dynatraceCurrentExecution){
+                return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: Not enough delay between the two Dynatrace advanced action execution. Make sure to have at least 30 seconds pacing on the Actions container.");
+            } else {
+                requestBuilder.append("(last execution was " + ((dynatraceCurrentExecution - (Long)dynatraceLastExecutionTime)/1000) + " seconds ago)\n");
+            }
+
+            context.getCurrentVirtualUser().put(Constants.DYNATRACE_LAST_EXECUTION_TIME, dynatraceCurrentExecution);
+
+
             final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName);
 
             final String virtualUserId = context.getCurrentVirtualUser().getId();
@@ -65,9 +92,14 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             }
 
             sampleResult.sampleStart();
-            long startTs = System.currentTimeMillis() - context.getElapsedTime();
+            ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+            long startTs = now.toInstant().toEpochMilli() - context.getElapsedTime();
             logger.debug("Sending start test...");
-            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeApiUrl, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
+
+            // Retrieve DataExchangeAPIClient from Context, or instantiate new one
+            DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl);
+
+            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
@@ -78,6 +110,23 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         sampleResult.setRequestContent(requestBuilder.toString());
         sampleResult.setResponseContent(responseBuilder.toString());
         return sampleResult;
+    }
+
+    private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {
+        DataExchangeAPIClient dataExchangeAPIClient = (DataExchangeAPIClient) context.getCurrentVirtualUser().get(Constants.NL_DATA_EXCHANGE_API_CLIENT);
+        if (dataExchangeAPIClient == null) {
+                final ContextBuilder contextBuilder = new ContextBuilder();
+                contextBuilder.hardware(Constants.NEOLOAD_CONTEXT_HARDWARE).location(Constants.NEOLOAD_CONTEXT_LOCATION).software(
+                        Constants.NEOLOAD_CONTEXT_SOFTWARE).script("DynatraceMonitoring" + System.currentTimeMillis());
+                dataExchangeAPIClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl,
+                        contextBuilder.build(),
+                        dataExchangeApiUrl);
+                context.getCurrentVirtualUser().put(Constants.NL_DATA_EXCHANGE_API_CLIENT, dataExchangeAPIClient);
+                requestBuilder.append("DataExchangeAPIClient created.\n");
+        } else {
+            requestBuilder.append("DataExchangeAPIClient retrieved from User Path Context.\n");
+        }
+        return dataExchangeAPIClient;
     }
 
     @Override
