@@ -8,7 +8,7 @@ This Advanced Action allows you to integrate [NeoLoad](https://www.neotys.com/ne
 
 This bundle provides inbound and an outbound integration:  
 * **DynatraceEvents:**
-  Links a load testing event to all services used by an Application monitored by Dynatrace.
+  Links a load testing event to all services used by an application monitored by Dynatrace.
   Data sent: Neoload Project, Test and Scenario Name.
              NeoLoadWeb Frontend Url.
   
@@ -69,9 +69,9 @@ Once installed, how to use in a given NeoLoad project:
    <p align="center"><img src="/screenshots/dynatrace_user_path.png" alt="Dynatrace User Path" /></p>
 1. Select the **Actions** container and set a pacing duration of 30 seconds.
    <p align="center"><img src="/screenshots/actions_container_pacing.png" alt="Action's Pacing" /></p>
-1. Select the **Actions** container and set the runtime parameters "Reset user session and emulate new browser between each iteration" to "No".
+1. Select the **Actions** container and set the "Reset user session and emulate new browser between each iteration" runtime parameters to "No".
    <p align="center"><img src="/screenshots/actions_container_reset_iteration_no.png" alt="Action's Runtime parameters" /></p>
-1. Create a Population "PopulationDynatrace" which contains 100% of User Path "Dynatrace".
+1. Create a "PopulationDynatrace" Population that contains 100% of "Dynatrace" User Path.
    <p align="center"><img src="/screenshots/dynatrace_population.png" alt="Dynatrace Population" /></p>
 1. In the **Runtime** section, select your scenario, select the "PopulationDynatrace" population and define a constant load of 1 user for the full duration of the load test.
    <p align="center"><img src="/screenshots/dynatrace_load_variation_policy.png" alt="Load Variation Policy" /></p>
@@ -83,11 +83,11 @@ Once installed, how to use in a given NeoLoad project:
 
 ## Dynatrace Set-up
 
-On the Dynatrace interface :
+On the Dynatrace interface
 
-1. Create (or retrieve) a Dynatrace API key from menu **Settings**, section **Intregration**, subsection **Dynatrace API**.
+1. Create (or retrieve) a Dynatrace API key from menu **Settings/Intregration/Dynatrace API**.
    <p align="center"><img src="/screenshots/dynatrace_api_key.png" alt="Dynatrace API key" /></p>
-1. Find out the application being tested.
+1. Search for the application being tested.
    <p align="center"><img src="/screenshots/dynatrace_application.png" alt="Dynatrace Application" /></p>
 1. Apply a tag on the application being tested.
    <p align="center"><img src="/screenshots/dynatrace_tag.png" alt="Dynatrace Tag" /></p>
@@ -116,28 +116,28 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dataExchangeApiKey  (Optional)  | API key of the DataExchange API |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
 
-## Analyse results in NeoLoad
+## Analyze results in NeoLoad
 
 All the metrics retrieved from Dynatrace are available on the NeoLoad Controller (live during the test, and after the test is executed), in the **External Data** tab.
 
 <p align="center"><img src="/screenshots/neoload_external_data_graphs.png" alt="NeoLoad Graphs External Data" /></p>
 
-## Analyse results in Dynatrace
+## Analyze results in Dynatrace
 
-1. Create a custom chart with NeoLoad data
+1. Create a custom chart with NeoLoad data.
    <p align="center"><img src="/screenshots/dynatrace_custom_chart.png" alt="Dynatrace custom chart" /></p>
-1. Analyse NeoLoad metrics
+1. Analyze NeoLoad metrics.
 
-    Click on the custom metric
+    Click on the custom metric:
     <p align="center"><img src="/screenshots/dynatrace_select_metric.png" alt="Dynatrace select custom neoload metric" /></p>
-    Analyse all NeoLoad metric sent
+    Analyze all the NeoLoad metrics sent:
     <p align="center"><img src="/screenshots/dynatrace_neoload_data.png" alt="NeoLoad Data" /></p>
-1. Consult NeoLoad event on the tested application
+1. Consult NeoLoad events on the tested application.
    <p align="center"><img src="/screenshots/dynatrace_consult_event.png" alt="Dynatrace consult NeoLoad Event" /></p>
 
 ## Check User Path
 
-This bundle does not work with Check User Path mode.
+This bundle does not work with the Check User Path mode.
 A Bad context error should be raised.
 
 ## Status Codes
