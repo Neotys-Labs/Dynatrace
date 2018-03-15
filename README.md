@@ -125,6 +125,7 @@ All the metrics retrieved from Dynatrace are available on the NeoLoad Controller
 1. Create a custom chart with NeoLoad data
    <p align="center"><img src="/screenshots/dynatrace_custom_chart.png" alt="Dynatrace custom chart" /></p>
 1. Analyse NeoLoad metrics
+
     Click on the custom metric
     <p align="center"><img src="/screenshots/dynatrace_select_metric.png" alt="Dynatrace select custom neoload metric" /></p>
     Analyse all NeoLoad metric sent
