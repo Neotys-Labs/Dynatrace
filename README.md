@@ -1,6 +1,6 @@
 <p align="center"><img src="/screenshots/dynatrace_logo.png" width="40%" alt="Dynatrace Logo" /></p>
 
-# Dynatrace	
+# Dynatrace	Integration for NeoLoad
 
 ## Overview
 
@@ -67,7 +67,7 @@ Once installed, how to use in a given NeoLoad project:
 1. Insert "DynatraceEvents" in the ‘End’ block.
 1. Insert "DynatraceMonitoring" in the ‘Actions’ block.
    <p align="center"><img src="/screenshots/dynatrace_user_path.png" alt="Dynatrace User Path" /></p>
-1. Select the **Actions** container and set a pacing duration of 60 seconds.
+1. Select the **Actions** container and set a pacing duration of 30 seconds.
    <p align="center"><img src="/screenshots/actions_container_pacing.png" alt="Action's Pacing" /></p>
 1. Select the **Actions** container and set the runtime parameters "Reset user session and emulate new browser between each iteration" to "No".
    <p align="center"><img src="/screenshots/actions_container_reset_iteration_no.png" alt="Action's Runtime parameters" /></p>
@@ -125,9 +125,11 @@ All the metrics retrieved from Dynatrace are available on the NeoLoad Controller
 1. Create a custom chart with NeoLoad data
    <p align="center"><img src="/screenshots/dynatrace_custom_chart.png" alt="Dynatrace custom chart" /></p>
 1. Analyse NeoLoad metrics
+    Click on the custom metric
     <p align="center"><img src="/screenshots/dynatrace_select_metric.png" alt="Dynatrace select custom neoload metric" /></p>
+    Analyse all NeoLoad metric sent
     <p align="center"><img src="/screenshots/dynatrace_neoload_data.png" alt="NeoLoad Data" /></p>
-1. Consult NeoLoad event
+1. Consult NeoLoad event on the tested application
    <p align="center"><img src="/screenshots/dynatrace_consult_event.png" alt="Dynatrace consult NeoLoad Event" /></p>
 
 ## Check User Path
