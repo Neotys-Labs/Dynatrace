@@ -76,6 +76,8 @@ Once installed, how to use in a given NeoLoad project:
 1. In the **Runtime** section, select your scenario, select the "PopulationDynatrace" population and define a constant load of 1 user for the full duration of the load test.
    <p align="center"><img src="/screenshots/dynatrace_load_variation_policy.png" alt="Load Variation Policy" /></p>
 1. Do not use multiple load generators. Good practice should be to keep only the local one.
+1. Verify that NeoLoad Web data transfer is properly configured on the Controller preferences (see **Preferences** / **General settings** / **NeoLoad Web**).
+   <p align="center"><img src="/screenshots/nlweb_preferences.png" alt="NeoLoad Web Preferences" /></p>
 1. Verify to have a license with "Integration & Advanced Usage".
    <p align="center"><img src="/screenshots/license_integration_and_advanced_usage.png" alt="License with Integration & Advanced Usage" /></p>
 
