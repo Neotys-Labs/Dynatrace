@@ -4,7 +4,7 @@
 
 ## Overview
 
-This Advanced Action allows you to integrate [NeoLoad](https://www.neotys.com/neoload/overview) with [Dynatrace](https://www.dynatrace.com/) in order to correlate data from one tool to another.
+These Advanced Actions allows you to integrate [NeoLoad](https://www.neotys.com/neoload/overview) with [Dynatrace](https://www.dynatrace.com/) in order to correlate data from one tool to another.
 
 This bundle provides inbound and an outbound integration:  
 * **DynatraceEvents:**
