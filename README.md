@@ -65,7 +65,6 @@ Once installed, how to use in a given NeoLoad project:
 
 1. Create a “Dynatrace” User Path.
 1. Insert "DynatraceEvents" in the ‘End’ block.
-1. Define a 30 seconds pacing on the ‘Actions’ block.
 1. Insert "DynatraceMonitoring" in the ‘Actions’ block.
    <p align="center"><img src="/screenshots/dynatrace_user_path.png" alt="Dynatrace User Path" /></p>
 1. Select the **Actions** container and set a pacing duration of 30 seconds.
