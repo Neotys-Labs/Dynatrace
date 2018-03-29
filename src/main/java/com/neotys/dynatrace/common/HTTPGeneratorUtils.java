@@ -1,5 +1,6 @@
 package com.neotys.dynatrace.common;
 
+import com.google.common.base.Splitter;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by anouvel on 18/12/2017.
@@ -138,12 +140,22 @@ class HTTPGeneratorUtils {
 		final List<NameValuePair> parameters = new LinkedList<>();
 		if (params != null) {
 			for (Map.Entry<String, String> entry : params.entrySet()) {
-				parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+				if("tag".equals(entry.getKey())){
+					parameters.addAll(getTags(entry.getValue()));
+				}else {
+					parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+				}
 			}
 		}
 		final String paramString = URLEncodedUtils.format(parameters, HTTP.UTF_8);
 		urlBuilder.append(paramString);
 		return urlBuilder.toString();
+	}
+
+	public static List<NameValuePair> getTags(final String tags) {
+		return Splitter.on(',').splitToList(tags)
+				.stream().map(tag -> new BasicNameValuePair("tag", tag.trim()))
+				.collect(toList());
 	}
 
 	static String convertStreamToString(final InputStream is) throws IOException {

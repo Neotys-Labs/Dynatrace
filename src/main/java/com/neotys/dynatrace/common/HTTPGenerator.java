@@ -78,8 +78,11 @@ public class HTTPGenerator {
 		return httpClient.execute(request);
 	}
 
-	public JSONArray executeAndGetJsonArrayResponse() throws IOException {
+	public JSONArray executeAndGetJsonArrayResponse() throws IOException, DynatraceException {
 		final HttpResponse response = httpClient.execute(request);
+		if (!HttpResponseUtils.isSuccessHttpCode(response.getStatusLine().getStatusCode())) {
+			throw new DynatraceException(response.getStatusLine().getReasonPhrase() + " "+ HttpResponseUtils.getStringResponse(response));
+		}
 		return HttpResponseUtils.getJsonArrayResponse(response);
 	}
 

@@ -1,7 +1,6 @@
 package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
@@ -48,11 +47,10 @@ public class DynatraceUtils {
 
     public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
             throws Exception {
-        final String tags = getTags(dynatraceContext.getTags());
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
         final Map<String, String> parameters = new HashMap<>();
-        if(!Strings.isNullOrEmpty(tags)) {
-            parameters.put("tag", tags);
+        if(dynatraceContext.getTags().isPresent()) {
+            parameters.put("tag", dynatraceContext.getTags().get());
         }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
@@ -94,23 +92,6 @@ public class DynatraceUtils {
                 applicationEntityId.add(jsonApplication.getString("entityId"));
             }
         }
-    }
-
-    public static String getTags(final Optional<String> tags) {
-        if (tags.isPresent()) {
-            final StringBuilder result = new StringBuilder();
-            final String tagsAsString = tags.get();
-            if (tagsAsString.contains(",")) {
-                final String[] tagsArray = tagsAsString.split(",");
-                for (String tag : tagsArray) {
-                    result.append(tag).append("AND");
-                }
-                return result.substring(0, result.length() - 3);
-            } else {
-                return tagsAsString;
-            }
-        }
-        return "";
     }
 
     public static Optional<Proxy> getProxy(final Context context, final Optional<String> proxyName, final String url) throws MalformedURLException {

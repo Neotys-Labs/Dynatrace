@@ -97,7 +97,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             logger.debug("Sending start test...");
 
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
-            DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl);
+            DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
             dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
 
@@ -112,7 +112,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         return sampleResult;
     }
 
-    private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {
+    private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl, final Optional<String> dataExchangeApiKey) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {
         DataExchangeAPIClient dataExchangeAPIClient = (DataExchangeAPIClient) context.getCurrentVirtualUser().get(Constants.NL_DATA_EXCHANGE_API_CLIENT);
         if (dataExchangeAPIClient == null) {
                 final ContextBuilder contextBuilder = new ContextBuilder();
@@ -120,7 +120,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
                         Constants.NEOLOAD_CONTEXT_SOFTWARE).script("DynatraceMonitoring" + System.currentTimeMillis());
                 dataExchangeAPIClient = DataExchangeAPIClientFactory.newClient(dataExchangeApiUrl,
                         contextBuilder.build(),
-                        dataExchangeApiUrl);
+                        dataExchangeApiKey.orNull());
                 context.getCurrentVirtualUser().put(Constants.NL_DATA_EXCHANGE_API_CLIENT, dataExchangeAPIClient);
                 requestBuilder.append("DataExchangeAPIClient created.\n");
         } else {

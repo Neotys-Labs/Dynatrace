@@ -5,8 +5,6 @@ import com.neotys.dynatrace.common.*;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
-import com.neotys.rest.dataexchange.client.DataExchangeAPIClientFactory;
-import com.neotys.rest.dataexchange.model.ContextBuilder;
 import com.neotys.rest.dataexchange.model.EntryBuilder;
 import com.neotys.rest.error.NeotysAPIException;
 import org.apache.http.HttpResponse;
@@ -21,7 +19,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -175,10 +172,11 @@ public class DynatraceIntegration {
     }
 
     private void getHosts() throws Exception {
-        final String tags = DynatraceUtils.getTags(dynatraceApplication);
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put(TAG, tags);
+        if(dynatraceApplication.isPresent()){
+            parameters.put(TAG, dynatraceApplication.get());
+        }
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
@@ -197,16 +195,20 @@ public class DynatraceIntegration {
             if(dynatraceApplicationHostIds.isEmpty()){
                 context.getLogger().debug("No host found.");
             }
-        } finally {
+
+        }catch (DynatraceException e){
+            context.getLogger().error(e.getMessage());
+        } finally{
             httpGenerator.closeHttpClient();
         }
     }
 
     private void getHostsFromProcessGroup() throws Exception {
-        final String tags = DynatraceUtils.getTags(dynatraceApplication);
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
         final Map<String, String> parameters = new HashMap<>();
-        parameters.put(TAG, tags);
+        if(dynatraceApplication.isPresent()){
+            parameters.put(TAG, dynatraceApplication.get());
+        }
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
@@ -233,6 +235,8 @@ public class DynatraceIntegration {
             if(dynatraceApplicationHostIds.isEmpty()){
                 context.getLogger().debug("No host found in process group");
             }
+        }catch (DynatraceException e){
+            context.getLogger().error(e.getMessage());
         } finally {
             httpGenerator.closeHttpClient();
         }
