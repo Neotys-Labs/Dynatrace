@@ -28,7 +28,7 @@ enum DynatraceMonitoringOption implements Option {
 
     DynatraceTags("tags", Optional, True, TEXT,
             "tag1,tag2",
-            "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: \"tag1,tag2\").",
+            "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
             ALWAYS_VALID),
 
     DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
