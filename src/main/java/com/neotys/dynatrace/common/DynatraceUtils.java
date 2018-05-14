@@ -67,8 +67,6 @@ public class DynatraceUtils {
                 if (jsonArrayResponse != null) {
                     extractApplicationEntityIdsFromResponse(applicationEntityIds, jsonArrayResponse);
                 }
-            } else if (HttpStatus.SC_NOT_FOUND == httpResponse.getStatusLine().getStatusCode()) {
-                throw new DynatraceException("No Application found in the Dynatrace Account with the name " + dynatraceContext.getTags().or(""));
             } else {
                 final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
                 throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " "+ stringResponse);
