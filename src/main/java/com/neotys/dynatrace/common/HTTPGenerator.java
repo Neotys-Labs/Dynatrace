@@ -52,10 +52,10 @@ public class HTTPGenerator {
 													 final Map<String, String> headers,
 													 final Map<String, String> params,
 													 final Optional<Proxy> proxy,
-													 final String jsonString)
+													 final String bodyJson)
 			throws Exception {
 		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params, proxy);
-		final StringEntity requestEntity = new StringEntity(jsonString, "application/json","utf8");
+		final StringEntity requestEntity = new StringEntity(bodyJson, "application/json","utf8");
 		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
 		return httpGenerator;
 	}
@@ -79,20 +79,16 @@ public class HTTPGenerator {
 	}
 
 	public JSONArray executeAndGetJsonArrayResponse() throws IOException, DynatraceException {
-		final HttpResponse response = httpClient.execute(request);
-		if (!HttpResponseUtils.isSuccessHttpCode(response.getStatusLine().getStatusCode())) {
-			throw new DynatraceException(response.getStatusLine().getReasonPhrase() + " "+ HttpResponseUtils.getStringResponse(response));
+		final HttpResponse httpResponse = httpClient.execute(request);
+		if (!HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+			final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+			throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ request + " - " + stringResponse);
 		}
-		return HttpResponseUtils.getJsonArrayResponse(response);
+		return HttpResponseUtils.getJsonArrayResponse(httpResponse);
 	}
 
 	public int executeAndGetResponseCode() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
 		return response.getStatusLine().getStatusCode();
-	}
-
-	public StatusLine executeAndGetStatusLine() throws IOException {
-		final HttpResponse response = httpClient.execute(request);
-		return response.getStatusLine();
 	}
 }

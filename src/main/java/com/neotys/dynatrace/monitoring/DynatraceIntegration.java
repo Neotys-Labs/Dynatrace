@@ -320,9 +320,9 @@ public class DynatraceIntegration {
             jsonEntitiesBuilder.append("\"").append(entit).append("\",");
         }
 
-        final String json = jsonEntitiesBuilder.substring(0, jsonEntitiesBuilder.length() - 1) + "]}";
+        final String bodyJson = jsonEntitiesBuilder.substring(0, jsonEntitiesBuilder.length() - 1) + "]}";
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, proxy, json);
+        httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, header, parameters, proxy, bodyJson);
 
         final List<DynatraceMetric> metrics = new ArrayList<>();
         try {
@@ -354,7 +354,8 @@ public class DynatraceIntegration {
                 }
             }
             else if(statusCode != HttpStatus.SC_BAD_REQUEST && statusCode != HttpStatus.SC_NOT_FOUND){
-                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase());
+                final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
             }
         } finally {
             httpGenerator.closeHttpClient();

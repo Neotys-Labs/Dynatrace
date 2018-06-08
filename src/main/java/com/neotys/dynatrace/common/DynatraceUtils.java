@@ -69,7 +69,7 @@ public class DynatraceUtils {
                 }
             } else {
                 final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
-                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " "+ stringResponse);
+                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ dynatraceUrl + " - " + stringResponse);
             }
         } finally {
             http.closeHttpClient();

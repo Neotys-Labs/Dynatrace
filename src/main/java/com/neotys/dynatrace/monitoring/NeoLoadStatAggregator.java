@@ -11,8 +11,8 @@ import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.api.ResultsApi;
 import io.swagger.client.model.TestStatistics;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -184,7 +184,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         long time = now.toInstant().toEpochMilli();
 
 
-        String jsonString = "{\"displayName\" : \"NeoLoad Data\","
+        String bodyJson = "{\"displayName\" : \"NeoLoad Data\","
                 + "\"ipAddresses\" : [\"" + componentIpAdresse + "\"],"
                 + "\"listenPorts\" : [\"" + componentPort + "\"],"
                 + "\"type\" : \"" + NEOLOAD_TYPE + "\","
@@ -205,34 +205,35 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
                         + "}";
 
 
-                jsonString += conStr + ",";
+                bodyJson += conStr + ",";
                 hasMetrics = true;
             }
         }
 
-        if (",".equalsIgnoreCase(jsonString.substring(jsonString.length() - 1))) {
-            jsonString = jsonString.substring(0, jsonString.length() - 1);
+        if (",".equalsIgnoreCase(bodyJson.substring(bodyJson.length() - 1))) {
+            bodyJson = bodyJson.substring(0, bodyJson.length() - 1);
         }
 
-        jsonString += "]}";
+        bodyJson += "]}";
 
         if (hasMetrics) {
 
             final Optional<Proxy> proxy = getProxy(proxyName, url);
-            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, jsonString);
+            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, bodyJson);
 
-            context.getLogger().debug("dynatrace report custom metric JSON content : " + jsonString);
+            context.getLogger().debug("dynatrace report custom metric JSON content : " + bodyJson);
 
-            StatusLine statusLine;
+            HttpResponse httpResponse;
             try {
                 context.getLogger().debug("Dynatrace service : report custom metric");
-                statusLine = insightHttp.executeAndGetStatusLine();
+                httpResponse = insightHttp.execute();
             } finally {
                 insightHttp.closeHttpClient();
             }
 
-            if (statusLine != null && !HttpResponseUtils.isSuccessHttpCode(statusLine.getStatusCode())) {
-                throw new DynatraceException(statusLine.getReasonPhrase());
+            if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+                final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
             }
         }
     }

@@ -66,7 +66,7 @@ class DynatraceEventAPI {
 		}
 		final String entities = entitiesBuilder.substring(0, entitiesBuilder.length() - 1);
 
-		final String jsonString = "{\"start\":" + startTime + ","
+		final String bodyJson = "{\"start\":" + startTime + ","
 				+ "\"end\":" + endTime + ","
 				+ "\"eventType\": \"CUSTOM_ANNOTATION\","
 				+ "\"annotationType\": \"NeoLoad Test" + context.getTestName() + "\","
@@ -85,20 +85,20 @@ class DynatraceEventAPI {
 				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
-		context.getLogger().debug("dynatrace event JSON content : " + jsonString);
+		context.getLogger().debug("dynatrace event JSON content : " + bodyJson);
 
 		final Optional<Proxy> proxy = getProxy(context, proxyName, url);
-		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, jsonString);
-		HttpResponse response;
+		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, bodyJson);
+		HttpResponse httpResponse;
 		try {
-			response = insightHttp.execute();
+			httpResponse = insightHttp.execute();
 		} finally {
 			insightHttp.closeHttpClient();
 		}
 
-		if (response != null && !HttpResponseUtils.isSuccessHttpCode(response.getStatusLine().getStatusCode())) {
-			final String stringResponse = HttpResponseUtils.getStringResponse(response);
-			throw new DynatraceException(response.getStatusLine().getReasonPhrase() + " " + stringResponse);
+		if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+			final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+			throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
 		}
 	}
 }
