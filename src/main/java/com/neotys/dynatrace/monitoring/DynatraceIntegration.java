@@ -33,6 +33,7 @@ public class DynatraceIntegration {
     private static final String DYNATRACE_TIMESERIES = "timeseries";
 
     private static final String COUNT = "COUNT";
+    private static final String NONE = null;
 
     private static final String ENTITY_ID = "entityId";
     private static final String DISPLAY_NAME = "displayName";
@@ -79,8 +80,8 @@ public class DynatraceIntegration {
         TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", "AVG");
 
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.clientsidefailurerate", "AVG");
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp4xx", COUNT);
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp5xx", COUNT);
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp4xx", NONE);
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp5xx", NONE);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.failurerate", "AVG");
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.requestspermin", COUNT);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.responsetime", "AVG");
@@ -303,14 +304,17 @@ public class DynatraceIntegration {
             throws Exception {
         JSONObject jsonApplication;
 
-        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_TIMESERIES;
+        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_TIMESERIES + "/" + timeSeries;
         final Map<String, String> parameters = new HashMap<>();
         sendTokenIngetParam(parameters);
 
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 
-        final StringBuilder jsonEntitiesBuilder = new StringBuilder().append("{")
-                .append("\"aggregationType\": \"").append(aggregate.toLowerCase()).append("\",")
+        final StringBuilder jsonEntitiesBuilder = new StringBuilder().append("{");
+        if(aggregate != null){
+            jsonEntitiesBuilder.append("\"aggregationType\": \"").append(aggregate.toLowerCase()).append("\",");
+        }
+        jsonEntitiesBuilder
                 .append("\"timeseriesId\" : \"").append(timeSeries).append("\",")
                 .append("\"endTimestamp\":\"").append(String.valueOf(now.toInstant().toEpochMilli())).append("\",")
                 .append("\"startTimestamp\":\"").append(String.valueOf(getUtcDate())).append("\",")
