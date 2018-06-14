@@ -102,28 +102,31 @@ public class DynatraceIntegration {
     private boolean isRunning = true;
     private final Context context;
     private long startTS;
+    private boolean traceMode;
 
     public DynatraceIntegration(final Context context,
                                 final String dynatraceApiKey,
                                 final String dynatraceId,
                                 final Optional<String> dynatraceTags,
-                                final DataExchangeAPIClient dataExchangeApiUrl,
+                                final DataExchangeAPIClient dataExchangeAPIClient,
                                 final Optional<String> dataExchangeApiKey,
                                 final Optional<String> proxyName,
                                 final Optional<String> dynatraceManagedHostname,
-                                final long startTs) throws Exception {
+                                final long startTs,
+                                final boolean traceMode) throws Exception {
         this.context = context;
         this.startTS = startTs;
         this.dynatraceApiKey = dynatraceApiKey;
         this.dynatraceApplication = dynatraceTags;
         this.dynatraceId = dynatraceId;
         this.dynatraceManagedHostname = dynatraceManagedHostname;
+        this.traceMode = traceMode;
         this.isRunning = true;
         this.proxyName = proxyName;
 
-        this.dataExchangeApiClient = dataExchangeApiUrl;
+        this.dataExchangeApiClient = dataExchangeAPIClient;
         initHttpClient();
-        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName);
+        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName, traceMode);
         this.dynatraceApplicationHostIds = new ArrayList<>();
         getHostsFromProcessGroup();
         getHosts();
@@ -184,6 +187,9 @@ public class DynatraceIntegration {
         httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
         try {
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, get hosts:\n" + httpGenerator.getRequest());
+            }
             final JSONArray jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
             if (jsonArray != null) {
                 for (int i = 0; i < jsonArray.length(); i++) {
@@ -194,7 +200,7 @@ public class DynatraceIntegration {
                 }
             }
             if(dynatraceApplicationHostIds.isEmpty()){
-                context.getLogger().debug("No host found.");
+                context.getLogger().info("No host found.");
             }
 
         }catch (DynatraceException e){
@@ -216,6 +222,9 @@ public class DynatraceIntegration {
         httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
         try {
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, get hosts from process group:\n" + httpGenerator.getRequest());
+            }
             final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
             if (jsonObj != null) {
                 for (int i = 0; i < jsonObj.length(); i++) {
@@ -330,6 +339,9 @@ public class DynatraceIntegration {
 
         final List<DynatraceMetric> metrics = new ArrayList<>();
         try {
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, get timeseries:\n" + httpGenerator.getRequest() + "\n" + bodyJson);
+            }
             final HttpResponse httpResponse = httpGenerator.execute();
 
             final int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -353,8 +365,8 @@ public class DynatraceIntegration {
                         addDataMetrics(metrics, jsonApplication, entity, displayName, arr);
                     }
                 }
-                if(metrics.isEmpty()){
-                    context.getLogger().debug("No timeseries found.");
+                if(metrics.isEmpty() && traceMode){
+                    context.getLogger().info("No timeseries found.");
                 }
             }
             else if(statusCode != HttpStatus.SC_BAD_REQUEST && statusCode != HttpStatus.SC_NOT_FOUND){

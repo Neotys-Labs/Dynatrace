@@ -19,12 +19,15 @@ import java.net.URI;
 import java.net.URL;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
-public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitoringApi {
+public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
 
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
     private static final String DYNATRACE_TIME_SERIES_CREATION = "timeseries/custom";
@@ -39,13 +42,15 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private static final int MIN_DYNATRACE_DURATION = 30;
 
     private final Optional<String> proxyName;
-    private final Context context;
+
+    private Context context;
 
     private ResultsApi nlWebResult;
+
     private String componentIpAdresse;
     private int componentPort;
-
     private String dynatraceApiKey;
+
     private String dynatraceAccountId;
     private String testName;
     private final String testId;
@@ -53,14 +58,14 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
     private Optional<String> dynatraceManagedHostName;
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
-
+    private boolean traceMode;
     public NeoLoadStatAggregator(final String dynatraceApiKey,
                                  final String dynatraceAccountId,
                                  final ResultsApi nlWebResult,
                                  final Context context,
                                  final String dataExchangeApiUrl,
                                  final Optional<String> dynatraceManagedHostName,
-                                 final Optional<String> proxyName) {
+                                 final Optional<String> proxyName, final boolean traceMode) {
         this.proxyName = proxyName;
         this.dynatraceApiKey = dynatraceApiKey;
         this.context = context;
@@ -71,6 +76,7 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         this.dynatraceAccountId = dynatraceAccountId;
         this.scenarioName = context.getScenarioName();
         this.dataExchangeApiUrl = dataExchangeApiUrl;
+        this.traceMode = traceMode;
 
         initComponentAdresse();
     }
@@ -82,6 +88,14 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             componentIpAdresse = "127.0.0.1";
         }
         componentPort = uri.getPort();
+    }
+
+    public void run() {
+        try {
+            runTask();
+        } catch (final Exception e) {
+            context.getLogger().error("Error while sending stats to Dynatrace", e);
+        }
     }
 
     private void runTask() throws Exception {
@@ -107,7 +121,9 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             //Report activity
             reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
         } else {
-            context.getLogger().debug("No stats found in NeoLoad web API.");
+            if(traceMode){
+                context.getLogger().info("No stats found in NeoLoad web API.");
+            }
         }
     }
 
@@ -121,15 +137,6 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             return HTTPS + dynatraceManagedHostName.get() + "/api/v1/";
         } else {
             return HTTPS + dynatraceAccountId + DYNATRACE_URL;
-        }
-    }
-
-    @Override
-    public void run() {
-        try {
-            runTask();
-        } catch (final Exception e) {
-            context.getLogger().error("Error while sending stats to Dynatrace", e);
         }
     }
 
@@ -148,21 +155,24 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
         parameters.put(API_TOKEN, dynatraceApiKey);
 
-        final String jsonString = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
+        final String bodyJson = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
                 + "\"dimensions\": [\"Neoload\"],"
                 + "\"types\":[\"" + dynatraceCustomMetric.getTypes().get(0) + "\"]}";
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, jsonString);
-
-        context.getLogger().debug("dynatrace register custom metric JSON content : " + jsonString);
+        final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, bodyJson);
 
         try {
-            context.getLogger().debug("Dynatrace service : register custom metric");
-            int httpCode = insightHttp.executeAndGetResponseCode();
-            if (httpCode == HttpStatus.SC_CREATED) {
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, register custom metric:\n" + insightHttp.getRequest() + "\n" + bodyJson);
+            }
+
+            HttpResponse httpResponse = insightHttp.execute();
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                 dynatraceCustomMetric.setCreated(true);
+            }else {
+                context.getLogger().error(httpResponse.toString());
             }
         } finally {
             insightHttp.closeHttpClient();
@@ -221,11 +231,12 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
             final Optional<Proxy> proxy = getProxy(proxyName, url);
             insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, bodyJson);
 
-            context.getLogger().debug("dynatrace report custom metric JSON content : " + bodyJson);
-
             HttpResponse httpResponse;
             try {
-                context.getLogger().debug("Dynatrace service : report custom metric");
+                if(traceMode){
+                    context.getLogger().info("Dynatrace service, report custom metric:\n" + insightHttp.getRequest() + "\n" + bodyJson);
+                }
+
                 httpResponse = insightHttp.execute();
             } finally {
                 insightHttp.closeHttpClient();
@@ -253,15 +264,26 @@ public class NeoLoadStatAggregator extends TimerTask implements DynatraceMonitor
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
-        int httpCode;
+        HttpResponse httpResponse;
         try {
-            context.getLogger().debug("Dynatrace service : has custom metric");
-            httpCode = httpGenerator.executeAndGetResponseCode();
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, has custom metric:\n" + httpGenerator.getRequest());
+            }
+            httpResponse = httpGenerator.execute();
+
+            if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                context.getLogger().error(httpResponse.toString());
+            }
         } finally {
             httpGenerator.closeHttpClient();
         }
 
-        return HttpResponseUtils.isSuccessHttpCode(httpCode);
+        return HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode());
+    }
+
+
+    public void setContext(final Context context) {
+        this.context = context;
     }
 }
 

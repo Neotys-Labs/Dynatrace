@@ -31,21 +31,23 @@ class DynatraceEventAPI {
 	private final Optional<String> dynatraceManagedHostname;
 	private final Optional<String> proxyName;
 	private final Context context;
+	private boolean traceMode;
 
 	DynatraceEventAPI(final Context context,
 					  final String dynatraceID,
 					  final String dynatraceAPIKEY,
 					  final Optional<String> dynatraceTags,
 					  final Optional<String> dynatraceManagedHostname,
-					  Optional<String> proxyName)
+					  Optional<String> proxyName, final boolean traceMode)
 			throws Exception {
 		this.dynatraceAccountID = dynatraceID;
 		this.dynatraceApiKey = dynatraceAPIKEY;
 		this.dynatraceManagedHostname = dynatraceManagedHostname;
 		this.proxyName = proxyName;
+		this.traceMode = traceMode;
 		this.headers = new HashMap<>();
 		this.context = context;
-		this.applicationEntityIds = getApplicationEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName);
+		this.applicationEntityIds = getApplicationEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName, this.traceMode);
 	}
 
 	void sendMessage() throws Exception {
@@ -85,12 +87,13 @@ class DynatraceEventAPI {
 				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
-		context.getLogger().debug("dynatrace event JSON content : " + bodyJson);
-
 		final Optional<Proxy> proxy = getProxy(context, proxyName, url);
 		final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, headers, parameters, proxy, bodyJson);
 		HttpResponse httpResponse;
 		try {
+			if(traceMode){
+				context.getLogger().info("Dynatrace service, event:\n" + insightHttp.getRequest() + "\n" + bodyJson);
+			}
 			httpResponse = insightHttp.execute();
 		} finally {
 			insightHttp.closeHttpClient();

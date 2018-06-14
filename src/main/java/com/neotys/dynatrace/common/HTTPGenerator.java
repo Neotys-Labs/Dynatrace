@@ -26,6 +26,7 @@ public class HTTPGenerator {
 	public static final String HTTP_PUT_METHOD = "PUT";
 
 	private final DefaultHttpClient httpClient;
+
 	private final HttpRequestBase request;
 
 	public HTTPGenerator(final String httpMethod,
@@ -90,5 +91,9 @@ public class HTTPGenerator {
 	public int executeAndGetResponseCode() throws IOException {
 		final HttpResponse response = httpClient.execute(request);
 		return response.getStatusLine().getStatusCode();
+	}
+
+	public HttpRequestBase getRequest() {
+		return request;
 	}
 }

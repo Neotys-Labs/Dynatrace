@@ -65,6 +65,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final String dataExchangeApiUrl = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiUrl.getName()).get();
         final Optional<String> dataExchangeApiKey = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiKey.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
+        final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceMonitoringOption.TraceMode.getName());
 
         try {
 
@@ -81,9 +82,9 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             }
 
             context.getCurrentVirtualUser().put(Constants.DYNATRACE_LAST_EXECUTION_TIME, dynatraceCurrentExecution);
+            boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
-
-            final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName);
+            final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName, traceMode);
 
             final String virtualUserId = context.getCurrentVirtualUser().getId();
             // if therer is multiple virtual user handling the action return error
@@ -96,10 +97,12 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             long startTs = now.toInstant().toEpochMilli() - context.getElapsedTime();
             logger.debug("Sending start test...");
 
+            pluginData.getNeoLoadAggregator().run();
+
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
-            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs);
+            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs, traceMode);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
@@ -132,8 +135,8 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     @Override
     public void stopExecute() {
         final DynatracePluginData pluginData = DynatracePluginData.getInstance();
-        if (pluginData != null)
-            pluginData.stopTimer();
+//        if (pluginData != null)
+//            pluginData.stopTimer();
 
         if (dynatraceIntegration != null)
             dynatraceIntegration.setTestToStop();

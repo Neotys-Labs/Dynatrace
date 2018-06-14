@@ -47,9 +47,13 @@ public final class DynatraceEventActionEngine implements ActionEngine {
 		final Optional<String> dynatraceTags = parsedArgs.get(DynatraceEventOption.DynatraceTags.getName());
 		final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceEventOption.DynatraceManagedHostname.getName());
 		final Optional<String> proxyName = parsedArgs.get(DynatraceEventOption.NeoLoadProxy.getName());
+		final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceEventOption.TraceMode.getName());
+
+		boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
+
 		sampleResult.sampleStart();
 		try {
-			final DynatraceEventAPI eventAPI = new DynatraceEventAPI(context, dynatraceId, dynatraceApiKey, dynatraceTags, dynatraceManagedHostname, proxyName);
+			final DynatraceEventAPI eventAPI = new DynatraceEventAPI(context, dynatraceId, dynatraceApiKey, dynatraceTags, dynatraceManagedHostname, proxyName, traceMode);
 			logger.debug("Sending start test...");
 			eventAPI.sendMessage();
 			logger.debug("Start test sent");

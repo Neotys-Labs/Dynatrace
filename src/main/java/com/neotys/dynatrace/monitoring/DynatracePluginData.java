@@ -31,19 +31,20 @@ public class DynatracePluginData {
     private Context neoLoadContext;
     private ApiClient neoLoadWebApiClient;
     private ResultsApi nlWebResult;
-    private NeoLoadStatAggregator neoLoadAggregator = null;
-    private Timer timerDynatrace = null;
 
+    private NeoLoadStatAggregator neoLoadAggregator = null;
+
+    private Timer timerDynatrace = null;
     private final String dataExchangeApiUrl;
 
     private String dynataceApiKey;
+
     private String dynatraceAccountId = null;
     private Optional<String> dynatraceManagedHostname = null;
     private final Optional<String> proxyName;
-
     private DynatracePluginData(final String dynataceApiKey,
-                               final Optional<String> proxyName, final Context context, final String dynatraceId,
-                               final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname) throws Exception {
+                                final Optional<String> proxyName, final Context context, final String dynatraceId,
+                                final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname, final boolean traceMode) throws Exception {
 
         this.dynataceApiKey = dynataceApiKey;
         dynatraceAccountId = dynatraceId;
@@ -65,21 +66,30 @@ public class DynatracePluginData {
         this.proxyName = proxyName;
         this.dataExchangeApiUrl = dataExchangeApiUrl;
         neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, dynatraceAccountId, nlWebResult,
-                context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName);
+                context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName, traceMode);
 
-        startTimer();
+//        startTimer();
     }
 
-    public synchronized static DynatracePluginData getInstance(final Context context, final String dynatraceId, final String dynatraceApiKey, final Optional<String> dynatraceManagedHostname, final String dataExchangeApiUrl, final Optional<String> proxyName) throws Exception {
-            if (instance == null) {
-                instance = new DynatracePluginData(
-                        dynatraceApiKey,
-                        proxyName,
-                        context,
-                        dynatraceId,
-                        dataExchangeApiUrl,
-                        dynatraceManagedHostname);
-            }
+    public synchronized static DynatracePluginData getInstance(final Context context,
+                                                               final String dynatraceId,
+                                                               final String dynatraceApiKey,
+                                                               final Optional<String> dynatraceManagedHostname,
+                                                               final String dataExchangeApiUrl,
+                                                               final Optional<String> proxyName,
+                                                               final boolean traceMode) throws Exception {
+        if (instance == null) {
+            instance = new DynatracePluginData(
+                    dynatraceApiKey,
+                    proxyName,
+                    context,
+                    dynatraceId,
+                    dataExchangeApiUrl,
+                    dynatraceManagedHostname,
+                    traceMode);
+        }else{
+            instance.neoLoadAggregator.setContext(context);
+        }
         return instance;
     }
 
@@ -160,16 +170,11 @@ public class DynatracePluginData {
         return virtualUserId;
     }
 
-    public void startTimer() {
-        timerDynatrace = new Timer();
-        timerDynatrace.scheduleAtFixedRate(neoLoadAggregator, TIMER_DELAY, TIMER_FREQUENCY);
-    }
-
-    public void stopTimer() {
-        timerDynatrace.cancel();
-    }
-
     private void initNeoLoadApi() {
         nlWebResult = new ResultsApi(neoLoadWebApiClient);
+    }
+
+    public NeoLoadStatAggregator getNeoLoadAggregator() {
+        return neoLoadAggregator;
     }
 }

@@ -39,6 +39,11 @@ enum DynatraceEventOption implements Option {
 	DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
 			"",
 			"Hostname of your managed Dynatrace environment.",
+			ALWAYS_VALID),
+
+	TraceMode("traceMode", Optional, False, TEXT,
+			"",
+			"",
 			ALWAYS_VALID);
 
 	private final String name;

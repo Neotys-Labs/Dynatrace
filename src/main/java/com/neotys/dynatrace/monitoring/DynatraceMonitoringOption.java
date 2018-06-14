@@ -49,6 +49,11 @@ enum DynatraceMonitoringOption implements Option {
     NeoLoadProxy("proxyName", Optional, False, TEXT,
             "",
             "The NeoLoad proxy name to access Dynatrace.",
+            ALWAYS_VALID),
+
+    TraceMode("traceMode", Optional, False, TEXT,
+            "",
+            "",
             ALWAYS_VALID);
 
 

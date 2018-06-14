@@ -14,4 +14,5 @@ public final class Constants {
 	public static final String NL_DATA_EXCHANGE_API_CLIENT = "NLDataExchangeAPIClient";
 	public static final String DYNATRACE_LAST_EXECUTION_TIME = "DynatraceLastExecutionTime";
 
+    public static final String TRACE_MODE = "traceMode";
 }

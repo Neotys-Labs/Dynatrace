@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -45,7 +44,7 @@ public class DynatraceUtils {
         return DYNATRACE_ICON;
     }
 
-    public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName)
+    public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
         final Map<String, String> parameters = new HashMap<>();
@@ -54,12 +53,13 @@ public class DynatraceUtils {
         }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
-        context.getLogger().debug("Getting application...");
-
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
         final List<String> applicationEntityIds = new ArrayList<>();
         try {
+            if(traceMode){
+                context.getLogger().info("Dynatrace service, get application entity:\n" + http.getRequest());
+            }
             final HttpResponse httpResponse = http.execute();
 
             if (HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
@@ -75,8 +75,8 @@ public class DynatraceUtils {
             http.closeHttpClient();
         }
 
-        if (context.getLogger().isDebugEnabled()) {
-            context.getLogger().debug("Found applications: " + applicationEntityIds);
+        if (traceMode) {
+            context.getLogger().info("Found applications: " + applicationEntityIds);
         }
 
         return applicationEntityIds;
