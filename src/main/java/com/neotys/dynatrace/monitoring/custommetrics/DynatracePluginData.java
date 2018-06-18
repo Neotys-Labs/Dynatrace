@@ -1,4 +1,4 @@
-package com.neotys.dynatrace.monitoring;
+package com.neotys.dynatrace.monitoring.custommetrics;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -18,35 +18,24 @@ import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.util.Timer;
 
 public class DynatracePluginData {
     private static DynatracePluginData instance;
     private static final String NLWEB_VERSION = "v1";
 
-    private static final int TIMER_FREQUENCY = 10000;
-    private static final int TIMER_DELAY = 0;
     private final String virtualUserId;
 
-    private Context neoLoadContext;
     private ApiClient neoLoadWebApiClient;
     private ResultsApi nlWebResult;
 
-    private NeoLoadStatAggregator neoLoadAggregator = null;
-
-    private Timer timerDynatrace = null;
-    private final String dataExchangeApiUrl;
-
-    private String dynataceApiKey;
+    private DynatraceReportCustomMetrics neoLoadAggregator = null;
 
     private String dynatraceAccountId = null;
-    private Optional<String> dynatraceManagedHostname = null;
-    private final Optional<String> proxyName;
+
     private DynatracePluginData(final String dynataceApiKey,
                                 final Optional<String> proxyName, final Context context, final String dynatraceId,
                                 final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname, final boolean traceMode) throws Exception {
 
-        this.dynataceApiKey = dynataceApiKey;
         dynatraceAccountId = dynatraceId;
         virtualUserId = context.getCurrentVirtualUser().getId();
 
@@ -59,16 +48,10 @@ public class DynatracePluginData {
         if(proxyOptional.isPresent()) {
             initProxyForNeoloadWebApiClient(proxyOptional.get());
         }
-        this.dynatraceManagedHostname = dynatraceManagedHostname;
         initNeoLoadApi();
         //-------------------------
-        neoLoadContext = context;
-        this.proxyName = proxyName;
-        this.dataExchangeApiUrl = dataExchangeApiUrl;
-        neoLoadAggregator = new NeoLoadStatAggregator(dynataceApiKey, dynatraceAccountId, nlWebResult,
+        neoLoadAggregator = new DynatraceReportCustomMetrics(dynataceApiKey, dynatraceAccountId, nlWebResult,
                 context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName, traceMode);
-
-//        startTimer();
     }
 
     public synchronized static DynatracePluginData getInstance(final Context context,
@@ -90,10 +73,6 @@ public class DynatracePluginData {
         }else{
             instance.neoLoadAggregator.setContext(context);
         }
-        return instance;
-    }
-
-    public static DynatracePluginData getInstance() {
         return instance;
     }
 
@@ -174,7 +153,7 @@ public class DynatracePluginData {
         nlWebResult = new ResultsApi(neoLoadWebApiClient);
     }
 
-    public NeoLoadStatAggregator getNeoLoadAggregator() {
+    public DynatraceReportCustomMetrics getNeoLoadAggregator() {
         return neoLoadAggregator;
     }
 }

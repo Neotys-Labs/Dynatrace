@@ -1,4 +1,4 @@
-package com.neotys.dynatrace.monitoring.neoloadmetrics;
+package com.neotys.dynatrace.monitoring.custommetrics;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;

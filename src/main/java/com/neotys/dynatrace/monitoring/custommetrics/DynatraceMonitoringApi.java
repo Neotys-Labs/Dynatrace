@@ -1,6 +1,4 @@
-package com.neotys.dynatrace.monitoring;
-
-import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
+package com.neotys.dynatrace.monitoring.custommetrics;
 
 import java.util.List;
 

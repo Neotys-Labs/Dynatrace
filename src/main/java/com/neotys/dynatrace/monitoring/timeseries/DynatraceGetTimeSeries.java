@@ -1,4 +1,4 @@
-package com.neotys.dynatrace.monitoring;
+package com.neotys.dynatrace.monitoring.timeseries;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.*;
@@ -27,7 +27,7 @@ import java.util.Map.Entry;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
-public class DynatraceIntegration {
+public class DynatraceGetTimeSeries {
     private static final String DYNATRACE_API_PROCESS_GROUP = "entity/infrastructure/process-groups";
     private static final String DYNATRACE_HOSTS = "entity/infrastructure/hosts";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
@@ -104,16 +104,16 @@ public class DynatraceIntegration {
     private long startTS;
     private boolean traceMode;
 
-    public DynatraceIntegration(final Context context,
-                                final String dynatraceApiKey,
-                                final String dynatraceId,
-                                final Optional<String> dynatraceTags,
-                                final DataExchangeAPIClient dataExchangeAPIClient,
-                                final Optional<String> dataExchangeApiKey,
-                                final Optional<String> proxyName,
-                                final Optional<String> dynatraceManagedHostname,
-                                final long startTs,
-                                final boolean traceMode) throws Exception {
+    public DynatraceGetTimeSeries(final Context context,
+                                  final String dynatraceApiKey,
+                                  final String dynatraceId,
+                                  final Optional<String> dynatraceTags,
+                                  final DataExchangeAPIClient dataExchangeAPIClient,
+                                  final Optional<String> dataExchangeApiKey,
+                                  final Optional<String> proxyName,
+                                  final Optional<String> dynatraceManagedHostname,
+                                  final long startTs,
+                                  final boolean traceMode) throws Exception {
         this.context = context;
         this.startTS = startTs;
         this.dynatraceApiKey = dynatraceApiKey;

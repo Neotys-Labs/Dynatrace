@@ -1,17 +1,17 @@
-package com.neotys.dynatrace.monitoring.neoloadmetrics;
+package com.neotys.dynatrace.monitoring.custommetrics;
 
 import io.swagger.client.model.TestStatistics;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric.of;
+import static com.neotys.dynatrace.monitoring.custommetrics.DynatraceCustomMetric.of;
 import static java.util.Arrays.asList;
 
 /**
  * Handle time series from nlweb to send to dynatrace
  */
-public class NeoLoadDynatraceCustomMetrics {
+public class NeoLoadMetrics {
 
     public static final String REQUEST_COUNT = "REQUEST_COUNT";
     public static final String REQUEST_DURATION = "REQUEST_DURATION";

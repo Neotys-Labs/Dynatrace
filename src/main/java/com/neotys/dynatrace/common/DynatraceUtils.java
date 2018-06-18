@@ -101,7 +101,7 @@ public class DynatraceUtils {
 
     public static String getDynatraceApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
         if (dynatraceManagedHostname.isPresent()) {
-            return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/api/v1/";
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID + "/api/v1/";
         } else {
             return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
         }

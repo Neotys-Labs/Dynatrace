@@ -1,12 +1,11 @@
-package com.neotys.dynatrace.monitoring;
+package com.neotys.dynatrace.monitoring.custommetrics;
 
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.HttpResponseUtils;
-import com.neotys.dynatrace.monitoring.neoloadmetrics.DynatraceCustomMetric;
-import com.neotys.dynatrace.monitoring.neoloadmetrics.NeoLoadDynatraceCustomMetrics;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import io.swagger.client.api.ResultsApi;
@@ -27,14 +26,12 @@ import java.util.Map;
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
-public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
+public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
 
-    private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
     private static final String DYNATRACE_TIME_SERIES_CREATION = "timeseries/custom";
     private static final String NL_TIMESERIES_PREFIX = "neoload.";
     private static final String DYNATRACE_NEW_DATA = "entity/infrastructure/custom/";
     private static final String DYNATRACE_TIME_SERIES = "timeseries";
-    private static final String HTTPS = "https://";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
     private static final String NEOLOAD_TYPE = "NeoLoad";
     private static final String API_TOKEN = "Api-Token";
@@ -59,13 +56,13 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
     private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
     private boolean traceMode;
-    public NeoLoadStatAggregator(final String dynatraceApiKey,
-                                 final String dynatraceAccountId,
-                                 final ResultsApi nlWebResult,
-                                 final Context context,
-                                 final String dataExchangeApiUrl,
-                                 final Optional<String> dynatraceManagedHostName,
-                                 final Optional<String> proxyName, final boolean traceMode) {
+    public DynatraceReportCustomMetrics(final String dynatraceApiKey,
+                                        final String dynatraceAccountId,
+                                        final ResultsApi nlWebResult,
+                                        final Context context,
+                                        final String dataExchangeApiUrl,
+                                        final Optional<String> dynatraceManagedHostName,
+                                        final Optional<String> proxyName, final boolean traceMode) {
         this.proxyName = proxyName;
         this.dynatraceApiKey = dynatraceApiKey;
         this.context = context;
@@ -105,12 +102,12 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
         statsResult = nlWebResult.getTestStatistics(testId);
         if (statsResult != null) {
             //Update metrics to send
-            NeoLoadDynatraceCustomMetrics.updateTimeseriesToSend(statsResult);
+            NeoLoadMetrics.updateTimeseriesToSend(statsResult);
 
             if (!timeSeriesConfigured) {
                 //Check if metric are created
-                if (!hasCustomMetric(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().get(NeoLoadDynatraceCustomMetrics.REQUEST_COUNT))) {
-                    for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()) {
+                if (!hasCustomMetric(NeoLoadMetrics.getTimeseriesToSend().get(NeoLoadMetrics.REQUEST_COUNT))) {
+                    for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadMetrics.getTimeseriesToSend().values()) {
                         //Create Metric
                         registerCustomMetric(dynatraceTimeseries);
                     }
@@ -119,7 +116,7 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
             }
 
             //Report activity
-            reportCustomMetrics(new ArrayList(NeoLoadDynatraceCustomMetrics.getTimeseriesToSend().values()));
+            reportCustomMetrics(new ArrayList(NeoLoadMetrics.getTimeseriesToSend().values()));
         } else {
             if(traceMode){
                 context.getLogger().info("No stats found in NeoLoad web API.");
@@ -130,14 +127,6 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
     private long getUtcDate() {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         return now.toInstant().toEpochMilli() - 200000;
-    }
-
-    private String getApiUrl() {
-        if (dynatraceManagedHostName.isPresent()) {
-            return HTTPS + dynatraceManagedHostName.get() + "/api/v1/";
-        } else {
-            return HTTPS + dynatraceAccountId + DYNATRACE_URL;
-        }
     }
 
     private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
@@ -152,7 +141,7 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
         final Map<String, String> head = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        final String url = getApiUrl() + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
+        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
         parameters.put(API_TOKEN, dynatraceApiKey);
 
         final String bodyJson = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
@@ -188,7 +177,7 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
 
         parameters.put(API_TOKEN, dynatraceApiKey);
 
-        String url = getApiUrl() + DYNATRACE_NEW_DATA + "NeoLoadData";
+        String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_NEW_DATA + "NeoLoadData";
 
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         long time = now.toInstant().toEpochMilli();
@@ -251,7 +240,7 @@ public class NeoLoadStatAggregator implements DynatraceMonitoringApi {
 
     @Override
     public boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception {
-        final String url = getApiUrl() + DYNATRACE_TIME_SERIES;
+        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES;
         final Map<String, String> header = new HashMap<>();
         final Map<String, String> parameters = new HashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);

@@ -4,6 +4,8 @@ import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.common.Constants;
 import com.neotys.dynatrace.common.DynatraceException;
+import com.neotys.dynatrace.monitoring.custommetrics.DynatracePluginData;
+import com.neotys.dynatrace.monitoring.timeseries.DynatraceGetTimeSeries;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -32,7 +34,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
     private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_MONITORING_ACTION-02";
     private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_MONITORING_ACTION-03";
 
-    private DynatraceIntegration dynatraceIntegration;
+    private DynatraceGetTimeSeries dynatraceIntegration;
 
     @Override
     public SampleResult execute(final Context context, final List<ActionParameter> parameters) {
@@ -102,7 +104,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
-            dynatraceIntegration = new DynatraceIntegration(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs, traceMode);
+            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs, traceMode);
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
@@ -134,10 +136,6 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
     @Override
     public void stopExecute() {
-        final DynatracePluginData pluginData = DynatracePluginData.getInstance();
-//        if (pluginData != null)
-//            pluginData.stopTimer();
-
         if (dynatraceIntegration != null)
             dynatraceIntegration.setTestToStop();
     }

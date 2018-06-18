@@ -1,4 +1,4 @@
-package com.neotys.dynatrace.monitoring;
+package com.neotys.dynatrace.monitoring.timeseries;
 
 public class DynatraceMetric {
 
