@@ -44,7 +44,7 @@ public class DynatracePluginData {
         neoLoadWebApiClient.setApiKey(context.getAccountToken());
         final String basePath = getBasePath(context);
         neoLoadWebApiClient.setBasePath(basePath);
-        final Optional<Proxy> proxyOptional = DynatraceUtils.getProxy(context, proxyName, basePath);
+        final Optional<Proxy> proxyOptional = DynatraceUtils.getNeoLoadWebProxy(context, basePath);
         if(proxyOptional.isPresent()) {
             initProxyForNeoloadWebApiClient(proxyOptional.get());
         }

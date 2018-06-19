@@ -3,6 +3,7 @@ package com.neotys.dynatrace.common;
 import com.google.common.base.Optional;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
+import com.neotys.extensions.action.engine.ProxyType;
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -97,6 +98,10 @@ public class DynatraceUtils {
             return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
         }
         return Optional.absent();
+    }
+
+    public static Optional<Proxy> getNeoLoadWebProxy(final Context context, final String url) throws MalformedURLException {
+       return Optional.fromNullable(context.getProxyByType(ProxyType.NEOLOAD_WEB, new URL(url)));
     }
 
     public static String getDynatraceApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {

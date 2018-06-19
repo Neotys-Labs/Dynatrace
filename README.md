@@ -99,7 +99,7 @@ On the Dynatrace interface
 | dynatraceId      |  Id of your Dynatrace environment (http://<id>.live.dynatrace.com) |
 | dynatraceApiKey  |  API key of your Dynatrace account |
 | tags (optional)  |  Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2) |
-| proxyName (Optional) |  The NeoLoad proxy name to access Dynatrace and NeoLoad Web |
+| proxyName (Optional) |  The NeoLoad proxy name to access Dynatrace |
 | dynatraceManagedHostname (Optional) | Hostname of your managed Dynatrace environment |
 
 ## Parameters for Dynatrace Monitoring
@@ -114,7 +114,7 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dynatraceManagedHostname (Optional) | Hostname of your Dynatrace managed environment |
 | dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
 | dataExchangeApiKey  (Optional)  | API key of the DataExchange API |
-| proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace and NeoLoad Web |
+| proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
 
 ## Analyze results in NeoLoad
 
