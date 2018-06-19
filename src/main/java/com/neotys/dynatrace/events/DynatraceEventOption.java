@@ -33,7 +33,7 @@ enum DynatraceEventOption implements Option {
 
 	NeoLoadProxy("proxyName", Optional, False, TEXT,
 			"",
-			"The NeoLoad proxy name to access Dynatrace.",
+			"The NeoLoad proxy name to access Dynatrace and NeoLoad Web.",
 			ALWAYS_VALID),
 
 	DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
