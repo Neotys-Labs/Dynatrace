@@ -12,8 +12,10 @@ import com.squareup.okhttp.Response;
 import io.swagger.client.ApiClient;
 import io.swagger.client.api.ResultsApi;
 
-import javax.net.ssl.*;
-import java.io.IOException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -76,12 +78,12 @@ public class DynatracePluginData {
         return instance;
     }
 
-    private void initProxyForNeoloadWebApiClient(final Proxy proxy) throws KeyManagementException, NoSuchAlgorithmException {
+    private void initProxyForNeoloadWebApiClient(final Proxy proxy) {
         neoLoadWebApiClient.getHttpClient().setProxy(toOkHttpProxy(proxy));
 		if (!Strings.isNullOrEmpty(proxy.getLogin())) {
-			Authenticator proxyAuthenticator = new Authenticator() {
+			final Authenticator proxyAuthenticator = new Authenticator() {
 				@Override
-				public Request authenticate(java.net.Proxy p, Response response) throws IOException {
+				public Request authenticate(java.net.Proxy p, Response response) {
 					final String credential = Credentials.basic(proxy.getLogin(), proxy.getPassword());
 					return response.request().newBuilder()
 							.header("Proxy-Authorization", credential)
@@ -89,7 +91,7 @@ public class DynatracePluginData {
 				}
 
 				@Override
-				public Request authenticateProxy(java.net.Proxy p, Response response) throws IOException {
+				public Request authenticateProxy(java.net.Proxy p, Response response) {
 					final String credential = Credentials.basic(proxy.getLogin(), proxy.getPassword());
 					return response.request().newBuilder()
 							.header("Proxy-Authorization", credential)
@@ -98,6 +100,9 @@ public class DynatracePluginData {
 			};
 			neoLoadWebApiClient.getHttpClient().setAuthenticator(proxyAuthenticator);
 		}
+	}
+
+	private void trustAllCerts() throws NoSuchAlgorithmException, KeyManagementException {
 		// Create a trust manager that does not validate certificate chains
 		final TrustManager[] trustAllCerts = new TrustManager[]{
 				new X509TrustManager() {
@@ -115,7 +120,6 @@ public class DynatracePluginData {
 					}
 				}
 		};
-
 		// Install the all-trusting trust manager
 		final SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(null, trustAllCerts, null);
@@ -123,15 +127,10 @@ public class DynatracePluginData {
 		final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
 		neoLoadWebApiClient.getHttpClient().setSslSocketFactory(sslSocketFactory);
-		neoLoadWebApiClient.getHttpClient().setHostnameVerifier(new HostnameVerifier() {
-			@Override
-			public boolean verify(String hostname, SSLSession session) {
-				return true;
-			}
-		});
+		neoLoadWebApiClient.getHttpClient().setHostnameVerifier((hostname, session) -> true);
 	}
 
-    private static java.net.Proxy toOkHttpProxy(final Proxy proxy) {
+	private static java.net.Proxy toOkHttpProxy(final Proxy proxy) {
         return new java.net.Proxy(java.net.Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
     }
 
@@ -149,7 +148,8 @@ public class DynatracePluginData {
         return virtualUserId;
     }
 
-    private void initNeoLoadApi() {
+    private void initNeoLoadApi() throws KeyManagementException, NoSuchAlgorithmException {
+		trustAllCerts();
         nlWebResult = new ResultsApi(neoLoadWebApiClient);
     }
 
