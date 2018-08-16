@@ -96,9 +96,7 @@ On the Dynatrace interface
 
 | Name             | Description |
 | -----            | ----- |
-| dynatraceId      | dynatraceId: Identifier of your Dynatrace environment: 
-<ul><li>for live environment, identifier part of URL http://&lt;identifier&gt;.live.dynatrace.com (for example identifier is 
-pk12475 for URL https://pk12475.live.dynatrace.com)</li><li>for managed environment, identifier is a UUID (Universal Unique Identifier), for example 123e4567-e89b-12d3-a456-426655440000</li></ul> |
+| dynatraceId      | dynatraceId: Identifier of your Dynatrace environment: <ul><li>for live environment, identifier part of URL http://&lt;identifier&gt;.live.dynatrace.com (for example identifier is pk12475 for URL https://pk12475.live.dynatrace.com)</li><li>for managed environment, identifier is a UUID (Universal Unique Identifier), for example 123e4567-e89b-12d3-a456-426655440000</li></ul> |
 | dynatraceApiKey  |  API key of your Dynatrace account |
 | tags (optional)  |  Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2) |
 | proxyName (Optional) |  The NeoLoad proxy name to access Dynatrace |
@@ -111,9 +109,7 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 
 | Name             | Description |
 | -----            | ----- |
-| dynatraceId      | dynatraceId: Identifier of your Dynatrace environment: 
-<ul><li>for live environment, identifier part of URL http://&lt;identifier&gt;.live.dynatrace.com (for example identifier is 
-pk12475 for URL https://pk12475.live.dynatrace.com)</li><li>for managed environment, identifier is a UUID (Universal Unique Identifier), for example 123e4567-e89b-12d3-a456-426655440000</li></ul> |
+| dynatraceId      | dynatraceId: Identifier of your Dynatrace environment:<ul><li>for live environment, identifier part of URL http://&lt;identifier&gt;.live.dynatrace.com (for example identifier is pk12475 for URL https://pk12475.live.dynatrace.com)</li><li>for managed environment, identifier is a UUID (Universal Unique Identifier), for example 123e4567-e89b-12d3-a456-426655440000</li></ul> |
 | dynatraceApiKey  | API key of your dynatrace account |
 | tags (optional)  | Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2) |
 | dynatraceManagedHostname (Optional) | <ul><li>for managed environment, it is the hostname of your managed Dynatrace environment (for example preprod.neotys.com, do not include neither protocol nor API path)</li><li>for live environment, this parameter should be removed</li></ul> |
