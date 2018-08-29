@@ -1,12 +1,12 @@
 package com.neotys.dynatrace.monitoring.timeseries;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.neotys.dynatrace.common.*;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
 import com.neotys.rest.dataexchange.model.EntryBuilder;
-import com.neotys.rest.error.NeotysAPIException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
@@ -14,15 +14,14 @@ import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.GeneralSecurityException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
@@ -130,19 +129,7 @@ public class DynatraceGetTimeSeries {
         this.dynatraceApplicationHostIds = new ArrayList<>();
         getHostsFromProcessGroup();
         getHosts();
-        initDynatraceData();
-    }
-
-
-
-    private void createAndAddEntry(final String entityName, final String metricName,
-                                   final String metricValueName, final double value,
-                                   final String unit, final long valueDate)
-            throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException {
-        final EntryBuilder entryBuilder = new EntryBuilder(Arrays.asList(DYNATRACE, entityName, metricName, metricValueName), valueDate);
-        entryBuilder.unit(unit);
-        entryBuilder.value(value);
-        dataExchangeApiClient.addEntry(entryBuilder.build());
+        processDynatraceData();
     }
 
     private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
@@ -256,46 +243,58 @@ public class DynatraceGetTimeSeries {
         param.put("Api-Token", dynatraceApiKey);
     }
 
-	private void initDynatraceData() throws Exception {
+	private void processDynatraceData() throws Exception {
 		if (isRunning) {
-			///---Send the service data of this entity-----
-            initDynatraceServiceData(dynatraceApplicationServiceIds);
+			List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processtServices(dynatraceApplicationServiceIds);
+			List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceApplicationHostIds);
 
-			//----send the infrastructure entity---------------
-            initDynatraceInfraData(dynatraceApplicationHostIds);
+			List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(serviceEntries.stream(), infraEntries.stream())
+					.collect(Collectors.toList());
+
+			if(!entryList.isEmpty()){
+                //Send merged Entries
+                dataExchangeApiClient.addEntries(entryList);
+            }
 		}
 	}
 
-    private void initDynatraceServiceData(final List<String> dynatraceApplicationIds) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processtServices(final List<String> dynatraceApplicationIds) throws Exception {
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
             for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
                 if (isRunning) {
                     final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds);
-                    initDynatraceMetricEntity(data);
+                    return toEntry(data);
                 }
             }
         }
+	    return ImmutableList.of();
     }
 
-    private void initDynatraceInfraData(final List<String> dynatraceApplicationIds) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processInfrastructures(final List<String> dynatraceApplicationIds) throws Exception {
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
             for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
                 if (isRunning) {
-                    final List<DynatraceMetric> data = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds);
-                    initDynatraceMetricEntity(data);
+                    final List<DynatraceMetric> dynatraceMetrics = getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds);
+                    return toEntry(dynatraceMetrics);
                 }
             }
         }
+	    return ImmutableList.of();
     }
 
-    private void initDynatraceMetricEntity(final List<DynatraceMetric> metric)
-            throws GeneralSecurityException, IOException, URISyntaxException, NeotysAPIException {
-        for (DynatraceMetric data : metric) {
-            String timeseries = data.getTimeseries();
-            String[] metricname = timeseries.split(":");
-            createAndAddEntry(data.getMetricName(), metricname[0], metricname[1], data.getValue(), data.getUnit(), data.getTime());
-        }
-    }
+	private List<com.neotys.rest.dataexchange.model.Entry> toEntry(final List<DynatraceMetric> dynatraceMetrics) {
+		return dynatraceMetrics.stream()
+				.map(dynatraceMetric -> {
+					String timeseries = dynatraceMetric.getTimeseries();
+					String[] metricname = timeseries.split(":");
+					List<String> path = Arrays.asList(DYNATRACE, dynatraceMetric.getMetricName(), metricname[0], metricname[1]);
+
+					return new EntryBuilder(path, dynatraceMetric.getTime())
+							.unit(dynatraceMetric.getUnit())
+							.value(dynatraceMetric.getValue()
+							).build();})
+				.collect(Collectors.toList());
+	}
 
     public void setTestToStop() {
         isRunning = false;
