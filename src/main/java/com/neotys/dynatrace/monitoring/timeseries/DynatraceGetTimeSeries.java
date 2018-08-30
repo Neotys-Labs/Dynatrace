@@ -183,7 +183,6 @@ public class DynatraceGetTimeSeries {
         List<String> path = new ArrayList<>();
         path.add(DYNATRACE);
         path.add(dynatraceMetric.getMetricName());
-        path.add(metricname[0]);
         path.addAll(Arrays.asList(metricname[1].split("\\.")));
 
         return new EntryBuilder(path, dynatraceMetric.getTime())
