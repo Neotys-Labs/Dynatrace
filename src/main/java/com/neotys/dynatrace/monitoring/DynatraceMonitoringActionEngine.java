@@ -105,6 +105,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
             dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs, traceMode);
+            dynatraceIntegration.processDynatraceData();
 
             //first call send event to dynatrace
             sampleResult.sampleEnd();
