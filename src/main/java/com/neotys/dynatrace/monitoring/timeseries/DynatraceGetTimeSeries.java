@@ -107,26 +107,28 @@ public class DynatraceGetTimeSeries {
                                   final String dynatraceId,
                                   final Optional<String> dynatraceTags,
                                   final DataExchangeAPIClient dataExchangeAPIClient,
-                                  final Optional<String> dataExchangeApiKey,
                                   final Optional<String> proxyName,
                                   final Optional<String> dynatraceManagedHostname,
                                   final long startTs,
                                   final boolean traceMode) throws Exception {
         this.context = context;
-        this.startTS = startTs;
-        this.dynatraceApiKey = dynatraceApiKey;
-        this.dynatraceApplication = dynatraceTags;
-        this.dynatraceId = dynatraceId;
-        this.dynatraceManagedHostname = dynatraceManagedHostname;
-        this.traceMode = traceMode;
-        this.isRunning = true;
-        this.proxyName = proxyName;
-        this.header = new HashMap<>();
+	    this.dynatraceApiKey = dynatraceApiKey;
+	    this.dynatraceId = dynatraceId;
+	    this.dynatraceApplication = dynatraceTags;
+	    this.dataExchangeApiClient = dataExchangeAPIClient;
+	    this.proxyName = proxyName;
+	    this.dynatraceManagedHostname = dynatraceManagedHostname;
+	    this.startTS = startTs;
+	    this.traceMode = traceMode;
 
-        this.dataExchangeApiClient = dataExchangeAPIClient;
-        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName, traceMode);
-        this.dynatraceApplicationHostIds = new ArrayList<>();
-        initHostsFromProcessGroup();
+
+	    this.isRunning = true;
+	    this.header = new HashMap<>();
+	    this.dynatraceApplicationHostIds = new ArrayList<>();
+
+	    this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header), proxyName, traceMode);
+
+	    initHostsFromProcessGroup();
         initHosts();
     }
 

@@ -9,6 +9,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -22,7 +23,6 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,8 +31,6 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -67,23 +65,14 @@ class HTTPGeneratorUtils {
 
 	@SuppressWarnings("deprecation")
 	private static DefaultHttpClient newHttpsClient() throws Exception {
-		final DefaultHttpClient client = new DefaultHttpClient();
-		final HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-		final TrustStrategy acceptingTrustStrategy = new TrustStrategy() {
-			@Override
-			public boolean isTrusted(X509Certificate[] cert, String authType) throws CertificateException {
-				return true;
-			}
-		};
-
-		final SchemeRegistry registry = client.getConnectionManager().getSchemeRegistry();
-		final SSLSocketFactory socketFactory;
-		socketFactory = new SSLSocketFactory(acceptingTrustStrategy, (X509HostnameVerifier) hostnameVerifier);
-		registry.register(new Scheme("https", socketFactory, 443));
-		final SingleClientConnManager mgr = new SingleClientConnManager(client.getParams(), registry);
-		// Set verifier
-		HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-		return new DefaultHttpClient(mgr, client.getParams());
+		TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+		X509HostnameVerifier allowAllHostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+		SSLSocketFactory sslSocketFactory = new SSLSocketFactory(acceptingTrustStrategy, allowAllHostnameVerifier);
+		final SchemeRegistry registry = new SchemeRegistry();
+		registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		registry.register(new Scheme("https", 443, sslSocketFactory));
+		HttpsURLConnection.setDefaultHostnameVerifier(allowAllHostnameVerifier);
+		return new DefaultHttpClient(new SingleClientConnManager(registry));
 	}
 
 	static void addJsonParameters(final HttpRequestBase request, final StringEntity jsonContent, final String httpMethod) {

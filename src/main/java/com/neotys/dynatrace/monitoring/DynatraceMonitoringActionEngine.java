@@ -86,6 +86,9 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             context.getCurrentVirtualUser().put(Constants.DYNATRACE_LAST_EXECUTION_TIME, dynatraceCurrentExecution);
             boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
+	        /*
+	         * Handle push Neoload custom metrics
+	         */
             final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName, traceMode);
 
             final String virtualUserId = context.getCurrentVirtualUser().getId();
@@ -101,10 +104,13 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
             pluginData.getNeoLoadAggregator().run();
 
+	        /*
+	         * Handle Dynatrace Timeseries
+	         */
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
-            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, dataExchangeApiKey, proxyName, dynatraceManagedHostname, startTs, traceMode);
+            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, proxyName, dynatraceManagedHostname, startTs, traceMode);
             dynatraceIntegration.processDynatraceData();
 
             //first call send event to dynatrace
