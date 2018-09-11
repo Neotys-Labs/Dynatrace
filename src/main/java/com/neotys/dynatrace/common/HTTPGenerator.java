@@ -64,7 +64,7 @@ public class HTTPGenerator {
 	private void initProxy(final Proxy proxy) {
 		final HttpHost proxyHttpHost = new HttpHost(proxy.getHost(), proxy.getPort(), "http");
 		httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHttpHost);
-		if (Strings.isNullOrEmpty(proxy.getLogin())) {
+		if (!Strings.isNullOrEmpty(proxy.getLogin())) {
 			httpClient.getCredentialsProvider().setCredentials(
 					new AuthScope(proxy.getHost(), proxy.getPort()),
 					new UsernamePasswordCredentials(proxy.getLogin(), proxy.getPassword()));
