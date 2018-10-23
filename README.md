@@ -113,8 +113,8 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dynatraceApiKey  | API key of your dynatrace account |
 | tags (optional)  | Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2) |
 | dynatraceManagedHostname (Optional) | <ul><li>for managed environment, it is the hostname of your managed Dynatrace environment (for example preprod.neotys.com, do not include neither protocol nor API path)</li><li>for live environment, this parameter should be removed</li></ul> |
-| dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
-| dataExchangeApiKey  (Optional)  | API key of the DataExchange API |
+| dataExchangeApiUrl (Optional)  | Where the DataExchange server is located. Optional, by default it will be: http://${NL-ControllerIp}:7400/DataExchange/v1/Service.svc/ |
+| dataExchangeApiKey (Optional)  | API key of the DataExchange API |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
 
 ## Analyze results in NeoLoad
