@@ -36,16 +36,12 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
     private static final String NEOLOAD_TYPE = "NeoLoad";
     private static final String API_TOKEN = "Api-Token";
 
-    private static final int MIN_DYNATRACE_DURATION = 30;
-
     private final Optional<String> proxyName;
 
     private Context context;
 
     private ResultsApi nlWebResult;
 
-    private String componentIpAdresse;
-    private int componentPort;
     private String dynatraceApiKey;
 
     private String dynatraceAccountId;
@@ -53,14 +49,12 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
     private final String testId;
     private String scenarioName;
     private Optional<String> dynatraceManagedHostName;
-    private String dataExchangeApiUrl;
     private boolean timeSeriesConfigured = false;
     private boolean traceMode;
     public DynatraceReportCustomMetrics(final String dynatraceApiKey,
                                         final String dynatraceAccountId,
                                         final ResultsApi nlWebResult,
                                         final Context context,
-                                        final String dataExchangeApiUrl,
                                         final Optional<String> dynatraceManagedHostName,
                                         final Optional<String> proxyName, final boolean traceMode) {
         this.proxyName = proxyName;
@@ -72,19 +66,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         this.dynatraceManagedHostName = dynatraceManagedHostName;
         this.dynatraceAccountId = dynatraceAccountId;
         this.scenarioName = context.getScenarioName();
-        this.dataExchangeApiUrl = dataExchangeApiUrl;
         this.traceMode = traceMode;
-
-        initComponentAdresse();
-    }
-
-    private void initComponentAdresse() {
-        URI uri = URI.create(dataExchangeApiUrl);
-        componentIpAdresse = uri.getHost();
-        if ("localhost".equalsIgnoreCase(componentIpAdresse)) {
-            componentIpAdresse = "127.0.0.1";
-        }
-        componentPort = uri.getPort();
     }
 
     public void run() {
@@ -184,8 +166,6 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
 
 
         String bodyJson = "{\"displayName\" : \"NeoLoad Data\","
-                + "\"ipAddresses\" : [\"" + componentIpAdresse + "\"],"
-                + "\"listenPorts\" : [\"" + componentPort + "\"],"
                 + "\"type\" : \"" + NEOLOAD_TYPE + "\","
                 + "\"favicon\" : \"" + NL_PICTURE_URL + "\","
                 + "\"configUrl\" : \"" + context.getWebPlatformRunningTestUrl() + "\","
@@ -227,13 +207,13 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
                 }
 
                 httpResponse = insightHttp.execute();
+
+                String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+                if (!HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+                    throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
+                }
             } finally {
                 insightHttp.closeHttpClient();
-            }
-
-            if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
-                final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
-                throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
             }
         }
     }
@@ -260,8 +240,9 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
             }
             httpResponse = httpGenerator.execute();
 
-            if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-                context.getLogger().error(httpResponse.toString());
+	        int statusCode = httpResponse.getStatusLine().getStatusCode();
+	        if (statusCode != HttpStatus.SC_CREATED && statusCode != HttpStatus.SC_NOT_FOUND) {
+                context.getLogger().error("Unexpected error while getting timeseries - " + httpResponse.toString());
             }
         } finally {
             httpGenerator.closeHttpClient();

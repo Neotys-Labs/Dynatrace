@@ -95,13 +95,13 @@ class DynatraceEventAPI {
 				context.getLogger().info("Dynatrace service, event:\n" + insightHttp.getRequest() + "\n" + bodyJson);
 			}
 			httpResponse = insightHttp.execute();
+
+			if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
+				throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
+			}
 		} finally {
 			insightHttp.closeHttpClient();
-		}
-
-		if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
-			final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
-			throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
 		}
 	}
 }

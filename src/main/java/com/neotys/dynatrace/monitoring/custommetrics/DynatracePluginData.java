@@ -53,7 +53,7 @@ public class DynatracePluginData {
         initNeoLoadApi();
         //-------------------------
         neoLoadAggregator = new DynatraceReportCustomMetrics(dynataceApiKey, dynatraceAccountId, nlWebResult,
-                context, dataExchangeApiUrl, dynatraceManagedHostname, proxyName, traceMode);
+                context, dynatraceManagedHostname, proxyName, traceMode);
     }
 
     public synchronized static DynatracePluginData getInstance(final Context context,

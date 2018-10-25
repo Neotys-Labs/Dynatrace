@@ -252,7 +252,7 @@ public class DynatraceGetTimeSeries {
             }
 
         }catch (DynatraceException e){
-            context.getLogger().error(e.getMessage());
+            context.getLogger().error("Failed to init Host", e);
         } finally{
             httpGenerator.closeHttpClient();
         }
@@ -294,7 +294,7 @@ public class DynatraceGetTimeSeries {
                 context.getLogger().debug("No host found in process group");
             }
         }catch (DynatraceException e){
-            context.getLogger().error(e.getMessage());
+            context.getLogger().error("Failed to init host", e);
         } finally {
             httpGenerator.closeHttpClient();
         }
