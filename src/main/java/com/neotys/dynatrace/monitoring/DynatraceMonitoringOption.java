@@ -38,7 +38,7 @@ enum DynatraceMonitoringOption implements Option {
 
     NeoLoadDataExchangeApiUrl("dataExchangeApiUrl", Optional, False, TEXT,
             "",
-            "Where the DataExchange server is located. Optional, by default it will be: http://${NL-ControllerIp}:7400/DataExchange/v1/Service.svc/",
+            "Where the DataExchange server is located. Optional, by default it is: http://${NL-ControllerIp}:7400/DataExchange/v1/Service.svc/",
             NON_EMPTY),
 
     NeoLoadDataExchangeApiKey("dataExchangeApiKey", Optional, False, TEXT,
