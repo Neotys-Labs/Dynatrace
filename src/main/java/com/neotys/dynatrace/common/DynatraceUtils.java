@@ -24,6 +24,7 @@ import static com.neotys.dynatrace.common.HttpResponseUtils.getJsonArrayResponse
  */
 public class DynatraceUtils {
     private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
+    private static final String DYNATRACE_CONFIGURL = ".live.dynatrace.com/api/config/v1/";
     private static final String DYNATRACE_APPLICATION = "entity/services";
     private static final String DYNATRACE_PROTOCOL = "https://";
 
@@ -109,6 +110,14 @@ public class DynatraceUtils {
             return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID + "/api/v1/";
         } else {
             return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
+        }
+    }
+
+    public static String getDynatraceConfigApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
+        if (dynatraceManagedHostname.isPresent()) {
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID + "/api/config/v1/";
+        } else {
+            return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_CONFIGURL;
         }
     }
 }
