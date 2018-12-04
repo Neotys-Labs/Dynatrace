@@ -1,6 +1,5 @@
 package com.neotys.dynatrace.common.data;
 
-import javax.xml.bind.annotation.XmlElement;
 import com.google.common.base.Optional;
 
 public class DynatarceServiceData {
@@ -15,19 +14,19 @@ public class DynatarceServiceData {
     public static final String Network_UNit="BytePerSecond (B/s)";
 
     private String serviceID;
-    @XmlElement
+
     private String serviceName;
-    @XmlElement
+
     private double number_ofprocess;
-    @XmlElement
+
     private double cpu;
-    @XmlElement
+
     private double memory;
-    @XmlElement
+
     private double networksent;
-    @XmlElement
+
     private double networkreceived;
-    @XmlElement
+
     public String getServiceID() {
         return serviceID;
     }
@@ -39,7 +38,7 @@ public class DynatarceServiceData {
     public void setServiceID(String serviceID) {
         this.serviceID = serviceID;
     }
-    @XmlElement
+
     public String getServiceName() {
         return serviceName;
     }
@@ -47,7 +46,7 @@ public class DynatarceServiceData {
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
     }
-    @XmlElement
+
     public double getNumber_ofprocess() {
         return number_ofprocess;
     }
@@ -62,7 +61,7 @@ public class DynatarceServiceData {
         this.serviceID=serivceID;
 
     }
-    @XmlElement
+
     public double getCpu() {
         return cpu;
     }
@@ -70,7 +69,7 @@ public class DynatarceServiceData {
     public void setCpu(double cpu) {
         this.cpu = cpu;
     }
-    @XmlElement
+
     public double getMemory() {
         return memory;
     }
@@ -78,7 +77,7 @@ public class DynatarceServiceData {
     public void setMemory(double memory) {
         this.memory = memory;
     }
-    @XmlElement
+
     public double getNetworksent() {
         return networksent;
     }
@@ -86,7 +85,7 @@ public class DynatarceServiceData {
     public void setNetworksent(double networksent) {
         this.networksent = networksent;
     }
-    @XmlElement
+
     public double getNetworkreceived() {
         return networkreceived;
     }
