@@ -1,0 +1,122 @@
+package com.neotys.dynatrace.common.data;
+
+import javax.xml.bind.annotation.XmlElement;
+import com.google.common.base.Optional;
+
+public class DynatarceServiceData {
+
+    public static final String NUMBER_PROCESS="Number of Process";
+    public static final String CPU="total cpu usage";
+    public static final String Memory="total memory usage";
+    public static final String NETWORK_SENT="total network sent";
+    public static final String NETWORK_RECEIVED="total network received";
+    public static final String CPU_Unit="%";
+    public static final String Memory_Unit="Byte";
+    public static final String Network_UNit="BytePerSecond (B/s)";
+
+    private String serviceID;
+    @XmlElement
+    private String serviceName;
+    @XmlElement
+    private double number_ofprocess;
+    @XmlElement
+    private double cpu;
+    @XmlElement
+    private double memory;
+    @XmlElement
+    private double networksent;
+    @XmlElement
+    private double networkreceived;
+    @XmlElement
+    public String getServiceID() {
+        return serviceID;
+    }
+
+
+
+    private Optional<Long> date;
+
+    public void setServiceID(String serviceID) {
+        this.serviceID = serviceID;
+    }
+    @XmlElement
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+    @XmlElement
+    public double getNumber_ofprocess() {
+        return number_ofprocess;
+    }
+
+    public void setNumber_ofprocess(double number_ofprocess) {
+        this.number_ofprocess = number_ofprocess;
+    }
+
+    public DynatarceServiceData(String serviceName, String serivceID, int number_ofprocess) {
+        this.serviceName = serviceName;
+        this.number_ofprocess = number_ofprocess;
+        this.serviceID=serivceID;
+
+    }
+    @XmlElement
+    public double getCpu() {
+        return cpu;
+    }
+
+    public void setCpu(double cpu) {
+        this.cpu = cpu;
+    }
+    @XmlElement
+    public double getMemory() {
+        return memory;
+    }
+
+    public void setMemory(double memory) {
+        this.memory = memory;
+    }
+    @XmlElement
+    public double getNetworksent() {
+        return networksent;
+    }
+
+    public void setNetworksent(double networksent) {
+        this.networksent = networksent;
+    }
+    @XmlElement
+    public double getNetworkreceived() {
+        return networkreceived;
+    }
+
+    public void setNetworkreceived(double networkreceived) {
+        this.networkreceived = networkreceived;
+    }
+
+    public void setDate(long date) {
+        this.date.of(date) ;
+    }
+
+    public long getDate() {
+        if(date.isPresent())
+            return date.get();
+        else
+            return 0;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("DynatarceServiceData{");
+        sb.append("serviceid=").append(serviceID);
+        sb.append(", servicename='").append(serviceName).append('\'');
+        sb.append(", number_ofprocess='").append(number_ofprocess).append('\'');
+        sb.append(", cpu='").append(cpu).append('\'');
+        sb.append(", memory='").append(memory).append('\'');
+        sb.append(", networksent='").append(networksent).append('\'');
+        sb.append(", networkreceived='").append(networkreceived).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+}

@@ -1,3 +1,4 @@
 com.neotys.dynatrace.events.DynatraceEventAction
 com.neotys.dynatrace.monitoring.DynatraceMonitoringAction
 com.neotys.dynatrace.configuration.DynatraceConfigurationAction
+com.neotys.dynatrace.sanityCheck.DynatraceSanityCheckAction

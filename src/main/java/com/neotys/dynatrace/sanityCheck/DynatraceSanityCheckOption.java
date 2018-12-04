@@ -1,4 +1,4 @@
-package com.neotys.dynatrace.configuration;
+package com.neotys.dynatrace.sanityCheck;
 
 import com.neotys.action.argument.ArgumentValidator;
 import com.neotys.action.argument.Option;
@@ -12,39 +12,45 @@ import static com.neotys.action.argument.Option.OptionalRequired.Optional;
 import static com.neotys.action.argument.Option.OptionalRequired.Required;
 import static com.neotys.extensions.action.ActionParameter.Type.TEXT;
 
-enum DynatraceConfigurationOption implements Option {
+enum DynatraceSanityCheckOption implements Option {
     DynatraceId("dynatraceId", Required, True, TEXT,
             "Dynatrace ID",
             "Dynatrace ID (section of your Dynatrace saas url).",
             NON_EMPTY),
 
     DynatraceApiKey("dynatraceApiKey", Required, True, TEXT,
-            "Dynatrace API key",
             "Dynatrace API key.",
+            "Dynatrace API key",
             NON_EMPTY),
+
+    DynatraceTags("tags", Optional, True, TEXT,
+            "tag1,tag2",
+            "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
+            ALWAYS_VALID),
+    DynatraceApplicationName("DynatraceApplicationName", Optional, True, TEXT,
+            "easytravel",
+            "Dynatrace Application Name. The sanitycheck will be based on the smartscape of the application.",
+            ALWAYS_VALID),
+    DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
+            "",
+            "Hostname of your managed Dynatrace environment.",
+            ALWAYS_VALID),
+
 
     NeoLoadProxy("proxyName", Optional, False, TEXT,
             "",
             "The NeoLoad proxy name to access Dynatrace.",
             ALWAYS_VALID),
 
-    DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
-            "",
-            "Hostname of your managed Dynatrace environment.",
-            ALWAYS_VALID),
-    DynatraceTags("tags", Required, True, TEXT,
-            "tag1,tag2",
-            "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
-            NON_EMPTY),
-    DynatraceApplicationName("DynatraceApplicationName", Required, True, TEXT,
-            "easytravel",
-            "Dynatrace Application Name. The configuration will be based on the smartscape of the application.",
-            NON_EMPTY),
-
     TraceMode("traceMode", Optional, False, TEXT,
             "",
             "",
-            ALWAYS_VALID);
+            ALWAYS_VALID),
+
+    OutputXmlReferenceFile("outPutReferenceFile", Optional, True, TEXT,
+            "${NL-CustomResources}/dynatrace_smarscape.xml",
+                    "XML file containing the last reference of the architecture.\n The action will fail if the architecutre has less services, processes, less CPU, memory..etc",
+            NON_EMPTY);
 
     private final String name;
     private final Option.OptionalRequired optionalRequired;
@@ -53,11 +59,10 @@ enum DynatraceConfigurationOption implements Option {
     private final String defaultValue;
     private final String description;
     private final ArgumentValidator argumentValidator;
-
-    DynatraceConfigurationOption(final String name, final Option.OptionalRequired optionalRequired,
-                                 final Option.AppearsByDefault appearsByDefault,
-                                 final ActionParameter.Type type, final String defaultValue, final String description,
-                                 final ArgumentValidator argumentValidator) {
+    DynatraceSanityCheckOption(final String name, final Option.OptionalRequired optionalRequired,
+                              final Option.AppearsByDefault appearsByDefault,
+                              final ActionParameter.Type type, final String defaultValue, final String description,
+                              final ArgumentValidator argumentValidator) {
         this.name = name;
         this.optionalRequired = optionalRequired;
         this.appearsByDefault = appearsByDefault;
@@ -100,5 +105,4 @@ enum DynatraceConfigurationOption implements Option {
     public ArgumentValidator getArgumentValidator() {
         return argumentValidator;
     }
-
 }

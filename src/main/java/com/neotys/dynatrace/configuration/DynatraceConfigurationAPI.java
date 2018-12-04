@@ -1,13 +1,7 @@
 package com.neotys.dynatrace.configuration;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.neotys.dynatrace.common.DynatraceException;
-import com.neotys.dynatrace.common.DynatraceUtils;
-import com.neotys.dynatrace.common.HTTPGenerator;
-import com.neotys.dynatrace.common.HttpResponseUtils;
-import com.neotys.dynatrace.monitoring.custommetrics.NeoLoadMetrics;
+import com.neotys.dynatrace.common.*;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
@@ -15,12 +9,12 @@ import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
@@ -94,6 +88,42 @@ public class DynatraceConfigurationAPI {
             return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
         }
         return Optional.absent();
+    }
+
+    public void setDynatraceTags(String applicationName,Optional<String> tags) throws Exception {
+        List<String> serviceListId;
+        AtomicReference<List<String>> processgroupListids=new AtomicReference<>();;
+        AtomicReference<List<String>> hostListid = new AtomicReference<>();;
+        Map<String, String> header = new HashMap<>();
+
+        DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, tags, header);
+
+        serviceListId=DynatraceUtils.getListServicesFromApplicationName(context,dynatraceContext,applicationName,proxyName,traceMode,false);
+        serviceListId.stream().forEach(serviceid->{
+            try {
+                processgroupListids.set(DynatraceUtils.getListProcessGroupIDfromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode,false));
+                DynatraceUtils.updateTagOnserviceID(context,dynatraceContext,proxyName,traceMode,serviceid);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            processgroupListids.get().stream().forEach(processgroupid->{
+                try {
+                    hostListid.set(DynatraceUtils.getHostIdFromProcessGroupID(context, dynatraceContext, processgroupid, proxyName, traceMode));
+                    DynatraceUtils.updateTagOnProcessGroupID(context,dynatraceContext,proxyName,traceMode,processgroupid);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                hostListid.get().stream().forEach(hostid->{
+                    try {
+                        DynatraceUtils.updateTagOnHostID(context,dynatraceContext,proxyName,traceMode,hostid);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            });
+
+        });
     }
 
     private boolean isNeoLoadRequestAttributesExists() throws Exception {

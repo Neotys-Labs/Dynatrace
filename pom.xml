@@ -18,6 +18,13 @@
     </properties>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.neotys.actions</groupId>
             <artifactId>neotys-custom-action-api</artifactId>
@@ -162,6 +169,7 @@
                                 <excludes>
                                     <exclude>*:neotys-custom-action-api</exclude>
                                     <exclude>*:neotys-custom-action-util</exclude>
+                                    <exclude>*:javax.ws.rs-api</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
