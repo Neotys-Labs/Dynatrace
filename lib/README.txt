@@ -1,1 +1,0 @@
-Put in that directory third party jars not present in a maven repository. These third party jars will be integrated in the custom action jar.

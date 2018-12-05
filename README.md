@@ -50,11 +50,11 @@ This bundle provides inbound and an outbound integration:
 | NeoLoad  | 6.3+ (Enterprise or Professional Edition w/ Integration & Advanced Usage and NeoLoad Web option required)|
 | Requirements | NeoLoad Web |
 | Bundled in NeoLoad | No
-| Download Binaries | See the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest)
+| Download Binaries | <ul><li>[latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest) is only compatible with NeoLoad from version 6.7</li><li> Use this [release](https://github.com/Neotys-Labs/Dynatrace/releases/tag/Neotys-Labs%2FDynatrace.git-2.0.10) for previous NeoLoad versions</li></ul>|
 
 ## Installation
 
-1. Download the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest).
+1. Download the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest) for NeoLoad from version 6.7 or this [release](https://github.com/Neotys-Labs/Dynatrace/releases/tag/Neotys-Labs%2FDynatrace.git-2.0.10) for previous NeoLoad versions.
 1. Read the NeoLoad documentation to see [How to install a custom Advanced Action](https://www.neotys.com/documents/doc/neoload/latest/en/html/#25928.htm).
 
 <p align="center"><img src="/screenshots/dynatrace_advanced_action.png" alt="New Relic Advanced Action" /></p>
@@ -113,8 +113,8 @@ Tip: Get NeoLoad API information in NeoLoad preferences: Project Preferences / R
 | dynatraceApiKey  | API key of your dynatrace account |
 | tags (optional)  | Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2) |
 | dynatraceManagedHostname (Optional) | <ul><li>for managed environment, it is the hostname of your managed Dynatrace environment (for example preprod.neotys.com, do not include neither protocol nor API path)</li><li>for live environment, this parameter should be removed</li></ul> |
-| dataExchangeApiUrl   | Where the DataExchange server is located. Typically the NeoLoad controller |
-| dataExchangeApiKey  (Optional)  | API key of the DataExchange API |
+| dataExchangeApiUrl (Optional)  | Where the DataExchange server is located. Optional, by default it is: http://${NL-ControllerIp}:7400/DataExchange/v1/Service.svc/ |
+| dataExchangeApiKey (Optional)  | API key of the DataExchange API |
 | proxyName (Optional) |  The name of the NeoLoad proxy to access to Dynatrace |
 
 ## Analyze results in NeoLoad
