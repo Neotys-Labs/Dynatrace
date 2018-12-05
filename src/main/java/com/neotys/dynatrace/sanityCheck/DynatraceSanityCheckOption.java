@@ -47,9 +47,9 @@ enum DynatraceSanityCheckOption implements Option {
             "",
             ALWAYS_VALID),
 
-    OutputXmlReferenceFile("outPutReferenceFile", Optional, True, TEXT,
-            "${NL-CustomResources}/dynatrace_smarscape.xml",
-                    "XML file containing the last reference of the architecture.\n The action will fail if the architecutre has less services, processes, less CPU, memory..etc",
+    OutputJSONReferenceFile("outPutReferenceFile", Optional, True, TEXT,
+            "/home/hrexed/dynatrace_smarscape.json",
+                    "json file containing the last reference of the architecture.\n The action will fail if the architecutre has less services, processes, less CPU, memory..etc",
             NON_EMPTY);
 
     private final String name;

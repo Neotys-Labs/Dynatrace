@@ -1,7 +1,11 @@
-package com.neotys.dynatrace.sanityCheck.xmlExport;
+package com.neotys.dynatrace.sanityCheck.jsonExport;
 
 import com.google.common.base.Optional;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
 import com.neotys.dynatrace.common.DynatraceContext;
+import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.data.DynatarceServiceData;
@@ -9,12 +13,7 @@ import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -36,7 +35,7 @@ public class DynatracePGIMetrics {
     private boolean traceMode;
     private List<String> dynatraceApplicationServiceIds;
     private String applicationName;
-    private final static double COMPARAISON_RATIO=0.05;
+    private final static double COMPARAISON_RATIO=0.10;
 
     static
     {
@@ -73,53 +72,60 @@ public class DynatracePGIMetrics {
         }
     }
 
-    public void marshal(String filename ,List<DynatarceServiceData> dynatarceServiceDataList) throws JAXBException, IOException {
+    public void marshal(String filename , List<DynatarceServiceData> dynatarceServiceDataList) throws  IOException {
         DynatraceSmartScapedata smartScapedata = new DynatraceSmartScapedata(applicationName,dynatarceServiceDataList);
+        Writer writer = new FileWriter(filename);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String strJson = gson.toJson(smartScapedata);
+        context.getLogger().info(strJson);
+        writer.write(strJson);
+        writer.close();
 
-        JAXBContext context = JAXBContext.newInstance(DynatraceSmartScapedata.class);
-        Marshaller mar= context.createMarshaller();
-        mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        mar.marshal(smartScapedata, new File(filename));
     }
 
-    public void sanityCheck(String xmlfilename) throws JAXBException, IOException {
+    public void sanityCheck(String jsonfile) throws IOException, DynatraceException {
         List<DynatarceServiceData> serviceDataList=getSmarscapeData();
-        File xmlfile=new File(xmlfilename);
-        AtomicBoolean error= new AtomicBoolean(true);
+        File xmlfile=new File(jsonfile);
+
 
         if(xmlfile.exists())
         {
             //----compare with baseline------
-            if(xmlfilename.contains(".xml"))
+            if(jsonfile.contains(".json"))
             {
-                DynatraceSmartScapedata imported_architecture=unmarshall(xmlfilename);
-                if(imported_architecture.getServiceDataList().size()>serviceDataList.size())
+                DynatraceSmartScapedata imported_architecture=unmarshall(jsonfile);
+                if(imported_architecture.getServiceDataList().size()>serviceDataList.size()) {
                     context.getLogger().error("There is less services running on the application");
-                else
+                    throw new DynatraceException("There is less services running on the application");
+
+                }else
                 {
+                    List<String> listoferrors=new ArrayList<>();
                     imported_architecture.getServiceDataList().stream().forEach(services->{
                         DynatarceServiceData relatedata=getDynatraceServiceData(services,serviceDataList);
                         if(relatedata!=null)
                         {
                             if(services.getNumber_ofprocess()>relatedata.getNumber_ofprocess())
-                                context.getLogger().error("There are less process running on "+services.getServiceName());
+                            {
+                                context.getLogger().error("There are less process running on " + services.getServiceName());
+                                listoferrors.add("There are less process running on " + services.getServiceName());
+                            }
                             else
                             {
                                 //------check the ressoruces----------------
                                 if(!compareMonitoringData(services.getCpu(),relatedata.getCpu()))
                                 {
                                     context.getLogger().error("The process are consuming more CPU"+services.getServiceName());
-
+                                    listoferrors.add("There are less process running on " + services.getServiceName());
                                 }
                                 else
                                 {
                                     if(!compareMonitoringData(services.getMemory(),relatedata.getMemory()))
                                     {
                                         context.getLogger().error("The process are consuming more Memory"+services.getServiceName());
-
+                                        listoferrors.add("There are less process running on " + services.getServiceName());
                                     }
-                                    else
-                                        error.set(false);
+
                                 }
                                 //------------------------------------------
                             }
@@ -129,10 +135,14 @@ public class DynatracePGIMetrics {
                             context.getLogger().error("Service is missing "+services.getServiceName());
                         }
                     });
-                    if(!error.get())
+                    if(listoferrors.size()==0)
                     {
                         //----if no error then store the new reference in the xml file
-                        marshal(xmlfilename,serviceDataList);
+                        marshal(jsonfile,serviceDataList);
+                    }
+                    else
+                    {
+                        throw new DynatraceException(listoferrors.stream().limit(1).collect(Collectors.joining(",")));
                     }
                 }
             }
@@ -140,7 +150,7 @@ public class DynatracePGIMetrics {
         else
         {
             //---export current data to xml----
-            marshal(xmlfilename,serviceDataList);
+            marshal(jsonfile,serviceDataList);
         }
     }
 
@@ -149,7 +159,7 @@ public class DynatracePGIMetrics {
         double minvalue=oldvalue-oldvalue*COMPARAISON_RATIO;
         double maxvalue=oldvalue+oldvalue*COMPARAISON_RATIO;
 
-        if(newValue>minvalue && newValue<maxvalue)
+        if(newValue<=maxvalue)
             return true;
         else
             return false;
@@ -163,10 +173,10 @@ public class DynatracePGIMetrics {
         else
             return null;
     }
-    public DynatraceSmartScapedata unmarshall(String filename) throws JAXBException, IOException {
-        JAXBContext context = JAXBContext.newInstance(DynatraceSmartScapedata.class);
-        return (DynatraceSmartScapedata) context.createUnmarshaller()
-                .unmarshal(new FileReader(filename));
+    public DynatraceSmartScapedata unmarshall(String filename) throws FileNotFoundException {
+        Gson gson = new Gson();
+        JsonReader reader = new JsonReader(new FileReader(filename));
+        return (DynatraceSmartScapedata) gson.fromJson(reader, DynatraceSmartScapedata.class);
     }
 
     public List<DynatarceServiceData> getSmarscapeData()

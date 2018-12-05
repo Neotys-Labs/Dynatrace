@@ -3,7 +3,7 @@ package com.neotys.dynatrace.sanityCheck;
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.common.DynatraceException;
-import com.neotys.dynatrace.sanityCheck.xmlExport.DynatracePGIMetrics;
+import com.neotys.dynatrace.sanityCheck.jsonExport.DynatracePGIMetrics;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -48,7 +48,7 @@ public class DynatraceSanityCheckActionEngine implements ActionEngine {
         final String dynatraceApiKey = parsedArgs.get(DynatraceSanityCheckOption.DynatraceApiKey.getName()).get();
         final Optional<String> dynatraceTags = parsedArgs.get(DynatraceSanityCheckOption.DynatraceTags.getName());
         final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceSanityCheckOption.DynatraceManagedHostname.getName());
-        final String outPutReferenceFile = parsedArgs.get(DynatraceSanityCheckOption.OutputXmlReferenceFile.getName()).get();
+        final String outPutReferenceFile = parsedArgs.get(DynatraceSanityCheckOption.OutputJSONReferenceFile.getName()).get();
         final Optional<String> proxyName = parsedArgs.get(DynatraceSanityCheckOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceSanityCheckOption.TraceMode.getName());
         final Optional<String> dynatraceApplicationName=parsedArgs.get(DynatraceSanityCheckOption.DynatraceApplicationName.getName());
@@ -60,9 +60,14 @@ public class DynatraceSanityCheckActionEngine implements ActionEngine {
             DynatracePGIMetrics dynatracePGIMetrics=new DynatracePGIMetrics(dynatraceApiKey,dynatraceId,dynatraceTags,dynatraceManagedHostname,dynatraceApplicationName,proxyName,context,startTs,traceMode);
             dynatracePGIMetrics.sanityCheck(outPutReferenceFile);
         }
+        catch (DynatraceException e)
+        {
+            return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Error encountered :", e);
+
+        }
         catch (Exception e) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Error encountered :", e);
-}
+        }
 
         sampleResult.setRequestContent(requestBuilder.toString());
         sampleResult.setResponseContent(responseBuilder.toString());
