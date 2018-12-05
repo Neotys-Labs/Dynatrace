@@ -25,6 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Strings.emptyToNull;
 import static com.neotys.action.argument.Arguments.getArgumentLogString;
 import static com.neotys.action.argument.Arguments.parseArguments;
 
@@ -64,10 +65,16 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final String dynatraceApiKey = parsedArgs.get(DynatraceMonitoringOption.DynatraceApiKey.getName()).get();
         final Optional<String> dynatraceTags = parsedArgs.get(DynatraceMonitoringOption.DynatraceTags.getName());
         final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceMonitoringOption.DynatraceManagedHostname.getName());
-        final String dataExchangeApiUrl = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiUrl.getName()).get();
         final Optional<String> dataExchangeApiKey = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiKey.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceMonitoringOption.TraceMode.getName());
+
+        final String dataExchangeApiUrl = Optional.fromNullable(emptyToNull(parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiUrl.getName()).orNull()))
+                .or(() -> getDefaultDataExchangeApiUrl(context));
+
+        if (context.getLogger().isDebugEnabled()) {
+            context.getLogger().debug("Data Exchange API URL used: " + dataExchangeApiUrl);
+        }
 
         try {
 
@@ -122,6 +129,10 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         sampleResult.setRequestContent(requestBuilder.toString());
         sampleResult.setResponseContent(responseBuilder.toString());
         return sampleResult;
+    }
+
+    private String getDefaultDataExchangeApiUrl(final Context context) {
+        return "http://" + context.getControllerIp() + ":7400/DataExchange/v1/Service.svc/";
     }
 
     private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl, final Optional<String> dataExchangeApiKey) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {
