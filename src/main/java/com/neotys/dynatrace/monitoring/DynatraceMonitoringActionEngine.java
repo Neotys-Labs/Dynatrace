@@ -1,6 +1,8 @@
 package com.neotys.dynatrace.monitoring;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.common.Constants;
 import com.neotys.dynatrace.common.DynatraceException;
@@ -68,7 +70,9 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Optional<String> dataExchangeApiKey = parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiKey.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceMonitoringOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceMonitoringOption.TraceMode.getName());
-
+        final Optional<List<String>>  dynatracecustomTimeSeries = Optional.of(Splitter.on(",").omitEmptyStrings()
+                .splitToList(parsedArgs.get(DynatraceMonitoringOption.DynatraceTimeSeries.getName()).or("")));
+        final Optional<String> dynatracecustomTImeseriesAggregateType = parsedArgs.get(DynatraceMonitoringOption.DynatraceTimeSeriesAgregation.getName());
         final String dataExchangeApiUrl = Optional.fromNullable(emptyToNull(parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiUrl.getName()).orNull()))
                 .or(() -> getDefaultDataExchangeApiUrl(context));
 
@@ -88,6 +92,13 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
                 return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: Not enough delay between the two Dynatrace advanced action execution. Make sure to have at least 30 seconds pacing on the Actions container.");
             } else {
                 requestBuilder.append("(last execution was " + ((dynatraceCurrentExecution - (Long)dynatraceLastExecutionTime)/1000) + " seconds ago)\n");
+            }
+
+            if(dynatracecustomTimeSeries.isPresent())
+            {
+                if(!validateAgggregationType(dynatracecustomTImeseriesAggregateType))
+                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be define or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
+
             }
 
             context.getCurrentVirtualUser().put(Constants.DYNATRACE_LAST_EXECUTION_TIME, dynatraceCurrentExecution);
@@ -117,7 +128,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
-            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, proxyName, dynatraceManagedHostname, startTs, traceMode);
+            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, proxyName, dynatraceManagedHostname,dynatracecustomTimeSeries,dynatracecustomTImeseriesAggregateType, startTs, traceMode);
             dynatraceIntegration.processDynatraceData();
 
             //first call send event to dynatrace
@@ -133,6 +144,17 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
     private String getDefaultDataExchangeApiUrl(final Context context) {
         return "http://" + context.getControllerIp() + ":7400/DataExchange/v1/Service.svc/";
+    }
+
+    private boolean validateAgggregationType(Optional<String> aggregatetype)
+    {
+        ImmutableList<String> dynatraceAggregagtionTypes=ImmutableList.of("MIN","MAX","SUM","AVG","MEDIAN","COUNT","PERCENTILE");
+        if(aggregatetype.isPresent())
+        {
+            if(dynatraceAggregagtionTypes.contains(aggregatetype.get()))
+                return true;
+        }
+        return false;
     }
 
     private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl, final Optional<String> dataExchangeApiKey) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {

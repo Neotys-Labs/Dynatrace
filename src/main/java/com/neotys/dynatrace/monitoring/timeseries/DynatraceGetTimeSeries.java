@@ -38,6 +38,7 @@ public class DynatraceGetTimeSeries {
     private static final Map<String, String> TIMESERIES_INFRA_MAP = new HashMap<>();
     private static final Map<String,String> TIMESERIES_PGI_MAP=new HashMap<>();
     private static final Map<String, String> TIMESERIES_SERVICES_MAP = new HashMap<>();
+    private  Map<String, String> CUSTOM_TIMESERIES_SERVICES_MAP = new HashMap<>();
     private DynatraceContext dynatraceContext;
 
     static {
@@ -98,6 +99,8 @@ public class DynatraceGetTimeSeries {
     private final String dynatraceId;
     private final Optional<String> dynatraceManagedHostname;
     private final Optional<String> dynatraceApplication;
+    private final Optional<List<String>>  dynatraceCustomTimeseries;
+    private final Optional<String> dynatraceAggregationType;
     private static final Optional<Long> diff=Optional.absent();
     private HTTPGenerator httpGenerator;
     private List<String> dynatraceApplicationServiceIds;
@@ -115,6 +118,8 @@ public class DynatraceGetTimeSeries {
                                   final DataExchangeAPIClient dataExchangeAPIClient,
                                   final Optional<String> proxyName,
                                   final Optional<String> dynatraceManagedHostname,
+                                  final Optional<List<String>> dynatraceCustomTimeseries,
+                                  final Optional<String> dynatraceAggregateType,
                                   final long startTs,
                                   final boolean traceMode) throws Exception {
         this.context = context;
@@ -127,6 +132,8 @@ public class DynatraceGetTimeSeries {
 	    this.startTS = startTs;
 	    this.traceMode = traceMode;
 
+        this.dynatraceCustomTimeseries=dynatraceCustomTimeseries;
+        this.dynatraceAggregationType=dynatraceAggregateType;
 
 	    this.isRunning = true;
 	    this.header = new HashMap<>();
@@ -136,22 +143,59 @@ public class DynatraceGetTimeSeries {
 
 	    initHostsFromProcessGroup();
         initHosts();
+        generateCustomTimeserices();
     }
 
+    private void generateCustomTimeserices()
+    {
+        if(dynatraceCustomTimeseries.isPresent())
+        {
+
+            dynatraceCustomTimeseries.get().stream().filter(key->!TIMESERIES_INFRA_MAP.containsKey(key)).filter(key->!TIMESERIES_SERVICES_MAP.containsKey(key)).forEach(timeseries->CUSTOM_TIMESERIES_SERVICES_MAP.put(timeseries,dynatraceAggregationType.get()));
+        }
+
+    }
     public void processDynatraceData() throws Exception {
         if (isRunning) {
-            List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processtServices(dynatraceApplicationServiceIds);
-            List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceApplicationHostIds);
+            List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processtServices(dynatraceApplicationServiceIds,TIMESERIES_SERVICES_MAP);
+            List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceApplicationHostIds,TIMESERIES_INFRA_MAP);
             List<com.neotys.rest.dataexchange.model.Entry> smarcapedate=getSmarscapeData();
             List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(Stream.concat(serviceEntries.stream(), infraEntries.stream()),smarcapedate.stream())
                     .collect(Collectors.toList());
 
+            if(CUSTOM_TIMESERIES_SERVICES_MAP.size()>0)
+            {
+                //---add the custom metrics-------
+                List<com.neotys.rest.dataexchange.model.Entry> servicecustomEntries = processtServices(dynatraceApplicationServiceIds,CUSTOM_TIMESERIES_SERVICES_MAP);
+                List<com.neotys.rest.dataexchange.model.Entry> infracustomEntries = processInfrastructures(dynatraceApplicationHostIds,CUSTOM_TIMESERIES_SERVICES_MAP);
+
+                entryList=Stream.concat(Stream.concat(entryList.stream(),servicecustomEntries.stream()),infracustomEntries.stream()).collect(Collectors.toList());
+            }
 
             if(!entryList.isEmpty()){
                 //Send merged Entries
                 dataExchangeApiClient.addEntries(entryList);
             }
         }
+    }
+
+    public List<com.neotys.rest.dataexchange.model.Entry> getCustomTimeSeries()
+    {
+        List<DynatarceServiceData> dynatarceServiceDataList=new ArrayList<>();
+
+        dynatarceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+            try {
+                return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).collect(Collectors.toList());
+
+        dynatarceServiceDataList=dynatarceServiceDataList.stream().filter(dynatarceServiceData -> dynatarceServiceData != null && dynatarceServiceData.getDate()>0).collect(Collectors.toList());
+
+        return dynatarceServiceDataList.stream().map(dynatarceServiceData -> dynatraceServiceDataTOEntry(dynatarceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
     }
 
     public List<com.neotys.rest.dataexchange.model.Entry> getSmarscapeData()
@@ -241,11 +285,11 @@ public class DynatraceGetTimeSeries {
         if(metricname.contains("bytessent"))
             data.setNetworksent(sum);
     }
-    private List<com.neotys.rest.dataexchange.model.Entry> processInfrastructures(final List<String> dynatraceApplicationIds) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processInfrastructures(final List<String> dynatraceApplicationIds,Map<String,String> dynatracemetrics) throws Exception {
 
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
-            for (Entry<String, String> m : TIMESERIES_INFRA_MAP.entrySet()) {
+            for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
                     final List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode, diff, Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));
@@ -255,10 +299,10 @@ public class DynatraceGetTimeSeries {
         return entries;
     }
 
-    private List<com.neotys.rest.dataexchange.model.Entry> processtServices(final List<String> dynatraceApplicationIds) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processtServices(final List<String> dynatraceApplicationIds,Map<String,String> dynatracemetrics) throws Exception {
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
-            for (Entry<String, String> m : TIMESERIES_SERVICES_MAP.entrySet()) {
+            for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
                     final List<DynatraceMetric> dynatraceMetrics = DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode,diff,Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));

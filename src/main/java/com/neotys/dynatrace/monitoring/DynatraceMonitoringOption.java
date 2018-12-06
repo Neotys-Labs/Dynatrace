@@ -35,7 +35,20 @@ enum DynatraceMonitoringOption implements Option {
             "",
             "Hostname of your managed Dynatrace environment.",
             ALWAYS_VALID),
-
+    DynatraceTimeSeries("dynatraceTimeSeries", Optional, False, TEXT,
+            "",
+            "List of dynatrace timeseries to report in NeoLoad .",
+            ALWAYS_VALID),
+    DynatraceTimeSeriesAgregation("dynatraceTimeSeriesAggregation", Optional, False, TEXT,
+            "AVG",
+            "Aggregationtype of the timeseries specified . Value possible :MIN\n" +
+                    "MAX\n" +
+                    "SUM\n" +
+                    "AVG\n" +
+                    "MEDIAN\n" +
+                    "COUNT\n" +
+                    "PERCENTILE",
+            ALWAYS_VALID),
     NeoLoadDataExchangeApiUrl("dataExchangeApiUrl", Optional, False, TEXT,
             "",
             "Where the DataExchange server is located. Optional, by default it is: http://${NL-ControllerIp}:7400/DataExchange/v1/Service.svc/",
