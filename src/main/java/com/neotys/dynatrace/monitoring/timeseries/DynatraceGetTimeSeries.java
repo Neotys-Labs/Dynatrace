@@ -166,7 +166,9 @@ public class DynatraceGetTimeSeries {
             {
                 return null;
             }
-        } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).filter(Objects::nonNull).collect(Collectors.toList());
+        } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).collect(Collectors.toList());
+
+        dynatarceServiceDataList=dynatarceServiceDataList.stream().filter(dynatarceServiceData -> dynatarceServiceData != null && dynatarceServiceData.getDate()>0).collect(Collectors.toList());
 
         return dynatarceServiceDataList.stream().map(dynatarceServiceData -> dynatraceServiceDataTOEntry(dynatarceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
     }
@@ -208,9 +210,12 @@ public class DynatraceGetTimeSeries {
         try {
             for (Map.Entry<String, String> m : TIMESERIES_PGI_MAP.entrySet()) {
                 List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatraceContext, proxyName, traceMode, diff,Optional.absent());
-                double total = dynatraceMetrics.stream().mapToDouble(metric->metric.getValue()).sum();
-                addSumTodata(data,m.getKey(),total);
-                data.setDate(dynatraceMetrics.stream().findFirst().get().getTime());
+                if(dynatraceMetrics.size()>0)
+                {
+                    double total = dynatraceMetrics.stream().mapToDouble(metric -> metric.getValue()).sum();
+                    addSumTodata(data, m.getKey(), total);
+                    data.setDate(dynatraceMetrics.stream().findFirst().get().getTime());
+                }
             }
             return data;
         }

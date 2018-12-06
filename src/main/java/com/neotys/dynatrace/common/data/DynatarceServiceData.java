@@ -59,7 +59,6 @@ public class DynatarceServiceData {
         this.serviceName = serviceName;
         this.number_ofprocess = number_ofprocess;
         this.serviceID=serivceID;
-
     }
 
     public double getCpu() {
@@ -95,14 +94,19 @@ public class DynatarceServiceData {
     }
 
     public void setDate(long date) {
-        this.date.of(date) ;
+        this.date=Optional.of(new Long(date));
+
     }
 
     public long getDate() {
-        if(date.isPresent())
-            return date.get();
-        else
+        if(date==null)
             return 0;
+        else {
+            if (date.isPresent())
+                return date.get();
+            else
+                return 0;
+        }
     }
 
     @Override
