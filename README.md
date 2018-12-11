@@ -14,7 +14,7 @@ This bundle provides inbound and an outbound integration:
   
 * **DynatraceMonitoring**   
     * **Dynatrace &rarr; NeoLoad**: Retrieves infrastructure and service metrics from Dynatrace and inserts them in NeoLoad External Data so that
-      you can correlate NeoLoad and Dynatrace metrics within NeoLoad.
+      you can correlate NeoLoad and Dynatrace metrics within NeoLoad. Since NeoLoad GUI 6.8 version, these metrics are sent to NeoLoad Web.
       * Infrastructure metrics: 
       
         ```shell
