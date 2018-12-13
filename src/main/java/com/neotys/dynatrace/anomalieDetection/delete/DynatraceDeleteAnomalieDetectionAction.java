@@ -1,34 +1,34 @@
-package com.neotys.dynatrace.configuration;
+package com.neotys.dynatrace.anomalieDetection.delete;
 
 import com.google.common.base.Optional;
 import com.neotys.action.argument.Arguments;
 import com.neotys.action.argument.Option;
 import com.neotys.dynatrace.common.DynatraceUtils;
-
 import com.neotys.extensions.action.Action;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class DynatraceConfigurationAction implements Action {
-    private static final String BUNDLE_NAME = "com.neotys.dynatrace.configuration.bundle";
+public class DynatraceDeleteAnomalieDetectionAction implements Action {
+    private static final String BUNDLE_NAME = "com.neotys.dynatrace.anomalieDetection.delete.bundle";
     private static final String DISPLAY_NAME = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayName");
     private static final String DISPLAY_PATH = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayPath");
 
-    @java.lang.Override
-    public java.lang.String getType() {
-        return "DynatraceConfiguration";
+    @Override
+    public String getType() {
+        return "DynatraceDeleteAnomalieDetection";
     }
 
-    @java.lang.Override
+    @Override
     public List<ActionParameter> getDefaultActionParameters() {
         final ArrayList<ActionParameter> parameters = new ArrayList<>();
 
-        for (final DynatraceConfigurationOption option : DynatraceConfigurationOption.values()) {
+        for (final DynatraceDeleteAnomalieDetectionOption option : DynatraceDeleteAnomalieDetectionOption.values()) {
             if (Option.AppearsByDefault.True.equals(option.getAppearsByDefault())) {
                 parameters.add(new ActionParameter(option.getName(), option.getDefaultValue(),
                         option.getType()));
@@ -38,43 +38,43 @@ public class DynatraceConfigurationAction implements Action {
         return parameters;
     }
 
-    @java.lang.Override
-    public java.lang.Class<? extends ActionEngine> getEngineClass() {
-        return DynatraceConfigurationActionEngine.class;
+    @Override
+    public Class<? extends ActionEngine> getEngineClass() {
+        return null;
     }
 
-    @java.lang.Override
+    @Override
     public boolean getDefaultIsHit() {
         return false;
     }
 
-    @java.lang.Override
-    public javax.swing.Icon getIcon() {
-        return  DynatraceUtils.getDynatraceIcon();
+    @Override
+    public Icon getIcon() {
+        return   DynatraceUtils.getDynatraceIcon();
     }
 
-    @java.lang.Override
-    public java.lang.String getDescription() {
-        return "create automatically the request attributest requried for the integration.\n\n" + Arguments.getArgumentDescriptions(DynatraceConfigurationOption.values());
+    @Override
+    public String getDescription() {
+        return "DynatraceDeleteAnomalieDetection will delete the Anomalie Detection created during the test.\n\n" + Arguments.getArgumentDescriptions(DynatraceDeleteAnomalieDetectionOption.values());
     }
 
-    @java.lang.Override
-    public java.lang.String getDisplayName() {
+    @Override
+    public String getDisplayName() {
         return DISPLAY_NAME;
     }
 
-    @java.lang.Override
-    public java.lang.String getDisplayPath() {
+    @Override
+    public String getDisplayPath() {
         return DISPLAY_PATH;
     }
 
-    @java.lang.Override
-    public Optional<java.lang.String> getMinimumNeoLoadVersion() {
+    @Override
+    public Optional<String> getMinimumNeoLoadVersion() {
         return Optional.of("6.3");
     }
 
-    @java.lang.Override
-    public Optional<java.lang.String> getMaximumNeoLoadVersion() {
+    @Override
+    public Optional<String> getMaximumNeoLoadVersion() {
         return Optional.absent();
     }
 }

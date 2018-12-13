@@ -2,6 +2,8 @@ package com.neotys.dynatrace.monitoring.custommetrics;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.neotys.ascode.swagger.client.ApiClient;
+import com.neotys.ascode.swagger.client.api.ResultsApi;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
@@ -9,8 +11,7 @@ import com.squareup.okhttp.Authenticator;
 import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import io.swagger.client.ApiClient;
-import io.swagger.client.api.ResultsApi;
+
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -103,7 +104,7 @@ public class DynatracePluginData {
 	}
 
 	private void trustAllCerts() throws NoSuchAlgorithmException, KeyManagementException {
-		// Create a trust manager that does not validate certificate chains
+		// create a trust manager that does not validate certificate chains
 		final TrustManager[] trustAllCerts = new TrustManager[]{
 				new X509TrustManager() {
 					@Override
@@ -123,7 +124,7 @@ public class DynatracePluginData {
 		// Install the all-trusting trust manager
 		final SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(null, trustAllCerts, null);
-		// Create an ssl socket factory with our all-trusting manager
+		// create an ssl socket factory with our all-trusting manager
 		final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
 		neoLoadWebApiClient.getHttpClient().setSslSocketFactory(sslSocketFactory);

@@ -1,6 +1,6 @@
 package com.neotys.dynatrace.monitoring.custommetrics;
 
-import io.swagger.client.model.TestStatistics;
+import com.neotys.ascode.swagger.client.model.TestStatistics;
 
 import java.util.HashMap;
 import java.util.Map;

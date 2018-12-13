@@ -2,14 +2,15 @@ package com.neotys.dynatrace.monitoring.custommetrics;
 
 
 import com.google.common.base.Optional;
+import com.neotys.ascode.swagger.client.api.ResultsApi;
+import com.neotys.ascode.swagger.client.model.TestStatistics;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.HttpResponseUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
-import io.swagger.client.api.ResultsApi;
-import io.swagger.client.model.TestStatistics;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 
@@ -90,7 +91,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
                 //Check if metric are created
                 if (!hasCustomMetric(NeoLoadMetrics.getTimeseriesToSend().get(NeoLoadMetrics.REQUEST_COUNT))) {
                     for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadMetrics.getTimeseriesToSend().values()) {
-                        //Create Metric
+                        //create Metric
                         registerCustomMetric(dynatraceTimeseries);
                     }
                 }

@@ -24,6 +24,7 @@ public class HTTPGenerator {
 	public static final String HTTP_POST_METHOD = "POST";
 	public static final String HTTP_OPTION_METHOD = "OPTION";
 	public static final String HTTP_PUT_METHOD = "PUT";
+	public static final String HTTP_DELETE_METHOD = "DELETE";
 
 	private final DefaultHttpClient httpClient;
 
@@ -46,6 +47,14 @@ public class HTTPGenerator {
 		if (params != null && !params.isEmpty()) {
 			setRequestUrl(request, url, params);
 		}
+	}
+	public static HTTPGenerator deleteHttpGenerator(final String url,
+													final Map<String, String> headers,
+													final Map<String, String> params,
+													final Optional<Proxy> proxy) throws Exception {
+		final HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_DELETE_METHOD, url, headers, params, proxy);
+		return httpGenerator;
+
 	}
 
 	public static HTTPGenerator newJsonHttpGenerator(final String httpMethod,

@@ -9,6 +9,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.swing.text.html.Option;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -21,7 +22,6 @@ import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
 public class DynatraceConfigurationAPI {
     private static final String DYNATRACE_EVENTS_API_URL = "requestAttributes";
-    private static final String MESSAGE_NL_TEST = "Start/Stop NeoLoad Test";
 
 
     private final Map<String, String> headers;
@@ -124,6 +124,16 @@ public class DynatraceConfigurationAPI {
             });
 
         });
+    }
+
+    public void createRequestNamingRules() throws Exception {
+        DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, Optional.absent(), this.headers);
+
+        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode)) {
+            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST);
+            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE);
+
+        }
     }
 
     private boolean isNeoLoadRequestAttributesExists() throws Exception {

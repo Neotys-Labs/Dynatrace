@@ -60,6 +60,14 @@ public class DynatraceUtils {
         return DYNATRACE_ICON;
     }
 
+
+
+    public static void generateHeaders(final Map<String,String> header)
+    {
+        header.put("Accept","application/json; charset=utf-8");
+        header.put("Content-Type","application/json");
+    }
+
     public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;

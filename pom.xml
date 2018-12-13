@@ -18,7 +18,12 @@
     </properties>
 
     <dependencies>
-
+        <!-- https://mvnrepository.com/artifact/com.neotys.ascode/swagger-java-client -->
+        <dependency>
+            <groupId>com.neotys.ascode</groupId>
+            <artifactId>swagger-java-client</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
         <dependency>
             <groupId>com.neotys.actions</groupId>

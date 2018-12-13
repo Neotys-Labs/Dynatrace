@@ -51,6 +51,7 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
             configurationAPI.generateRequestAttributes();
             configurationAPI.setDynatraceTags(dynatraceApplicationName,dynatraceTags);
+            configurationAPI.createRequestNamingRules();
             sampleResult.sampleEnd();
         }
         catch (Exception e)

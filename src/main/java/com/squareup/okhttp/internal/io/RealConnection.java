@@ -228,7 +228,7 @@ public final class RealConnection implements Connection {
     boolean success = false;
     SSLSocket sslSocket = null;
     try {
-      // Create the wrapper over the connected socket.
+      // create the wrapper over the connected socket.
       sslSocket = (SSLSocket) sslSocketFactory.createSocket(
           rawSocket, address.url().host(), address.url().port(), true /* autoClose */);
 

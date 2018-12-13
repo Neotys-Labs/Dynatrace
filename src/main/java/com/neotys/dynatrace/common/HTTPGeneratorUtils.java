@@ -4,10 +4,7 @@ import com.google.common.base.Splitter;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -115,6 +112,8 @@ class HTTPGeneratorUtils {
 				return new HttpPost(url);
 			case HTTP_PUT_METHOD:
 				return new HttpPut(url);
+			case HTTP_DELETE_METHOD:
+				return new HttpDelete(url);
 			case HTTP_OPTION_METHOD:
 			default:
 				throw new IllegalStateException("Unsupported method");

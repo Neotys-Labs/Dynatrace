@@ -8,9 +8,12 @@ import com.neotys.dynatrace.common.HttpResponseUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,7 @@ class DynatraceEventAPI {
 	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
+		List<String> eventids=new ArrayList<>();
 		parameters.put("Api-Token", dynatraceApiKey);
 
 		final StringBuilder entitiesBuilder = new StringBuilder();
@@ -99,6 +103,21 @@ class DynatraceEventAPI {
 			if (httpResponse != null && !HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
 				final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
 				throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
+			}
+			else
+			{
+				if(httpResponse!=null)
+				{
+					JSONObject jsonObject= HttpResponseUtils.getJsonResponse(httpResponse);
+					if(jsonObject!=null)
+					{
+						JSONArray jsonArray=jsonObject.getJSONArray("storedEventIds");
+						for(int j=0;j<jsonArray.length();j++)
+						{
+							eventids.add(jsonArray.getString(j));
+						}
+					}
+				}
 			}
 		} finally {
 			insightHttp.closeHttpClient();
