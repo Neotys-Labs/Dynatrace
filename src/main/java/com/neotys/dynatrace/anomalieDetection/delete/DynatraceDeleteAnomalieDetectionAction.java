@@ -40,7 +40,7 @@ public class DynatraceDeleteAnomalieDetectionAction implements Action {
 
     @Override
     public Class<? extends ActionEngine> getEngineClass() {
-        return null;
+        return DynatraceDeleteAnomalieDetectionActionEngine.class;
     }
 
     @Override
