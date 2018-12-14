@@ -36,10 +36,7 @@ enum DynatraceConfigurationOption implements Option {
             "tag1,tag2",
             "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
             NON_EMPTY),
-    DynatraceApplicationName("dynatraceApplicationName", Required, True, TEXT,
-            "easytravel",
-            "Dynatrace Application Name. The configuration will be based on the smartscape of the application.",
-            NON_EMPTY),
+
 
     TraceMode("traceMode", Optional, False, TEXT,
             "",

@@ -150,8 +150,8 @@ public class DynatraceGetTimeSeries {
     {
         if(dynatraceCustomTimeseries.isPresent())
         {
-
-            dynatraceCustomTimeseries.get().stream().filter(key->!TIMESERIES_INFRA_MAP.containsKey(key)).filter(key->!TIMESERIES_SERVICES_MAP.containsKey(key)).forEach(timeseries->CUSTOM_TIMESERIES_SERVICES_MAP.put(timeseries,dynatraceAggregationType.get()));
+            if(dynatraceCustomTimeseries.get().size()>0)
+                dynatraceCustomTimeseries.get().stream().filter(key->!TIMESERIES_INFRA_MAP.containsKey(key)).filter(key->!TIMESERIES_SERVICES_MAP.containsKey(key)).forEach(timeseries->CUSTOM_TIMESERIES_SERVICES_MAP.put(timeseries,dynatraceAggregationType.get()));
         }
 
     }

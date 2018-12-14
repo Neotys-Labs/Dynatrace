@@ -12,10 +12,10 @@ import org.json.JSONObject;
 import javax.swing.text.html.Option;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
@@ -90,15 +90,29 @@ public class DynatraceConfigurationAPI {
         return Optional.absent();
     }
 
-    public void setDynatraceTags(String applicationName,Optional<String> tags) throws Exception {
+
+    public void setDynatraceTags(Optional<String> tags) throws Exception {
         List<String> serviceListId;
+        List<String> dependenListId;
         AtomicReference<List<String>> processgroupListids=new AtomicReference<>();;
         AtomicReference<List<String>> hostListid = new AtomicReference<>();;
         Map<String, String> header = new HashMap<>();
 
         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, tags, header);
 
-        serviceListId=DynatraceUtils.getListServicesFromApplicationName(context,dynatraceContext,applicationName,proxyName,traceMode,false);
+        serviceListId=DynatraceUtils.getApplicationEntityIds(context,dynatraceContext,proxyName,traceMode);
+        dependenListId=new ArrayList<>();
+        serviceListId.stream().forEach(serviceid-> {
+            try {
+                dependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        serviceListId=Stream.concat(serviceListId.stream(), dependenListId.stream()).distinct()
+                .collect(Collectors.toList());
+
         serviceListId.stream().forEach(serviceid->{
             try {
                 processgroupListids.set(DynatraceUtils.getListProcessGroupIDfromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode,false));
@@ -129,7 +143,8 @@ public class DynatraceConfigurationAPI {
     public void createRequestNamingRules() throws Exception {
         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, Optional.absent(), this.headers);
 
-        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode)) {
+        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode))
+        {
             NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST);
             NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE);
 

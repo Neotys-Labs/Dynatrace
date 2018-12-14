@@ -43,6 +43,7 @@ public class DynatraceUtils {
     private static final String DYNATRACE_PROTOCOL = "https://";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
     private static final ImageIcon DYNATRACE_ICON;
+    private static final String DYNATRACE_SERVICE_PREFIX="SERVICE";
     private static final long DYNATRACE_DEFAULT_DIFF=120000;
     static {
         final URL iconURL = DynatraceUtils.class.getResource("dynatrace.png");
@@ -414,10 +415,10 @@ public class DynatraceUtils {
         return hostid;
     }
 
-    public static List<String> getListServicesFromApplicationName(final Context context, final DynatraceContext dynatraceContext, String applicationName, final Optional<String> proxyName, final boolean traceMode,final boolean usetags)
-            throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATIONNAME;
+    public static List<String> getListDependentServicesFromServiceID(final Context context, final DynatraceContext dynatraceContext, String serviceid, final Optional<String> proxyName, final boolean traceMode,final boolean usetags) throws Exception {
+        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION+"/"+serviceid;
         final Map<String, String> parameters = new HashMap<>();
+
         if(usetags) {
             if (dynatraceContext.getTags().isPresent()) {
                 parameters.put("tag", dynatraceContext.getTags().get());
@@ -425,19 +426,20 @@ public class DynatraceUtils {
         }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
+        DynatraceService dynatraceService = null;
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
         final List<String> applicationEntityIds = new ArrayList<>();
         try {
             if(traceMode){
-                context.getLogger().info("Dynatrace service, get application entity:\n" + http.getRequest());
+                context.getLogger().info("Dynatrace service, get service entity:\n" + http.getRequest());
             }
             final HttpResponse httpResponse = http.execute();
 
             if (HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
-                final JSONArray jsonArrayResponse = getJsonArrayResponse(httpResponse);
-                if (jsonArrayResponse != null) {
-                    extractSerivcesIdsFromResponse(applicationEntityIds, jsonArrayResponse,applicationName);
+                final JSONObject jsonObjectResponse = getJsonResponse(httpResponse);
+                if (jsonObjectResponse != null) {
+                    extractServiceIdsFromResponse(applicationEntityIds, jsonObjectResponse);
                 }
             } else {
                 final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
@@ -448,11 +450,12 @@ public class DynatraceUtils {
         }
 
         if (traceMode) {
-            context.getLogger().info("Found applications: " + applicationEntityIds);
+            context.getLogger().info("Found service: " + applicationEntityIds);
         }
 
         return applicationEntityIds;
     }
+
 
     private static void extractApplicationEntityIdsFromResponse(final List<String> applicationEntityId, final JSONArray jsonArrayResponse) {
         for (int i = 0; i < jsonArrayResponse.length(); i++) {
@@ -460,6 +463,7 @@ public class DynatraceUtils {
             if (jsonApplication.has("entityId") && jsonApplication.has("displayName")) {
                 applicationEntityId.add(jsonApplication.getString("entityId"));
             }
+
         }
     }
 
@@ -472,6 +476,23 @@ public class DynatraceUtils {
             processgroupInstanceIds.add(processgroupinstances.getString(j));
         }
 
+
+    }
+    private static void extractServiceIdsFromResponse(final List<String> processgroupInstanceIds, final JSONObject jsonObject) {
+
+        JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
+        JSONArray  processgroupinstances=fromRelationships.getJSONArray("calls");
+        for(int j=0;j<processgroupinstances.length();j++)
+        {
+            processgroupInstanceIds.add(processgroupinstances.getString(j));
+        }
+        JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
+        JSONArray  toRelationshipscalls=fromRelationships.getJSONArray("calls");
+        for(int i=0;i<toRelationshipscalls.length();i++)
+        {
+            if(toRelationshipscalls.getString(i).contains(DYNATRACE_SERVICE_PREFIX))
+                 processgroupInstanceIds.add(toRelationshipscalls.getString(i));
+        }
 
     }
 

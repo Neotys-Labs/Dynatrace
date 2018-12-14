@@ -17,6 +17,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DynatracePGIMetrics {
     private static final Map<String,String> PGI_TIMESERIES_MAP=new HashMap<>();
@@ -25,7 +26,6 @@ public class DynatracePGIMetrics {
     private final String dynatraceId;
     private static final long DYNATRACE_SMARTSCAPE_DIFF=300000;
     private final Optional<String> dynatraceManagedHostname;
-    private final Optional<String> dynatraceApplication;
     private static final Optional<Long> diff=Optional.of(DYNATRACE_SMARTSCAPE_DIFF);
     private HTTPGenerator httpGenerator;
     private Map<String, String> header = null;
@@ -48,28 +48,36 @@ public class DynatracePGIMetrics {
     }
     private DynatraceContext dynatraceContext;
 
-    public DynatracePGIMetrics( String dynatraceApiKey, String dynatraceId, final Optional<String> dynatraceTags, Optional<String> dynatraceManagedHostname, Optional<String> dynatraceApplication,Optional<String> proxyName, Context context,long startTS, boolean traceMode) throws Exception {
+    public DynatracePGIMetrics( String dynatraceApiKey, String dynatraceId, final Optional<String> dynatraceTags, Optional<String> dynatraceManagedHostname,Optional<String> proxyName, Context context,long startTS, boolean traceMode) throws Exception {
         this.proxyName = proxyName;
         this.dynatraceApiKey = dynatraceApiKey;
         this.dynatraceId = dynatraceId;
         this.dynatraceManagedHostname = dynatraceManagedHostname;
-        this.dynatraceApplication = dynatraceApplication;
         this.context = context;
         this.traceMode = traceMode;
         this.startTS=startTS;
         dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header);
 
-        if(dynatraceApplication.isPresent()) {
-            this.dynatraceApplicationServiceIds = DynatraceUtils.getListServicesFromApplicationName(context, dynatraceContext, dynatraceApplication.get(), proxyName, traceMode,false);
-            applicationName=dynatraceApplication.get();
-        }
-        else {
-            this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, dynatraceContext, proxyName, traceMode);
-            if(dynatraceTags.isPresent())
-                applicationName=dynatraceTags.get();
-            else
-                applicationName="DYNATRACE";
-        }
+
+        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, dynatraceContext, proxyName, traceMode);
+        //---get dependencies-----
+        List<String> dependenListId=new ArrayList<>();
+        dynatraceApplicationServiceIds.stream().forEach(serviceid-> {
+            try {
+                dependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        dynatraceApplicationServiceIds= Stream.concat(dynatraceApplicationServiceIds.stream(), dependenListId.stream()).distinct()
+                .collect(Collectors.toList());
+        //--------
+        if(dynatraceTags.isPresent())
+            applicationName=dynatraceTags.get();
+        else
+            applicationName="DYNATRACE";
+
     }
 
     public void marshal(String filename , List<DynatarceServiceData> dynatarceServiceDataList) throws  IOException {

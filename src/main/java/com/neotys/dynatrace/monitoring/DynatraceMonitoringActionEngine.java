@@ -96,9 +96,10 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 
             if(dynatracecustomTimeSeries.isPresent())
             {
-                if(!validateAgggregationType(dynatracecustomTImeseriesAggregateType))
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be define or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
-
+                if(dynatracecustomTimeSeries.get().size()>0) {
+                    if (!validateAgggregationType(dynatracecustomTImeseriesAggregateType))
+                        return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be define or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
+                }
             }
 
             context.getCurrentVirtualUser().put(Constants.DYNATRACE_LAST_EXECUTION_TIME, dynatraceCurrentExecution);

@@ -104,7 +104,8 @@ class DynatraceEventAPI {
 				final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
 				throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ url + " - "+ bodyJson + " - " + stringResponse);
 			}
-			else
+			//#TODO add the update of the events by retrieving the eventid ....required the change on the API of DYnatrace. FEATURE in PENDING
+			/*else
 			{
 				if(httpResponse!=null)
 				{
@@ -118,7 +119,7 @@ class DynatraceEventAPI {
 						}
 					}
 				}
-			}
+			}*/
 		} finally {
 			insightHttp.closeHttpClient();
 		}

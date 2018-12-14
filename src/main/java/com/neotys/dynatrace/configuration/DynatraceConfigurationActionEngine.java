@@ -41,7 +41,6 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
         final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceConfigurationOption.DynatraceManagedHostname.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceConfigurationOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceConfigurationOption.TraceMode.getName());
-        final String dynatraceApplicationName=parsedArgs.get(DynatraceConfigurationOption.DynatraceApplicationName.getName()).get();
         final Optional<String> dynatraceTags=parsedArgs.get(DynatraceConfigurationOption.DynatraceTags.getName());
         boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
@@ -50,7 +49,8 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
             sampleResult.sampleStart();
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
             configurationAPI.generateRequestAttributes();
-            configurationAPI.setDynatraceTags(dynatraceApplicationName,dynatraceTags);
+            //#TODO remove applicaiton name ---parse the architecture based on tags
+            configurationAPI.setDynatraceTags(dynatraceTags);
             configurationAPI.createRequestNamingRules();
             sampleResult.sampleEnd();
         }

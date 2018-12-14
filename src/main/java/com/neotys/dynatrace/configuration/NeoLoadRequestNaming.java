@@ -21,9 +21,9 @@ import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 public class NeoLoadRequestNaming {
 
 
-    private final static String requestNamingRule="{RequestAttribute:NeoLoad_ScenarioName}_{RequestAttribute:NeoLoad_Transaction}_{URL:Path}";
+    private final static String requestNamingRule="{RequestAttribute:NEOLOAD_ScenarioName}_{RequestAttribute:NEOLOAD_Transaction}:{URL:Path}";
     private final static String DYNATRACE_NAMING_URL="requestNaming";
-    private final static String NeoLoad_REQUEST_ATTRIBUTE="NeoLoad_Transaction";
+    private final static String NeoLoad_REQUEST_ATTRIBUTE="NEOLOAD_Transaction";
     public final static String WEB_REQUEST="WEB_REQUEST";
     public final static String WEB_SERVICE="WEB_SERVICE";
 
@@ -55,10 +55,10 @@ public class NeoLoadRequestNaming {
             final Optional<Proxy> proxy = DynatraceUtils.getProxy(context,proxyName, url);
 
             String jsonpayload=String.format(requestNaminJson,type);
-            httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD,url,dynatraceContext.getHeaders(),parameters,proxy,requestNaminJson);
+            httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD,url,dynatraceContext.getHeaders(),parameters,proxy,jsonpayload);
 
             if (traceMode) {
-                context.getLogger().info("Dynatrace requestnaming, post request naming rule:\n" + httpGenerator.getRequest());
+                context.getLogger().info("Dynatrace requestnaming, post request naming rule:\n" + httpGenerator.getRequest() + "payload : "+jsonpayload);
             }
             HttpResponse httpResponse = httpGenerator.execute();
             final int statusCode = httpResponse.getStatusLine().getStatusCode();

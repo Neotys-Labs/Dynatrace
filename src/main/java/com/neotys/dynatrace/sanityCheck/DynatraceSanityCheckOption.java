@@ -23,14 +23,11 @@ enum DynatraceSanityCheckOption implements Option {
             "Dynatrace API key",
             NON_EMPTY),
 
-    DynatraceTags("tags", Optional, True, TEXT,
+    DynatraceTags("tags", Required, True, TEXT,
             "tag1,tag2",
             "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
             ALWAYS_VALID),
-    DynatraceApplicationName("dynatraceApplicationName", Optional, True, TEXT,
-            "easytravel",
-            "Dynatrace Application Name. The sanitycheck will be based on the smartscape of the application.",
-            ALWAYS_VALID),
+
     DynatraceManagedHostname("dynatraceManagedHostname", Optional, False, TEXT,
             "",
             "Hostname of your managed Dynatrace environment.",

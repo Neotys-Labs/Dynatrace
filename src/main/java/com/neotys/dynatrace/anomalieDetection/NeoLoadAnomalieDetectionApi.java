@@ -32,8 +32,7 @@ public class NeoLoadAnomalieDetectionApi {
             "  \"threshold\": %s,\n" +
             "  \"enabled\": true,\n" +
             "  \"tagFilters\": [\n" ;
-    private final static String ENDPAYLOAD="]\\n\" +\n" +
-            "            \"}\"\n";
+    private final static String ENDPAYLOAD="]}";
 
 
     private final Map<String, String> headers;
@@ -112,7 +111,7 @@ public class NeoLoadAnomalieDetectionApi {
     }
 
     private void deleteAnoalieDetectionFromId(String id) throws Exception {
-        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_ANOMALIE_URL+"/"+id;
+        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_ANOMALIE_URL  +id;
         final Map<String, String> parameters = new HashMap<>();
 
         parameters.put("Api-Token", dynatraceApiKey);
@@ -132,7 +131,7 @@ public class NeoLoadAnomalieDetectionApi {
             }
             else
             {
-                context.getLogger().error("Unable to delete the anoamlie detection ");
+                context.getLogger().error("Unable to delete the anoamlie detection with the id :"+id);
             }
 
 
