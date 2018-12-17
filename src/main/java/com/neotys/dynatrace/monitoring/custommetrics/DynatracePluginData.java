@@ -36,7 +36,7 @@ public class DynatracePluginData {
 
     private DynatracePluginData(final String dynataceApiKey,
                                 final Optional<String> proxyName, final Context context, final String dynatraceId,
-                                final String dataExchangeApiUrl, final Optional<String> dynatraceManagedHostname, final boolean traceMode) throws Exception {
+								final Optional<String> dynatraceManagedHostname, final boolean traceMode) throws Exception {
 
         dynatraceAccountId = dynatraceId;
         virtualUserId = context.getCurrentVirtualUser().getId();
@@ -60,7 +60,6 @@ public class DynatracePluginData {
                                                                final String dynatraceId,
                                                                final String dynatraceApiKey,
                                                                final Optional<String> dynatraceManagedHostname,
-                                                               final String dataExchangeApiUrl,
                                                                final Optional<String> proxyName,
                                                                final boolean traceMode) throws Exception {
         if (instance == null) {
@@ -69,7 +68,6 @@ public class DynatracePluginData {
                     proxyName,
                     context,
                     dynatraceId,
-                    dataExchangeApiUrl,
                     dynatraceManagedHostname,
                     traceMode);
         }else{

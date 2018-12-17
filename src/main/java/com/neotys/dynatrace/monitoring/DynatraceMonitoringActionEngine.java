@@ -96,7 +96,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
 	        /*
 	         * Handle push Neoload custom metrics
 	         */
-            final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName, traceMode);
+            final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, proxyName, traceMode);
 
             final String virtualUserId = context.getCurrentVirtualUser().getId();
             // if therer is multiple virtual user handling the action return error
