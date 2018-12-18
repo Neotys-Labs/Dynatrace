@@ -145,8 +145,8 @@ public class DynatraceConfigurationAPI {
 
         if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode))
         {
-            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST);
             NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE);
+            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST);
 
         }
     }

@@ -166,8 +166,7 @@ public class NeoLoadAnomalieDetectionApi {
            List<String> listofTags= Arrays.asList(tag.get().split("\\s*,\\s*"));
            listofTags=listofTags.stream().map(s -> {
                    return "{\"context\": \"CONTEXTLESS\",\n" +
-                           "      \"key\": \""+s+"\",\n" +
-                           "      \"value\": \""+s+"\"}";
+                           "      \"key\": \""+s+"\"}";
 
            }).collect(Collectors.toList());
            return String.join(",",listofTags);
