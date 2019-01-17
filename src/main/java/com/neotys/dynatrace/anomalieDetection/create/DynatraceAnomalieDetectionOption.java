@@ -52,6 +52,19 @@ enum DynatraceAnomalieDetectionOption implements Option {
             "PERFORMANCE",
             "Value possible : AVAILABILITY, CUSTOM_ALERT, ERROR, PERFORMANCE, RESOURCE_CONTENTION",
             NON_EMPTY),
+    JsonAnomalieDetection("jsonAnomalieDetection", Optional, False, TEXT,
+            "",
+            "Json string containing the different anomalies rules : example : {[{\n" +
+                    "      \"dynatraceMetricName\":\"com.dynatrace.builtin:service.responsetime\",\n" +
+                    "      \"operator\":\"ABOVE\",\n" +
+                    "      \"value\": \"100\" ,\n" +
+                    "      \"typeOfAnomalie\":\"PERFORMANCE\"\n" +
+                    "    }]}",
+            ALWAYS_VALID),
+    JsonAnomalieDetectionFile("jsonAnomalieDetectionFile", Optional, False, TEXT,
+            "",
+            "path to the json file containing the anomalie detection rules",
+            ALWAYS_VALID),
     TraceMode("traceMode", Optional, False, TEXT,
             "",
             "",

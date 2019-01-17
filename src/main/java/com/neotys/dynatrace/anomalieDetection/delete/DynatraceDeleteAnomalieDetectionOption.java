@@ -32,6 +32,8 @@ enum DynatraceDeleteAnomalieDetectionOption implements Option {
             "",
             "Hostname of your managed Dynatrace environment.",
             ALWAYS_VALID),
+
+
     TraceMode("traceMode", Optional, False, TEXT,
             "",
             "",

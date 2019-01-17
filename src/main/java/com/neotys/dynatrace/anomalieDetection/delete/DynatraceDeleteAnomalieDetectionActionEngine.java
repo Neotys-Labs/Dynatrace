@@ -43,6 +43,7 @@ public class DynatraceDeleteAnomalieDetectionActionEngine implements ActionEngin
         final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceDeleteAnomalieDetectionOption.DynatraceManagedHostname.getName());
         final Optional<String> proxyName = parsedArgs.get(DynatraceDeleteAnomalieDetectionOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceDeleteAnomalieDetectionOption.TraceMode.getName());
+
         boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
         try

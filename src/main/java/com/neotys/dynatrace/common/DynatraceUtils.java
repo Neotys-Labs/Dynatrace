@@ -14,6 +14,7 @@ import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -74,6 +75,7 @@ public class DynatraceUtils {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
         final Map<String, String> parameters = new HashMap<>();
         if(dynatraceContext.getTags().isPresent()) {
+            //#TODO : hanndle tags
             parameters.put("tag", dynatraceContext.getTags().get());
         }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
@@ -481,17 +483,27 @@ public class DynatraceUtils {
     private static void extractServiceIdsFromResponse(final List<String> processgroupInstanceIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
-        JSONArray  processgroupinstances=fromRelationships.getJSONArray("calls");
-        for(int j=0;j<processgroupinstances.length();j++)
+        try {
+            JSONArray processgroupinstances = fromRelationships.getJSONArray("calls");
+            for (int j = 0; j < processgroupinstances.length(); j++) {
+                processgroupInstanceIds.add(processgroupinstances.getString(j));
+            }
+        }catch(JSONException e)
         {
-            processgroupInstanceIds.add(processgroupinstances.getString(j));
+
         }
+
         JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
-        JSONArray  toRelationshipscalls=fromRelationships.getJSONArray("calls");
-        for(int i=0;i<toRelationshipscalls.length();i++)
+        try {
+            JSONArray toRelationshipscalls = toRelationships.getJSONArray("calls");
+            for (int i = 0; i < toRelationshipscalls.length(); i++) {
+                if (toRelationshipscalls.getString(i).contains(DYNATRACE_SERVICE_PREFIX))
+                    processgroupInstanceIds.add(toRelationshipscalls.getString(i));
+            }
+        }
+        catch(JSONException e)
         {
-            if(toRelationshipscalls.getString(i).contains(DYNATRACE_SERVICE_PREFIX))
-                 processgroupInstanceIds.add(toRelationshipscalls.getString(i));
+
         }
 
     }
@@ -523,16 +535,26 @@ public class DynatraceUtils {
         updateTagsOnEntity(context,dynatraceContext,proxyName,traceMode,dynatraceUrl);
     }
     private static void updateTagsOnEntity(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String url) throws Exception {
+        String jsonpayloadstart;
+        String jsonpayloadend;
         String jsonpayload;
         final Map<String, String> parameters = new HashMap<>();
         if(dynatraceContext.getTags().isPresent()) {
-            jsonpayload="{\n" +
-                    "  \"tags\": [\n" +
-                    "    \""+dynatraceContext.getTags().get()+"\"\n" +
-                    "  ]\n" +
+
+            jsonpayloadstart="{\n" +
+                    "  \"tags\": [\n";
+
+            List<String> listofTags= Arrays.asList(dynatraceContext.getTags().get().split("\\s*,\\s*"));
+            listofTags=listofTags.stream().map(s -> {
+                     return "\""+s+"\"\n";
+
+                }).collect(Collectors.toList());
+
+
+            jsonpayloadend ="  ]\n" +
                     "}";
 
-
+            jsonpayload=jsonpayloadstart+String.join(",",listofTags) + jsonpayloadend;
             parameters.put("Api-Token", dynatraceContext.getApiKey());
 
             final Optional<Proxy> proxy = getProxy(context, proxyName, url);

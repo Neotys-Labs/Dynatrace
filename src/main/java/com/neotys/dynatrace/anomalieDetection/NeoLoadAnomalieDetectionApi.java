@@ -9,10 +9,7 @@ import org.apache.http.HttpStatus;
 import org.json.JSONObject;
 
 import java.net.MalformedURLException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NeoLoadAnomalieDetectionApi {
@@ -163,12 +160,23 @@ public class NeoLoadAnomalieDetectionApi {
     {
         if(tag.isPresent())
         {
+
            List<String> listofTags= Arrays.asList(tag.get().split("\\s*,\\s*"));
            listofTags=listofTags.stream().map(s -> {
-                   return "{\"context\": \"CONTEXTLESS\",\n" +
+                    if(s.contains(":"))
+                    {
+                        List<String> listofkeys=Arrays.asList(s.split(":"));
+                        if(listofkeys.size()>1)
+                           return "{\"context\": \"CONTEXTLESS\",\n" +
+                                    "      \"key\": \""+listofkeys.get(0)+"\", \"value\":\""+listofkeys.get(1)+"\"}";
+                        else
+                            return null;
+                    }
+                    else
+                        return "{\"context\": \"CONTEXTLESS\",\n" +
                            "      \"key\": \""+s+"\"}";
 
-           }).collect(Collectors.toList());
+           }).filter(Objects::nonNull).collect(Collectors.toList());
            return String.join(",",listofTags);
         }
         else
