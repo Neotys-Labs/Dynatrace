@@ -58,34 +58,54 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
         final Optional<String> proxyName = parsedArgs.get(DynatraceAnomalieDetectionOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceAnomalieDetectionOption.TraceMode.getName());
         final Optional<String> dynatraceTags=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTags.getName());
-        final String dynatracemetric=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMetricName.getName()).get();;
-        String operator=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceOperator.getName()).get();;
-        final String threshold=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMericValue.getName()).get();;
-        String typeOfAnomalie=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTypeofAnomalie.getName()).get();
+        final Optional<String> dynatracemetric=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMetricName.getName());;
+        Optional<String> operator=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceOperator.getName());;
+        final Optional<String> threshold=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMericValue.getName());;
+        Optional<String> typeOfAnomalie=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTypeofAnomalie.getName());
         boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
-        final Optional<String> jsonAnomalieDetection = parsedArgs.get(DynatraceAnomalieDetectionOption.TraceMode.getName());
-        final Optional<String> jsonAnomalieDetectionFile=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTags.getName());
+        final Optional<String> jsonAnomalieDetection = parsedArgs.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetection.getName());
+        final Optional<String> jsonAnomalieDetectionFile=parsedArgs.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile.getName());
 
         List<String> listofids;
         //----------validate the value----------------
 
         if(!jsonAnomalieDetection.isPresent()&&!jsonAnomalieDetectionFile.isPresent()) {
-            //----valid Operator------------------
-            if (isPartOftheList(operator, OPERATOR))
-                operator = operator.toUpperCase();
+            if(operator.isPresent()) {
+                //----valid Operator------------------
+                if (!isPartOftheList(operator.get(), OPERATOR))
+                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Operator: " + operator, null);
+            }
             else
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Operator: " + operator, null);
+            {
+                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Operator: cannot be null if the json reference is not set" , null);
 
+            }
 
-            //----valid value ---------------------
-            if (!isaDigit(threshold))
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Threshold needs to be a digit: " + threshold, null);
+            if(threshold.isPresent()) {
+                //----valid value ---------------------
+                if (!isaDigit(threshold.get()))
+                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Threshold needs to be a digit: " + threshold, null);
+            }
+            else
+            {
+                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Threshold: cannot be null if the json reference is not set" , null);
 
+            }
             //----valid type of anoamlie------------
-            if (isPartOftheList(typeOfAnomalie, TYPE_ANOMALIE))
-                typeOfAnomalie = typeOfAnomalie.toUpperCase();
+            if(typeOfAnomalie.isPresent()) {
+                if (!isPartOftheList(typeOfAnomalie.get(), TYPE_ANOMALIE))
+                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of type of anomalie: " + typeOfAnomalie, null);
+            }
             else
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of type of anomalie: " + typeOfAnomalie, null);
+            {
+                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of type of anomalie: cannot be null if the json reference is not set" , null);
+
+            }
+            if(!dynatracemetric.isPresent())
+            {
+                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of dynatracemetricname: cannot be null if the json reference is not set" , null);
+
+            }
         }
         else
         {
@@ -106,8 +126,9 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
                     }
                     else
                     {
-                        if(!Files.exists( Paths.get(jsonAnomalieDetectionFile.get())))
+                        if(!Files.exists( Paths.get(jsonAnomalieDetectionFile.get().trim())))
                         {
+                            context.getLogger().error(jsonAnomalieDetectionFile.get()+" does not exists");
                             return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid argument: jsonAnomalieDetectionFile needs to exist "
                                     + DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile + ".", null);
 
@@ -148,7 +169,7 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
                 context.getCurrentVirtualUser().put("Dynatrace_Anoamlie", listofids);
             }
             else {
-                String id = anomalieDetectionApi.createAnomalie(dynatracemetric, operator, typeOfAnomalie, threshold, dynatraceTags);
+                String id = anomalieDetectionApi.createAnomalie(dynatracemetric.get(), operator.get().toUpperCase(), typeOfAnomalie.get().toUpperCase(), threshold.get(), dynatraceTags);
                 if (id != null) {
                     listofids.add(id);
                     context.getCurrentVirtualUser().put("Dynatrace_Anoamlie", listofids);
@@ -168,7 +189,7 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
 
         if(jsonAnomalieDetectionFile.isPresent())
         {
-            JsonReader reader = new JsonReader(new FileReader(jsonAnomalieDetectionFile.get()));
+            JsonReader reader = new JsonReader(new FileReader(jsonAnomalieDetectionFile.get().trim()));
             return dynatraceAnomalies=gson.fromJson(reader, DynatraceAnomalies.class);
         }
         else
