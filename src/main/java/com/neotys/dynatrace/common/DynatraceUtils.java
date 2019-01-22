@@ -23,6 +23,7 @@ import java.net.URL;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
@@ -472,10 +473,15 @@ public class DynatraceUtils {
     private static void extractProcessGroupIdsFromResponse(final List<String> processgroupInstanceIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
-        JSONArray  processgroupinstances=fromRelationships.getJSONArray("runsOn");
-        for(int j=0;j<processgroupinstances.length();j++)
+        try {
+            JSONArray processgroupinstances = fromRelationships.getJSONArray("runsOn");
+            for (int j = 0; j < processgroupinstances.length(); j++) {
+                processgroupInstanceIds.add(processgroupinstances.getString(j));
+            }
+        }
+        catch (JSONException e)
         {
-            processgroupInstanceIds.add(processgroupinstances.getString(j));
+            //----print the exeption
         }
 
 
@@ -490,7 +496,7 @@ public class DynatraceUtils {
             }
         }catch(JSONException e)
         {
-
+            //----print the exeption
         }
 
         JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
@@ -503,7 +509,7 @@ public class DynatraceUtils {
         }
         catch(JSONException e)
         {
-
+            //----print the exeption
         }
 
     }
