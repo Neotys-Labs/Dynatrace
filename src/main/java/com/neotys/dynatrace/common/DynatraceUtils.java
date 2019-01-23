@@ -35,8 +35,8 @@ import static com.neotys.dynatrace.common.HttpResponseUtils.getJsonResponse;
  * Created by anouvel on 20/12/2017.
  */
 public class DynatraceUtils {
-    private static final String DYNATRACE_URL = ".live.dynatrace.com/api/v1/";
-    private static final String DYNATRACE_CONFIGURL = ".live.dynatrace.com/api/config/v1/";
+    private static final String DYNATRACE_URL = "/api/v1/";
+    private static final String DYNATRACE_CONFIGURL = "/api/config/v1/";
     private static final String DYNATRACE_APPLICATION = "entity/services";
     private static final String DYNATRACE_APPLICATIONNAME="entity/applications";
     private static final String DYNATRACE_PROCESS="entity/infrastructure/processes";
