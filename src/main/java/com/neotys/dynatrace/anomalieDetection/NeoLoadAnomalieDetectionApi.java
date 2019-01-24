@@ -2,6 +2,7 @@ package com.neotys.dynatrace.anomalieDetection;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.*;
+import com.neotys.dynatrace.common.tag.DynatraceTaggingUtils;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpResponse;
@@ -10,9 +11,11 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class NeoLoadAnomalieDetectionApi {
+
 
     private final static String DYNATRACE_ANOMALIE_URL = "anomalyDetection/metricEvents/";
 
@@ -158,29 +161,7 @@ public class NeoLoadAnomalieDetectionApi {
 
     private String generateTagFilterString(Optional<String> tag)
     {
-        if(tag.isPresent())
-        {
-
-           List<String> listofTags= Arrays.asList(tag.get().split("\\s*,\\s*"));
-           listofTags=listofTags.stream().map(s -> {
-                    if(s.contains(":"))
-                    {
-                        List<String> listofkeys=Arrays.asList(s.split(":"));
-                        if(listofkeys.size()>1)
-                           return "{\"context\": \"CONTEXTLESS\",\n" +
-                                    "      \"key\": \""+listofkeys.get(0)+"\", \"value\":\""+listofkeys.get(1)+"\"}";
-                        else
-                            return null;
-                    }
-                    else
-                        return "{\"context\": \"CONTEXTLESS\",\n" +
-                           "      \"key\": \""+s+"\"}";
-
-           }).filter(Objects::nonNull).collect(Collectors.toList());
-           return String.join(",",listofTags);
-        }
-        else
-            return null;
+       return DynatraceTaggingUtils.convertIntoDynatraceContextTag(tag);
     }
 
 

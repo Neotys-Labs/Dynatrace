@@ -11,4 +11,6 @@ public class DynatraceEventStopActionTest {
 		assertEquals("DynatraceEventAction", action.getType());
 	}
 
+
+
 }

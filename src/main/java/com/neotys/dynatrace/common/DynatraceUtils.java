@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.gson.JsonObject;
 import com.neotys.dynatrace.common.data.DynatarceServiceData;
 import com.neotys.dynatrace.common.data.DynatraceService;
+import com.neotys.dynatrace.common.tag.DynatraceTaggingUtils;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
@@ -550,17 +551,10 @@ public class DynatraceUtils {
             jsonpayloadstart="{\n" +
                     "  \"tags\": [\n";
 
-            List<String> listofTags= Arrays.asList(dynatraceContext.getTags().get().split("\\s*,\\s*"));
-            listofTags=listofTags.stream().map(s -> {
-                     return "\""+s+"\"\n";
-
-                }).collect(Collectors.toList());
-
-
             jsonpayloadend ="  ]\n" +
                     "}";
 
-            jsonpayload=jsonpayloadstart+String.join(",",listofTags) + jsonpayloadend;
+            jsonpayload=jsonpayloadstart+ DynatraceTaggingUtils.convertforUpdateTags(dynatraceContext.getTags()) + jsonpayloadend;
             parameters.put("Api-Token", dynatraceContext.getApiKey());
 
             final Optional<Proxy> proxy = getProxy(context, proxyName, url);
