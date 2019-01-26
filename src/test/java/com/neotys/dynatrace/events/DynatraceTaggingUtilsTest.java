@@ -20,7 +20,7 @@ public class DynatraceTaggingUtilsTest {
         Optional<String> tag= Optional.of("app");
 
         String dynatracekubernetes="{\n" +
-                "\"context\": \"Kubernetes\",\n" +
+                "\"context\": \"KUBERNETES\",\n" +
                 "\"key\": \"app\",\n" +
                 "\"value\" : \"carts\"\n" +
                 "}," +
@@ -30,7 +30,7 @@ public class DynatraceTaggingUtilsTest {
                 "\"value\" : \"dev\"\n" +
                 "}";
         String dynatracesimplekubernetes="{\n" +
-                "\"context\": \"Kubernetes\",\n" +
+                "\"context\": \"KUBERNETES\",\n" +
                 "\"key\": \"app\",\n" +
                 "\"value\" : \"carts\"\n" +
                 "}";
@@ -80,7 +80,7 @@ public class DynatraceTaggingUtilsTest {
     Optional<String> tag= Optional.of("app");
 
     String dynatracekubernetes="{\n" +
-            "\"context\": \"Kubernetes\",\n" +
+            "\"context\": \"KUBERNETES\",\n" +
             "\"key\": \"app\",\n" +
             "\"value\" : \"carts\"\n" +
             "}," +
@@ -90,7 +90,7 @@ public class DynatraceTaggingUtilsTest {
             "\"value\" : \"dev\"\n" +
             "}";
     String dynatracesimplekubernetes="{\n" +
-                "\"context\": \"Kubernetes\",\n" +
+                "\"context\": \"KUBERNETES\",\n" +
                 "\"key\": \"app\",\n" +
                 "\"value\" : \"carts\"\n" +
                 "}";
