@@ -88,7 +88,7 @@ public class DynatraceTaggingUtils {
 
         Matcher matcher=taggingContextPatern.matcher(tag);
         if (matcher.matches()) {
-            context = matcher.group(1);
+            context = matcher.group(1).toUpperCase();
             key = matcher.group(2);
             value = matcher.group(3);
         }else {
