@@ -22,6 +22,7 @@ public class NeoLoadAnomalieDetectionApi {
     private final static String JSONPAYLOAD="{\n" +
             "  \"metricId\": \"%s\",\n" +
             "  \"displayName\": \"Neoload Anomalie on %s\",\n" +
+            "  \"name\": \"Neoload Anomalie on %s\",\n" +
             "  \"description\": \"Neoload Threshold Validation for %s\",\n" +
             "  \"aggregationType\": \"AVG\",\n" +
             "  \"eventType\": \"%s\",\n" +
@@ -64,7 +65,7 @@ public class NeoLoadAnomalieDetectionApi {
         try
         {
             final Optional<Proxy> proxy = DynatraceUtils.getProxy(context, proxyName, url);
-            String jsonpayload=String.format(JSONPAYLOAD,dynatracemetricname,dynatracemetricname,dynatracemetricname,typeofAlert,operator,value);
+            String jsonpayload=String.format(JSONPAYLOAD,dynatracemetricname,dynatracemetricname,dynatracemetricname,dynatracemetricname,typeofAlert,operator,value);
             //-----add tags---------------
             String tagfilter=generateTagFilterString(tags);
             if(tagfilter!=null)
