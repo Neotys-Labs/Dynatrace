@@ -32,6 +32,8 @@
             <groupId>com.neotys.rest</groupId>
             <artifactId>neotys-rest-api-dataexchange-client-olingo</artifactId>
             <version>1.0.4</version>
+            <!-- already in NeoLoad: can cause conflicts -->
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
