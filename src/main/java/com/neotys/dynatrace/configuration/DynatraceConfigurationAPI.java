@@ -21,7 +21,7 @@ import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
 
 public class DynatraceConfigurationAPI {
-    private static final String DYNATRACE_EVENTS_API_URL = "requestAttributes";
+    private static final String DYNATRACE_EVENTS_API_URL = "service/requestAttributes";
 
 
     private final Map<String, String> headers;
