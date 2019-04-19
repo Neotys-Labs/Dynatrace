@@ -40,7 +40,7 @@ This bundle provides inbound and an outbound integration:
           Request.Failure.PerSeconds, Transaction.Average.Failure, Iteration.Average.Success, Transaction.Failure.PerSecond, Iteration.Average.Success, Transaction.Average.Count, 
           Failure.Rate
           ```    
-      
+     * Other experimental features in the ['develop' branch](https://github.com/Neotys-Labs/Dynatrace/blob/develop/README.md): DynatraceConfiguration, DynatraceSetAnomalieDetection, DynatraceDeleteAnomalieDetection, DynatraceSanityCheck.
      
 | Property | Value |
 | -----| -------------- |
@@ -151,3 +151,7 @@ A Bad context error should be raised.
     * NL-DYNATRACE_MONITORING_ACTION-01: Could not parse arguments
     * NL-DYNATRACE_MONITORING_ACTION-02: Technical Error
     * NL-DYNATRACE_MONITORING_ACTION-03: Bad context
+    
+ ## Experimental Features
+ 
+Learn more about the experimental features in the ['develop' branch](https://github.com/Neotys-Labs/Dynatrace/blob/develop/README.md): DynatraceConfiguration, DynatraceSetAnomalieDetection, DynatraceDeleteAnomalieDetection, DynatraceSanityCheck. 
