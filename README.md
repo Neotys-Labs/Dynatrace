@@ -2,6 +2,8 @@
 
 # Dynatrace	Integration for NeoLoad
 
+This is the stable version, see the [experimental version](https://github.com/Neotys-Labs/Dynatrace/tree/develop) for a wider integration.
+
 ## Overview
 
 These Advanced Actions allows you to integrate [NeoLoad](https://www.neotys.com/neoload/overview) with [Dynatrace](https://www.dynatrace.com/) in order to correlate data from one tool to another.
