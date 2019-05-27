@@ -1,6 +1,8 @@
 <p align="center"><img src="/screenshots/dynatrace_logo.png" width="40%" alt="Dynatrace Logo" /></p>
 
-# Dynatrace	Integration for NeoLoad
+# Dynatrace	Integration for NeoLoad (experimental)
+
+This is an experimental version, see the [stable version](https://github.com/Neotys-Labs/Dynatrace/)
 
 ## Overview
 
