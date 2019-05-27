@@ -22,7 +22,7 @@ public class NeoLoadRequestNaming {
 
 
     private final static String requestNamingRule="{RequestAttribute:NEOLOAD_ScenarioName}_{RequestAttribute:NEOLOAD_Transaction}:{URL:Path}";
-    private final static String DYNATRACE_NAMING_URL="requestNaming";
+    private final static String DYNATRACE_NAMING_URL="service/requestNaming";
     private final static String NeoLoad_REQUEST_ATTRIBUTE="NEOLOAD_Transaction";
     public final static String WEB_REQUEST="WEB_REQUEST";
     public final static String WEB_SERVICE="WEB_SERVICE";
