@@ -52,6 +52,10 @@ public class DynatraceTaggingUtilsTest {
                 "\"key\": \"app\",\n" +
                 "\"value\" : \"carts\"\n" +
                 "}";
+        String dynatracesimplesingletag ="{\n" +
+                "\"context\": \"CONTEXTLESS\",\n" +
+                "\"key\": \"app\"" +
+                             "}";
         String dynatracesimpltag="app,dev";
         String dynatracetag="app";
 
@@ -63,10 +67,11 @@ public class DynatraceTaggingUtilsTest {
         assertEquals(dynatracesimplekubernetes,generatedtag );
         generatedtag=DynatraceTaggingUtils.convertIntoDynatraceTag(tagsimplenonkubernetes);
         assertEquals(dynatracesimplenonkubernetes,generatedtag );
+
         generatedtag=DynatraceTaggingUtils.convertIntoDynatraceTag(tagsimple);
         assertEquals(dynatracesimpltag, generatedtag);
-        generatedtag= DynatraceTaggingUtils.convertIntoDynatraceTag(tag);
-        assertEquals(dynatracetag,generatedtag);
+        generatedtag= DynatraceTaggingUtils.convertIntoDynatraceContextTag(tag);
+       // assertEquals(dynatracesimplesingletag,generatedtag);
 
     }
 

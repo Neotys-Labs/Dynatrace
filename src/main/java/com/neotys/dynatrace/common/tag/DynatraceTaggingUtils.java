@@ -120,7 +120,7 @@ public class DynatraceTaggingUtils {
         else
             return "{\n" +
                     " \"context\": \"" + context + "\",\n" +
-                    "\"key\": \"" + key + "\",\n" +
+                    "\"key\": \"" + key + "\""+
                     "}";
 
     }
@@ -169,7 +169,7 @@ public class DynatraceTaggingUtils {
             if(context!=null)
                 return "{\n" +
                         "\"context\": \"" + context + "\",\n" +
-                        "\"key\": \"" + key + "\",\n" +
+                        "\"key\": \"" + key + "\""+
                         "}";
             else
                 return key;
