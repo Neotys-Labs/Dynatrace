@@ -127,12 +127,15 @@ All the metrics retrieved from Dynatrace are available on the NeoLoad Controller
 
 ## Analyze results in Dynatrace
 
-1. Create a custom chart with NeoLoad data.
-   <p align="center"><img src="/screenshots/dynatrace_custom_chart.png" alt="Dynatrace custom chart" /></p>
+1. Find NeoLoad in Technologies.
+
+   Click on Group details:
+   <p align="center"><img src="/screenshots/dynatrace_technologies.png" alt="Technologies" /></p>
+   
+   Click on NeoLoad Data:
+   <p align="center"><img src="/screenshots/dynatrace_neoload_technology.png" alt="NeoLoad Technology" /></p>
 1. Analyze NeoLoad metrics.
 
-    Click on the custom metric:
-    <p align="center"><img src="/screenshots/dynatrace_select_metric.png" alt="Dynatrace select custom neoload metric" /></p>
     Analyze all the NeoLoad metrics sent:
     <p align="center"><img src="/screenshots/dynatrace_neoload_data.png" alt="NeoLoad Data" /></p>
 1. Consult NeoLoad events on the tested application.
