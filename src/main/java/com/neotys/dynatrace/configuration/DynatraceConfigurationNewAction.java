@@ -4,7 +4,6 @@ import com.google.common.base.Optional;
 import com.neotys.action.argument.Arguments;
 import com.neotys.action.argument.Option;
 import com.neotys.dynatrace.common.DynatraceUtils;
-
 import com.neotys.extensions.action.Action;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
@@ -14,7 +13,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public class DynatraceConfigurationAction implements Action {
+public class DynatraceConfigurationNewAction implements Action {
     private static final String BUNDLE_NAME = "com.neotys.dynatrace.configuration.bundle";
     private static final String DISPLAY_NAME = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayName");
     private static final String DISPLAY_PATH = ResourceBundle.getBundle(BUNDLE_NAME, Locale.getDefault()).getString("displayPath");
@@ -69,12 +68,12 @@ public class DynatraceConfigurationAction implements Action {
     }
 
     @java.lang.Override
-    public Optional<java.lang.String> getMinimumNeoLoadVersion() {
-        return Optional.of("6.3");
+    public Optional<String> getMinimumNeoLoadVersion() {
+        return Optional.of("6.11");
     }
 
     @java.lang.Override
     public Optional<java.lang.String> getMaximumNeoLoadVersion() {
-        return Optional.of("6.10");
+        return Optional.absent();
     }
 }

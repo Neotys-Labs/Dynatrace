@@ -91,6 +91,7 @@ public class DynatraceConfigurationAPI {
     }
 
 
+
     public void setDynatraceTags(Optional<String> tags) throws Exception {
         List<String> serviceListId;
         List<String> dependenListId;
@@ -110,6 +111,25 @@ public class DynatraceConfigurationAPI {
             }
         });
 
+        //search for dependencies
+        int size=dependenListId.size();
+        List<String> tmp=new ArrayList<>();
+        tmp.addAll(dependenListId);
+        while(size>0)
+        {
+            List<String> secondleveldependenListId=new ArrayList<>();
+            tmp.stream().forEach(serviceid-> {
+                try {
+                    secondleveldependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            size=secondleveldependenListId.size();
+            tmp=new ArrayList<>();
+            tmp.addAll(secondleveldependenListId);
+            dependenListId.addAll(secondleveldependenListId);
+        }
         serviceListId=Stream.concat(serviceListId.stream(), dependenListId.stream()).distinct()
                 .collect(Collectors.toList());
 
@@ -140,18 +160,84 @@ public class DynatraceConfigurationAPI {
         });
     }
 
-    public void createRequestNamingRules() throws Exception {
+    public void createRequestNamingRules(String type) throws Exception {
         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, Optional.absent(), this.headers);
 
-        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode))
+        HashMap<String,String> requestAttributesID=getRequestAttributesids(type);
+
+        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode,requestAttributesID,type))
         {
-            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE);
-            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST);
+            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE,type);
+            NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST,type);
 
         }
     }
 
-    private boolean isNeoLoadRequestAttributesExists() throws Exception {
+    public  HashMap<String,String> getRequestAttributesids(String type) throws Exception {
+        List<String> keys=new ArrayList<>();
+        if(type.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
+        {
+            keys.add(NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE);
+            keys.add(NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE);
+        }
+        else
+        {
+            keys.add(NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE);
+            keys.add(NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE);
+        }
+        return getRequestAttributeType(keys);
+    }
+
+    public  HashMap<String,String> getRequestAttributeType(List<String> key) throws Exception
+    {
+        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
+        final Map<String, String> parameters = new HashMap<>();
+
+
+        sendTokenIngetParam(parameters);
+
+        try{
+            final Optional<Proxy> proxy = getProxy(proxyName, url);
+
+
+            httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, headers, parameters, proxy);
+
+            if (traceMode) {
+                context.getLogger().info("Dynatrace service, get request attributes ids:\n" + httpGenerator.getRequest());
+            }
+            HttpResponse httpResponse = httpGenerator.execute();
+            final int statusCode = httpResponse.getStatusLine().getStatusCode();
+            if (HttpResponseUtils.isSuccessHttpCode(statusCode))
+            {
+                JSONObject jsonobj = HttpResponseUtils.getJsonResponse(httpResponse);
+                if (jsonobj != null)
+                {
+                    JSONArray jsonArray=jsonobj.getJSONArray("values");
+                    if (traceMode) {
+                        context.getLogger().info("json array : " + jsonArray.toString() + " and list of keys "+ key.toString());
+                    }
+                    return  NeoLoadRequestAttributes.getNeoLoadRequestAttributeEqualToKey(jsonArray,key);
+
+                }
+                else
+                {
+                    return null;
+                }
+
+
+            }
+            else
+            {
+                context.getLogger().error("Dynatrace apî send bad response .statuscode :"+statusCode);
+                return null;
+            }
+
+        } finally{
+            httpGenerator.closeHttpClient();
+        }
+
+     }
+        private boolean isNeoLoadRequestAttributesExists(String type) throws Exception {
        boolean result=false;
        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
        final Map<String, String> parameters = new HashMap<>();
@@ -175,7 +261,7 @@ public class DynatraceConfigurationAPI {
                if (jsonobj != null)
                {
                    JSONArray jsonArray=jsonobj.getJSONArray("values");
-                   return  NeoLoadRequestAttributes.isNeoLoadRequestAttributesExists(jsonArray);
+                   return  NeoLoadRequestAttributes.isNeoLoadRequestAttributesExists(jsonArray,type);
 
                }
                else
@@ -198,19 +284,19 @@ public class DynatraceConfigurationAPI {
 
        }
 
-    public void generateRequestAttributes() throws Exception {
-        if(!isNeoLoadRequestAttributesExists())
+    public void generateRequestAttributes(String type) throws Exception {
+        if(!isNeoLoadRequestAttributesExists(type))
         {
-            createRequestAttributes();
+            createRequestAttributes(type);
         }
     }
    private static String newRequesAttributPayload(final String parametername,final String headersuffix,final String headername) {
        return String.format(REQUEST_ATTRIBUTE_PAYLOAD, parametername,headersuffix,headername);
 
    }
-   private void createRequestAttributes()
+   private void createRequestAttributes(String type)
    {
-       Map<String,String> attributeshashmap=NeoLoadRequestAttributes.generateHasMap();
+       Map<String,String> attributeshashmap=NeoLoadRequestAttributes.generateHasMap(type);
        attributeshashmap.forEach((k,v)-> {
            try {
                createRequestAttribute(k,v);

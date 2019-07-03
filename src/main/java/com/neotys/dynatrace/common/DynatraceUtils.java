@@ -453,9 +453,12 @@ public class DynatraceUtils {
             http.closeHttpClient();
         }
 
+
         if (traceMode) {
             context.getLogger().info("Found service: " + applicationEntityIds);
         }
+
+
 
         return applicationEntityIds;
     }
@@ -500,7 +503,7 @@ public class DynatraceUtils {
             //----print the exeption
         }
 
-        JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
+       /* JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
         try {
             JSONArray toRelationshipscalls = toRelationships.getJSONArray("calls");
             for (int i = 0; i < toRelationshipscalls.length(); i++) {
@@ -511,7 +514,7 @@ public class DynatraceUtils {
         catch(JSONException e)
         {
             //----print the exeption
-        }
+        }*/
 
     }
 

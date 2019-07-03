@@ -36,22 +36,30 @@ public class NeoLoadRequestNaming {
     private final static String requestNamingRule="{RequestAttribute:NEOLOAD_ScenarioName}_{RequestAttribute:NEOLOAD_Transaction}:{URL:Path}";
     private final static String requestNamingRuleRegexp="\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}_\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}:\\{URL:Path\\}";
 
+
+    private final static String requestNEWNamingRule="{RequestAttribute:getRequestAttributeType}_{RequestAttribute:NeoLoad_Transaction}:{URL:Path}";
+    private final static String requestNEWNamingRuleRegexp="\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}_\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}:\\{URL:Path\\}";
+
+
     private final static String DYNATRACE_NAMING_URL="service/requestNaming";
     private final static String NeoLoad_REQUEST_ATTRIBUTE="NEOLOAD_Transaction";
+    private final static String NeoLoad_NEW_REQUEST_ATTRIBUTE="NeoLoad_Transaction";
     public final static String WEB_REQUEST="WEB_REQUEST";
     public final static String WEB_SERVICE="WEB_SERVICE";
 
-    public final static String requestNaminJson="{\n" +
+    final static String requestnaming="{RequestAttribute:%s}_{RequestAttribute:%s}:{URL:Path}";
+
+    final static String requestNaminJson="{\n" +
             "  \"enabled\": true,\n" +
             "  \"serviceType\": \"%s\",\n" +
-            "  \"namingPattern\": \""+requestNamingRule+"\",\n" +
+            "  \"namingPattern\": \"%s\",\n" +
             "  \"conditions\": [\n" +
             "    {\n" +
             "      \"attribute\": \"SERVICE_REQUEST_ATTRIBUTE\",\n" +
             "      \"comparisonInfo\": {\n" +
             "        \"type\": \"STRING_REQUEST_ATTRIBUTE\",\n" +
             "        \"comparison\": \"EXISTS\",\n" +
-            "        \"requestAttribute\": \""+NeoLoad_REQUEST_ATTRIBUTE+"\",\n" +
+            "        \"requestAttribute\": \"%s\",\n" +
             "        \"negate\": false\n" +
             "      }\n" +
             "    }\n" +
@@ -59,13 +67,32 @@ public class NeoLoadRequestNaming {
             "  \"skipPersonalDataMasking\": false\n" +
             "}";
 
-    private static  boolean isaNeoLaodRequestNamingRule(String rule)
+    private static  boolean isaNeoLaodRequestNamingRule(String rule,String type)
     {
-         Pattern requestnamingPatern=Pattern.compile(requestNamingRuleRegexp);
+        Pattern requestnamingPatern;
+         if(type.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
+             requestnamingPatern=Pattern.compile(requestNEWNamingRuleRegexp);
+         else
+            requestnamingPatern=Pattern.compile(requestNamingRuleRegexp);
          return requestnamingPatern.matcher(rule).matches();
     }
 
-    public static void createNeoLoadNamingRule(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,final String type) throws Exception {
+    private static String generatePayLoad(String requestype,String requestattributetype)
+    {
+
+        if(requestattributetype.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
+        {
+            return String.format(requestNaminJson,requestype,requestNEWNamingRule,NeoLoad_NEW_REQUEST_ATTRIBUTE);
+
+        }
+        else
+        {
+            return String.format(requestNaminJson,requestype,requestNamingRule,NeoLoad_REQUEST_ATTRIBUTE);
+
+        }
+    }
+
+    public static void createNeoLoadNamingRule(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,final String type,String requestattributetype) throws Exception {
         final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_NAMING_URL;
         final Map<String, String> parameters = new HashMap<>();
         HTTPGenerator httpGenerator = null;
@@ -74,7 +101,7 @@ public class NeoLoadRequestNaming {
         try{
             final Optional<Proxy> proxy = DynatraceUtils.getProxy(context,proxyName, url);
 
-            String jsonpayload=String.format(requestNaminJson,type);
+            String jsonpayload=generatePayLoad(type,requestattributetype);
             httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD,url,dynatraceContext.getHeaders(),parameters,proxy,jsonpayload);
 
             if (traceMode) {
@@ -99,12 +126,41 @@ public class NeoLoadRequestNaming {
         }
     }
 
-    public static boolean isNeoLoadNamingRuleExists(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode) throws Exception {
+    public static String getRequetNamingPatern(HashMap<String,String> requestAttributesID,String type) throws Exception {
+        if(requestAttributesID!=null)
+        {
+            if(type.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
+            {
+                if(requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE) && requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE))
+                    return String.format(requestnaming,requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE),requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE));
+
+                return null;
+            }
+            else
+            {
+                if(requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE) && requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE))
+                    return String.format(requestnaming,requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE),requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE));
+
+                return null;
+            }
+        }
+        else return null;
+
+    }
+    public static boolean isNeoLoadNamingRuleExists(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,HashMap<String,String> requestAttributesID,String requestattributetype) throws Exception {
+        String pattern=getRequetNamingPatern(requestAttributesID,requestattributetype);
+
         final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_NAMING_URL;
         final Map<String, String> parameters = new HashMap<>();
         boolean result = false;
         HTTPGenerator httpGenerator = null;
 
+        if(traceMode)
+        {
+            context.getLogger().info("Patter found + "+pattern);
+        }
+        if(pattern==null)
+            return false;
 
         parameters.put("Api-Token", dynatraceContext.getApiKey());
         try {
@@ -114,7 +170,7 @@ public class NeoLoadRequestNaming {
             httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, dynatraceContext.getHeaders(), parameters, proxy);
 
             if (traceMode) {
-                context.getLogger().info("Dynatrace requestnaming, post request naming rule:\n" + httpGenerator.getRequest());
+                context.getLogger().info("Dynatrace requestnaming, check if exsits post request naming rule:\n" + httpGenerator.getRequest());
             }
             HttpResponse httpResponse = httpGenerator.execute();
             final int statusCode = httpResponse.getStatusLine().getStatusCode();
@@ -125,7 +181,8 @@ public class NeoLoadRequestNaming {
                     JSONArray jsonArray = jsonobj.getJSONArray("values");
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject requestnaming = jsonArray.getJSONObject(i);
-                         if (isaNeoLaodRequestNamingRule(requestnaming.getString("name")))
+
+                         if (pattern.equalsIgnoreCase(requestnaming.getString("name")))
                             return true;
                     }
 

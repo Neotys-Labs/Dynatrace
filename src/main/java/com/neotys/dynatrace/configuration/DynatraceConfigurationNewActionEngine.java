@@ -14,7 +14,7 @@ import java.util.Map;
 import static com.neotys.action.argument.Arguments.getArgumentLogString;
 import static com.neotys.action.argument.Arguments.parseArguments;
 
-public class DynatraceConfigurationActionEngine implements ActionEngine {
+public class DynatraceConfigurationNewActionEngine implements ActionEngine {
     private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_CONF_ACTION-01";
     private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_CONF_ACTION-02";
     private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_CONF_ACTION-03";
@@ -48,11 +48,11 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
         {
             sampleResult.sampleStart();
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
-            configurationAPI.generateRequestAttributes("OLD");
+            configurationAPI.generateRequestAttributes("NEW");
 
             //#TODO remove applicaiton name ---parse the architecture based on tags
             configurationAPI.setDynatraceTags(dynatraceTags);
-            configurationAPI.createRequestNamingRules("OLD");
+            configurationAPI.createRequestNamingRules("NEW");
             sampleResult.sampleEnd();
         }
         catch (Exception e)
