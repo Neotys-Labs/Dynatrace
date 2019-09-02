@@ -299,15 +299,20 @@ public class DynatraceConfigurationAPI {
        Map<String,String> attributeshashmap=NeoLoadRequestAttributes.generateHasMap(type);
        attributeshashmap.forEach((k,v)-> {
            try {
-               createRequestAttribute(k,v);
+               createRequestAttribute(k,v,type);
            } catch (Exception e) {
                context.getLogger().error("Technical Error ",e);
            }
        });
     }
 
-    private void createRequestAttribute(String parametername,String headersuffix) throws Exception {
-        String payload=newRequesAttributPayload(parametername,headersuffix,NeoLoadRequestAttributes.NEOLOAD_HTTP_HEADER_NAME);
+    private void createRequestAttribute(String parametername,String headersuffix,String type) throws Exception {
+        String payload;
+        if(type.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
+            payload=newRequesAttributPayload(parametername,headersuffix,NeoLoadRequestAttributes.NEOLOAD_HTTP_HEADER_NAME_NEW);
+        else
+            payload=newRequesAttributPayload(parametername,headersuffix,NeoLoadRequestAttributes.NEOLOAD_HTTP_HEADER_NAME);
+
         final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
         final Map<String, String> parameters = new HashMap<>();
 

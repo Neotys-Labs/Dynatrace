@@ -75,6 +75,6 @@ public class DynatraceConfigurationAction implements Action {
 
     @java.lang.Override
     public Optional<java.lang.String> getMaximumNeoLoadVersion() {
-        return Optional.of("6.10");
+        return Optional.of("6.9");
     }
 }

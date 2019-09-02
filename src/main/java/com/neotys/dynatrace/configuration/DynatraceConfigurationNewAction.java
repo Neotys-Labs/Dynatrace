@@ -69,7 +69,7 @@ public class DynatraceConfigurationNewAction implements Action {
 
     @java.lang.Override
     public Optional<String> getMinimumNeoLoadVersion() {
-        return Optional.of("6.11");
+        return Optional.of("7.0");
     }
 
     @java.lang.Override
