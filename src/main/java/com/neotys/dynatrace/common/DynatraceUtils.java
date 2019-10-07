@@ -1,15 +1,12 @@
 package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
-import com.google.gson.JsonObject;
-import com.neotys.dynatrace.common.data.DynatarceServiceData;
 import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.dynatrace.common.tag.DynatraceTaggingUtils;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
 import com.neotys.extensions.action.engine.ProxyType;
-import jdk.nashorn.internal.runtime.options.Option;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
@@ -24,8 +21,6 @@ import java.net.URL;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
@@ -46,6 +41,8 @@ public class DynatraceUtils {
     private static final String DYNATRACE_PROTOCOL = "https://";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
     private static final ImageIcon DYNATRACE_ICON;
+    private static final String DYNATRACE_TAG_PARAMETER ="tag=";
+    private static final String DYNATRACE_TAG_NEXTPARAMETER="&tag=";
     private static final String DYNATRACE_SERVICE_PREFIX="SERVICE";
     private static final long DYNATRACE_DEFAULT_DIFF=120000;
     static {
@@ -72,14 +69,47 @@ public class DynatraceUtils {
         header.put("Content-Type","application/json");
     }
 
+    public static String cleanUpTags(String tag)
+    {
+        if(tag!=null)
+        {
+            return tag.replaceAll(":","\\\\:");
+
+        }
+        else
+            return null;
+    }
+    public static Map<String,String> generateGetTagParameter(Optional<String> tag,boolean usetag)
+    {
+        Map<String,String> parameters=new HashMap<>();
+        if(usetag) {
+            if (tag.isPresent())
+            {
+                String parameter = null;
+                /*List<String> listofTags = Arrays.asList(cleanUpTags(tag.get()).split("\\s*,\\s*"));
+                if (listofTags.size() > 0) {
+                    for (String tagvalue : listofTags) {
+                        if (parameter != null)
+                            parameter += DYNATRACE_TAG_NEXTPARAMETER;
+                        else
+                            parameter = "";
+
+                        parameter += tagvalue;
+                    }
+                } else {*/
+                    parameter = cleanUpTags(tag.get());
+               // }
+                parameters.put("tag", parameter);
+            }
+        }
+
+        return parameters;
+
+    }
     public static List<String> getApplicationEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION;
-        final Map<String, String> parameters = new HashMap<>();
-        if(dynatraceContext.getTags().isPresent()) {
-            //#TODO : hanndle tags
-            parameters.put("tag", dynatraceContext.getTags().get());
-        }
+        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
@@ -130,11 +160,7 @@ public class DynatraceUtils {
         JSONObject jsonApplication;
 
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_TIMESERIES + "/" + timeSeries;
-        final Map<String, String> parameters = new HashMap<>();
-
-        if(dynatraceContext.getTags().isPresent()) {
-            parameters.put("tag", dynatraceContext.getTags().get());
-        }
+        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
@@ -270,13 +296,9 @@ public class DynatraceUtils {
     public static List<String> getListProcessGroupIDfromServiceId(final Context context, final DynatraceContext dynatraceContext, String serviceID, final Optional<String> proxyName, final boolean traceMode,final boolean usetags)
             throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION+"/"+serviceID;
-        final Map<String, String> parameters = new HashMap<>();
+        final Map<String, String> parameters =generateGetTagParameter(dynatraceContext.getTags(),usetags);
 
-        if(usetags) {
-            if (dynatraceContext.getTags().isPresent()) {
-                parameters.put("tag", dynatraceContext.getTags().get());
-            }
-        }
+
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         DynatraceService dynatraceService = null;
@@ -312,11 +334,9 @@ public class DynatraceUtils {
     public static DynatraceService getListProcessGroupInstanceFromServiceId(final Context context, final DynatraceContext dynatraceContext, String serviceID, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION+"/"+serviceID;
-        final Map<String, String> parameters = new HashMap<>();
+        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
         String servicename;
-        if(dynatraceContext.getTags().isPresent()) {
-            parameters.put("tag", dynatraceContext.getTags().get());
-        }
+
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         DynatraceService dynatraceService = null;
@@ -421,13 +441,8 @@ public class DynatraceUtils {
 
     public static List<String> getListDependentServicesFromServiceID(final Context context, final DynatraceContext dynatraceContext, String serviceid, final Optional<String> proxyName, final boolean traceMode,final boolean usetags) throws Exception {
         final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_APPLICATION+"/"+serviceid;
-        final Map<String, String> parameters = new HashMap<>();
+        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),usetags);
 
-        if(usetags) {
-            if (dynatraceContext.getTags().isPresent()) {
-                parameters.put("tag", dynatraceContext.getTags().get());
-            }
-        }
         parameters.put("Api-Token", dynatraceContext.getApiKey());
 
         DynatraceService dynatraceService = null;

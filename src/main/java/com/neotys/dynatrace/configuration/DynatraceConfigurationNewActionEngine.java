@@ -46,6 +46,7 @@ public class DynatraceConfigurationNewActionEngine implements ActionEngine {
 
         try
         {
+
             sampleResult.sampleStart();
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
             configurationAPI.generateRequestAttributes("NEW");

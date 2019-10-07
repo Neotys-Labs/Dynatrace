@@ -42,17 +42,33 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
         final Optional<String> proxyName = parsedArgs.get(DynatraceConfigurationOption.NeoLoadProxy.getName());
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceConfigurationOption.TraceMode.getName());
         final Optional<String> dynatraceTags=parsedArgs.get(DynatraceConfigurationOption.DynatraceTags.getName());
+        final Optional<String> compatilitymode=parsedArgs.get(DynatraceConfigurationOption.compatibilityMode.getName());
+
         boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
         try
         {
+            String mode;
+
+            if(compatilitymode.isPresent())
+            {
+                if(compatilitymode.get().equalsIgnoreCase("TRUE"))
+                    mode="OLD";
+                else
+                    mode="NEW";
+
+            }
+            else
+                mode="NEW";
+
             sampleResult.sampleStart();
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
-            configurationAPI.generateRequestAttributes("OLD");
+            configurationAPI.generateRequestAttributes(mode);
 
             //#TODO remove applicaiton name ---parse the architecture based on tags
             configurationAPI.setDynatraceTags(dynatraceTags);
-            configurationAPI.createRequestNamingRules("OLD");
+
+            configurationAPI.createRequestNamingRules(mode);
             sampleResult.sampleEnd();
         }
         catch (Exception e)

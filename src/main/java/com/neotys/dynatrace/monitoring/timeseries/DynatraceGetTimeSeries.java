@@ -125,7 +125,7 @@ public class DynatraceGetTimeSeries {
         this.context = context;
 	    this.dynatraceApiKey = dynatraceApiKey;
 	    this.dynatraceId = dynatraceId;
-	    this.dynatraceApplication = dynatraceTags;
+	    this.dynatraceApplication = getDynatracetag(dynatraceTags);
 	    this.dataExchangeApiClient = dataExchangeAPIClient;
 	    this.proxyName = proxyName;
 	    this.dynatraceManagedHostname = dynatraceManagedHostname;
@@ -138,7 +138,8 @@ public class DynatraceGetTimeSeries {
 	    this.isRunning = true;
 	    this.header = new HashMap<>();
 	    this.dynatraceApplicationHostIds = new ArrayList<>();
-        dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header);
+
+        dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, getDynatracetag(dynatraceTags), header);
 	    this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context,dynatraceContext , proxyName, traceMode);
 
 	    initHostsFromProcessGroup();
@@ -146,6 +147,19 @@ public class DynatraceGetTimeSeries {
         generateCustomTimeserices();
     }
 
+    private Optional<String> getDynatracetag(Optional<String> tag)
+    {
+        Optional<String> result;
+        if(tag.isPresent()) {
+            result = Optional.of(tag.get().replaceAll(":", ":NL"));
+            if(!result.get().contains(":"))
+                result=Optional.of("NL"+tag.get());
+        }
+        else
+            result=Optional.absent();
+
+        return result;
+    }
     private void generateCustomTimeserices()
     {
         if(dynatraceCustomTimeseries.isPresent())
@@ -341,10 +355,8 @@ public class DynatraceGetTimeSeries {
 
     private void initHosts() throws Exception {
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
-        final Map<String, String> parameters = new HashMap<>();
-        if(dynatraceApplication.isPresent()){
-            parameters.put(TAG, dynatraceApplication.get());
-        }
+        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceApplication,true);
+
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);
@@ -376,10 +388,8 @@ public class DynatraceGetTimeSeries {
 
     private void initHostsFromProcessGroup() throws Exception {
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
-        final Map<String, String> parameters = new HashMap<>();
-        if(dynatraceApplication.isPresent()){
-            parameters.put(TAG, dynatraceApplication.get());
-        }
+        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceApplication,true);
+
         sendTokenIngetParam(parameters);
 
         final Optional<Proxy> proxy = getProxy(proxyName, url);

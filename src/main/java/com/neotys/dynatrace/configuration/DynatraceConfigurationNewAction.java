@@ -39,7 +39,7 @@ public class DynatraceConfigurationNewAction implements Action {
 
     @java.lang.Override
     public java.lang.Class<? extends ActionEngine> getEngineClass() {
-        return DynatraceConfigurationActionEngine.class;
+        return DynatraceConfigurationNewActionEngine.class;
     }
 
     @java.lang.Override

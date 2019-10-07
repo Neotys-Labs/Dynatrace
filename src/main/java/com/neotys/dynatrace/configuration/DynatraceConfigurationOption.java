@@ -36,6 +36,10 @@ enum DynatraceConfigurationOption implements Option {
             "tag1,tag2",
             "Dynatrace tags. Links the NeoLoad computed data to Dynatrace tags (format: tag1,tag2).",
             NON_EMPTY),
+    compatibilityMode("compatibilityMode", Optional, False, TEXT,
+            "true",
+            "Compatibility mode will if true will handle the dynatrace tag name ( header name : X-dynatrace) like the previous of Neoload 1.X->6.9. If false if would handle the new format of the dynatrace tag : X-Dynatrace-Test available since 7.0",
+            NON_EMPTY),
 
 
     TraceMode("traceMode", Optional, False, TEXT,

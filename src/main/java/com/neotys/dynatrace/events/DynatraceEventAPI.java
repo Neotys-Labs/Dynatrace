@@ -50,9 +50,22 @@ class DynatraceEventAPI {
 		this.traceMode = traceMode;
 		this.headers = new HashMap<>();
 		this.context = context;
-		this.applicationEntityIds = getApplicationEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, dynatraceTags, headers), proxyName, this.traceMode);
+		this.applicationEntityIds = getApplicationEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, getDynatracetag(dynatraceTags), headers), proxyName, this.traceMode);
 	}
 
+	private Optional<String> getDynatracetag(Optional<String> tag)
+	{
+		Optional<String> result;
+		if(tag.isPresent()) {
+			result = Optional.of(tag.get().replaceAll(":", ":NL"));
+			if(!result.get().contains(":"))
+				result=Optional.of("NL"+tag.get());
+		}
+		else
+			result=Optional.absent();
+
+		return result;
+	}
 	void sendMessage() throws Exception {
 		long start;
 		final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);

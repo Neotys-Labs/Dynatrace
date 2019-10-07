@@ -13,6 +13,7 @@ public class DynatraceTaggingUtils {
     private final static String TAGGING_NonCONTEXT="(\\w{1,}):(\\w{1,})";
     private static Pattern taggingContextPatern=Pattern.compile(TAGGING_CONTEXT);
     private static Pattern taggingNonContextPatern=Pattern.compile(TAGGING_NonCONTEXT);
+    private static String NLTAGSUFFIX="NL";
     private static String CONTEXTLESS="CONTEXTLESS";
 
     public static String convertIntoDynatraceContextTag(Optional<String> dynatraceTag)
@@ -45,6 +46,9 @@ public class DynatraceTaggingUtils {
             if(listofTags.size()>0)
             {
                 List<String> listofConcertedTags = listofTags.stream().map(tag -> {
+                    tag=tag.replaceAll(":",":"+NLTAGSUFFIX);
+                    if(!tag.contains(":"))
+                        tag=NLTAGSUFFIX+tag;
                     return "\""+tag+"\"";
                 }).filter(Objects::nonNull).collect(Collectors.toList());
 

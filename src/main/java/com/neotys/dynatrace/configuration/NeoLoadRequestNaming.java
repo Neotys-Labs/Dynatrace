@@ -37,7 +37,7 @@ public class NeoLoadRequestNaming {
     private final static String requestNamingRuleRegexp="\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}_\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}:\\{URL:Path\\}";
 
 
-    private final static String requestNEWNamingRule="{RequestAttribute:getRequestAttributeType}_{RequestAttribute:NeoLoad_Transaction}:{URL:Path}";
+    private final static String requestNEWNamingRule="{RequestAttribute:NeoLoad_ScenarioName}_{RequestAttribute:NeoLoad_Transaction}:{URL:Path}";
     private final static String requestNEWNamingRuleRegexp="\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}_\\{RequestAttribute:[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}\\}:\\{URL:Path\\}";
 
 
