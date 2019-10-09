@@ -45,7 +45,7 @@ enum DynatraceSanityCheckOption implements Option {
             ALWAYS_VALID),
 
     OutputJSONReferenceFile("outPutReferenceFile", Required, True, TEXT,
-            "/home/hrexed/dynatrace_smarscape.json",
+            "/home/hrexed/dynatrace_smartscape.json",
                     "json file containing the last reference of the architecture.\n The action will fail if the architecutre has less services, processes, less CPU, memory..etc",
             NON_EMPTY);
 

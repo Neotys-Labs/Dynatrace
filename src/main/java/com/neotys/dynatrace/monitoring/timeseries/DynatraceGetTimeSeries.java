@@ -2,7 +2,7 @@ package com.neotys.dynatrace.monitoring.timeseries;
 
 import com.google.common.base.Optional;
 import com.neotys.dynatrace.common.*;
-import com.neotys.dynatrace.common.data.DynatarceServiceData;
+import com.neotys.dynatrace.common.data.DynatraceServiceData;
 import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Proxy;
@@ -173,7 +173,7 @@ public class DynatraceGetTimeSeries {
         if (isRunning) {
             List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processtServices(dynatraceApplicationServiceIds,TIMESERIES_SERVICES_MAP);
             List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceApplicationHostIds,TIMESERIES_INFRA_MAP);
-            List<com.neotys.rest.dataexchange.model.Entry> smarcapedate=getSmarscapeData();
+            List<com.neotys.rest.dataexchange.model.Entry> smarcapedate=getSmartscapeData();
             List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(Stream.concat(serviceEntries.stream(), infraEntries.stream()),smarcapedate.stream())
                     .collect(Collectors.toList());
 
@@ -195,9 +195,9 @@ public class DynatraceGetTimeSeries {
 
     public List<com.neotys.rest.dataexchange.model.Entry> getCustomTimeSeries()
     {
-        List<DynatarceServiceData> dynatarceServiceDataList=new ArrayList<>();
+        List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
 
-        dynatarceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
             try {
                 return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
             }
@@ -207,16 +207,16 @@ public class DynatraceGetTimeSeries {
             }
         } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).collect(Collectors.toList());
 
-        dynatarceServiceDataList=dynatarceServiceDataList.stream().filter(dynatarceServiceData -> dynatarceServiceData != null && dynatarceServiceData.getDate()>0).collect(Collectors.toList());
+        dynatraceServiceDataList=dynatraceServiceDataList.stream().filter(dynatraceServiceData -> dynatraceServiceData != null && dynatraceServiceData.getDate()>0).collect(Collectors.toList());
 
-        return dynatarceServiceDataList.stream().map(dynatarceServiceData -> dynatraceServiceDataTOEntry(dynatarceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
+        return dynatraceServiceDataList.stream().map(dynatraceServiceData -> dynatraceServiceDataTOEntry(dynatraceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
     }
 
-    public List<com.neotys.rest.dataexchange.model.Entry> getSmarscapeData()
+    public List<com.neotys.rest.dataexchange.model.Entry> getSmartscapeData()
     {
-        List<DynatarceServiceData> dynatarceServiceDataList=new ArrayList<>();
+        List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
 
-        dynatarceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
             try {
                 return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
             }
@@ -226,45 +226,45 @@ public class DynatraceGetTimeSeries {
             }
         } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).collect(Collectors.toList());
 
-        dynatarceServiceDataList=dynatarceServiceDataList.stream().filter(dynatarceServiceData -> dynatarceServiceData != null && dynatarceServiceData.getDate()>0).collect(Collectors.toList());
+        dynatraceServiceDataList=dynatraceServiceDataList.stream().filter(dynatraceServiceData -> dynatraceServiceData != null && dynatraceServiceData.getDate()>0).collect(Collectors.toList());
 
-        return dynatarceServiceDataList.stream().map(dynatarceServiceData -> dynatraceServiceDataTOEntry(dynatarceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
+        return dynatraceServiceDataList.stream().map(dynatraceServiceData -> dynatraceServiceDataTOEntry(dynatraceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
     }
 
-    private List<com.neotys.rest.dataexchange.model.Entry> dynatraceServiceDataTOEntry(DynatarceServiceData dynatarceServiceData)
+    private List<com.neotys.rest.dataexchange.model.Entry> dynatraceServiceDataTOEntry(DynatraceServiceData dynatraceServiceData)
     {
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
         List<String> path=new ArrayList<>();
         path.add(DYNATRACE);
-        path.add(dynatarceServiceData.getServiceName());
+        path.add(dynatraceServiceData.getServiceName());
         path.add(PROCESS);
 
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatarceServiceData.NUMBER_PROCESS).stream()).collect(Collectors.toList()),dynatarceServiceData.getDate())
-                .unit(dynatarceServiceData.NUMBER_PROCESS)
-                .value(dynatarceServiceData.getNumber_ofprocess())
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NUMBER_PROCESS).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(dynatraceServiceData.NUMBER_PROCESS)
+                .value(dynatraceServiceData.getNumber_ofprocess())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatarceServiceData.CPU).stream()).collect(Collectors.toList()),dynatarceServiceData.getDate())
-                .unit(dynatarceServiceData.CPU_Unit)
-                .value(dynatarceServiceData.getCpu())
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.CPU).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(dynatraceServiceData.CPU_Unit)
+                .value(dynatraceServiceData.getCpu())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatarceServiceData.Memory).stream()).collect(Collectors.toList()),dynatarceServiceData.getDate())
-                .unit(dynatarceServiceData.Memory_Unit)
-                .value(dynatarceServiceData.getMemory())
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.Memory).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(dynatraceServiceData.Memory_Unit)
+                .value(dynatraceServiceData.getMemory())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatarceServiceData.NETWORK_RECEIVED).stream()).collect(Collectors.toList()),dynatarceServiceData.getDate())
-                .unit(dynatarceServiceData.Network_UNit)
-                .value(dynatarceServiceData.getNetworkreceived())
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NETWORK_RECEIVED).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(dynatraceServiceData.Network_UNit)
+                .value(dynatraceServiceData.getNetworkreceived())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatarceServiceData.NETWORK_SENT).stream()).collect(Collectors.toList()),dynatarceServiceData.getDate())
-                .unit(dynatarceServiceData.Network_UNit)
-                .value(dynatarceServiceData.getNetworksent())
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NETWORK_SENT).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(dynatraceServiceData.Network_UNit)
+                .value(dynatraceServiceData.getNetworksent())
                 .build());
 
         return entries;
     }
-    private DynatarceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
+    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
     {
-        DynatarceServiceData data=new DynatarceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
+        DynatraceServiceData data=new DynatraceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
         try {
             for (Map.Entry<String, String> m : TIMESERIES_PGI_MAP.entrySet()) {
                 List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatraceContext, proxyName, traceMode, diff,Optional.absent());
@@ -284,7 +284,7 @@ public class DynatraceGetTimeSeries {
         return null;
     }
 
-    private void addSumTodata(DynatarceServiceData data,String metricname,double sum)
+    private void addSumTodata(DynatraceServiceData data,String metricname,double sum)
     {
 
         if(metricname.contains("cpu"))

@@ -8,7 +8,7 @@ import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
-import com.neotys.dynatrace.common.data.DynatarceServiceData;
+import com.neotys.dynatrace.common.data.DynatraceServiceData;
 import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
@@ -80,8 +80,8 @@ public class DynatracePGIMetrics {
 
     }
 
-    public void marshal(String filename , List<DynatarceServiceData> dynatarceServiceDataList) throws  IOException {
-        DynatraceSmartScapedata smartScapedata = new DynatraceSmartScapedata(applicationName,dynatarceServiceDataList);
+    public void marshal(String filename , List<DynatraceServiceData> dynatraceServiceDataList) throws  IOException {
+        DynatraceSmartScapedata smartScapedata = new DynatraceSmartScapedata(applicationName,dynatraceServiceDataList);
         Writer writer = new FileWriter(filename);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String strJson = gson.toJson(smartScapedata);
@@ -92,7 +92,7 @@ public class DynatracePGIMetrics {
     }
 
     public void sanityCheck(String jsonfile) throws IOException, DynatraceException {
-        List<DynatarceServiceData> serviceDataList=getSmarscapeData();
+        List<DynatraceServiceData> serviceDataList=getSmartscapeData();
         File xmlfile=new File(jsonfile);
 
 
@@ -110,7 +110,7 @@ public class DynatracePGIMetrics {
                 {
                     List<String> listoferrors=new ArrayList<>();
                     imported_architecture.getServiceDataList().stream().forEach(services->{
-                        DynatarceServiceData relatedata=getDynatraceServiceData(services,serviceDataList);
+                        DynatraceServiceData relatedata=getDynatraceServiceData(services,serviceDataList);
                         if(relatedata!=null)
                         {
                             if(services.getNumber_ofprocess()>relatedata.getNumber_ofprocess())
@@ -173,9 +173,9 @@ public class DynatracePGIMetrics {
             return false;
     }
 
-    private DynatarceServiceData getDynatraceServiceData(DynatarceServiceData data, List<DynatarceServiceData> serviceDataList)
+    private DynatraceServiceData getDynatraceServiceData(DynatraceServiceData data, List<DynatraceServiceData> serviceDataList)
     {
-        java.util.Optional<DynatarceServiceData> findservicedata=serviceDataList.stream().filter(dynatarceServiceData ->( dynatarceServiceData.getServiceName().equals(data.getServiceName())||dynatarceServiceData.getServiceID().equals(data.getServiceID()))).findFirst();
+        java.util.Optional<DynatraceServiceData> findservicedata=serviceDataList.stream().filter(dynatraceServiceData ->( dynatraceServiceData.getServiceName().equals(data.getServiceName())||dynatraceServiceData.getServiceID().equals(data.getServiceID()))).findFirst();
         if(findservicedata.isPresent())
             return findservicedata.get();
         else
@@ -187,11 +187,11 @@ public class DynatracePGIMetrics {
         return (DynatraceSmartScapedata) gson.fromJson(reader, DynatraceSmartScapedata.class);
     }
 
-    public List<DynatarceServiceData> getSmarscapeData()
+    public List<DynatraceServiceData> getSmartscapeData()
     {
-        List<DynatarceServiceData> dynatarceServiceDataList=new ArrayList<>();
+        List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
 
-        dynatarceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
             try {
                 return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
             }
@@ -201,12 +201,12 @@ public class DynatracePGIMetrics {
             }
         } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).filter(Objects::nonNull).collect(Collectors.toList());
 
-        return dynatarceServiceDataList;
+        return dynatraceServiceDataList;
     }
 
-    private DynatarceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
+    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
     {
-        DynatarceServiceData data=new DynatarceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
+        DynatraceServiceData data=new DynatraceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
         try {
             for (Map.Entry<String, String> m : PGI_TIMESERIES_MAP.entrySet()) {
                 List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatraceContext, proxyName, traceMode, diff,Optional.of(true));
@@ -222,7 +222,7 @@ public class DynatracePGIMetrics {
         return null;
     }
 
-    private void addSumTodata(DynatarceServiceData data,String metricname,double sum)
+    private void addSumTodata(DynatraceServiceData data,String metricname,double sum)
     {
 
         if(metricname.contains("cpu"))

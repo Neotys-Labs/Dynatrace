@@ -5,7 +5,7 @@
     <groupId>com.neotys.dynatrace</groupId>
     <artifactId>DynatraceIntegration</artifactId>
     <name>DynatraceIntegration</name>
-    <version>3.0.1-SNAPSHOT</version>
+    <version>4.0.7-BETA-SNAPSHOT</version>
 
     <properties>
         <swagger-core-version>1.5.12</swagger-core-version>

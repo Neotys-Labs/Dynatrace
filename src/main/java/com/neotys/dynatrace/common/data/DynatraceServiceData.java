@@ -2,7 +2,7 @@ package com.neotys.dynatrace.common.data;
 
 import com.google.common.base.Optional;
 
-public class DynatarceServiceData {
+public class DynatraceServiceData {
 
     public static final String NUMBER_PROCESS="Number of Process";
     public static final String CPU="total cpu usage";
@@ -55,7 +55,7 @@ public class DynatarceServiceData {
         this.number_ofprocess = number_ofprocess;
     }
 
-    public DynatarceServiceData(String serviceName, String serivceID, int number_ofprocess) {
+    public DynatraceServiceData(String serviceName, String serivceID, int number_ofprocess) {
         this.serviceName = serviceName;
         this.number_ofprocess = number_ofprocess;
         this.serviceID=serivceID;
@@ -111,7 +111,7 @@ public class DynatarceServiceData {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("DynatarceServiceData{");
+        final StringBuffer sb = new StringBuffer("DynatraceServiceData{");
         sb.append("serviceid=").append(serviceID);
         sb.append(", servicename='").append(serviceName).append('\'');
         sb.append(", number_ofprocess='").append(number_ofprocess).append('\'');

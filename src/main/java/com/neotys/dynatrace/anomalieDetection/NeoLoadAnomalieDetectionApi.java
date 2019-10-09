@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class NeoLoadAnomalieDetectionApi {
 
 
-    private final static String DYNATRACE_ANOMALIE_URL = "anomalyDetection/metricEvents/";
+    private final static String DYNATRACE_ANOMALIE_URL = "anomalyDetection/metricEvents";
 
     private final static String JSONPAYLOAD="{\n" +
             "  \"metricId\": \"%s\",\n" +
@@ -111,8 +111,8 @@ public class NeoLoadAnomalieDetectionApi {
         return null;
     }
 
-    private void deleteAnoalieDetectionFromId(String id) throws Exception {
-        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_ANOMALIE_URL  +id;
+    private void deleteAnomalieDetectionFromId(String id) throws Exception {
+        final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_ANOMALIE_URL + "/" +id;
         final Map<String, String> parameters = new HashMap<>();
 
         parameters.put("Api-Token", dynatraceApiKey);
@@ -151,7 +151,7 @@ public class NeoLoadAnomalieDetectionApi {
                 try
                     {
 
-                        deleteAnoalieDetectionFromId(id);
+                        deleteAnomalieDetectionFromId(id);
                     }
                     catch(Exception e)
                     {
