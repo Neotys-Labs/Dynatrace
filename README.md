@@ -86,9 +86,9 @@ This bundle provides inbound and an outbound integration:
       in Dynatrace dashboards.
       * Custom metrics:
            ```shell
-          Request.duration, Request.Count, Transaction.Average.Duration, User.Load, Count.Average.Failure, DowLoaded.Average.Bytes, Downloaded.Average.Bytes.PerSecond, 
-          Iteration.Average.Failure, Iteration.Average.Success, Request.Average.Count, Request.Average.Success, Request.Average.Failure, Request.Sucess.PerSecond, 
-          Request.Failure.PerSeconds, Transaction.Average.Failure, Iteration.Average.Success, Transaction.Failure.PerSecond, Iteration.Average.Success, Transaction.Average.Count, 
+          Request.Duration, Request.Count, Transaction.Average.Duration, User.Load, Count.Average.Failure, Downloaded.Average.Bytes, Downloaded.Average.Bytes.PerSecond, 
+          Iteration.Average.Failure, Iteration.Average.Success, Request.Average.Count, Request.Average.Success, Request.Average.Failure, Request.Success.PerSecond, 
+          Request.Failure.PerSecond, Transaction.Average.Failure, Iteration.Average.Success, Transaction.Failure.PerSecond, Iteration.Average.Success, Transaction.Average.Count, 
           Failure.Rate
           ```    
       
