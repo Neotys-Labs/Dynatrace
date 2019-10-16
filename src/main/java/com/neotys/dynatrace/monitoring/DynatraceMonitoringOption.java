@@ -39,7 +39,7 @@ enum DynatraceMonitoringOption implements Option {
             "",
             "List of dynatrace timeseries to report in NeoLoad .",
             ALWAYS_VALID),
-    DynatraceTimeSeriesAgregation("dynatraceTimeSeriesAggregation", Optional, False, TEXT,
+    DynatraceTimeSeriesAggregation("dynatraceTimeSeriesAggregation", Optional, False, TEXT,
             "AVG",
             "Aggregationtype of the timeseries specified . Value possible :MIN\n" +
                     "MAX\n" +

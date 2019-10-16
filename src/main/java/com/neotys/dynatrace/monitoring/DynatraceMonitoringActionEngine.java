@@ -72,7 +72,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceMonitoringOption.TraceMode.getName());
         final Optional<List<String>>  dynatracecustomTimeSeries = Optional.of(Splitter.on(",").omitEmptyStrings()
                 .splitToList(parsedArgs.get(DynatraceMonitoringOption.DynatraceTimeSeries.getName()).or("")));
-        final Optional<String> dynatracecustomTImeseriesAggregateType = parsedArgs.get(DynatraceMonitoringOption.DynatraceTimeSeriesAgregation.getName());
+        final Optional<String> dynatracecustomTimeseriesAggregateType = parsedArgs.get(DynatraceMonitoringOption.DynatraceTimeSeriesAggregation.getName());
         final String dataExchangeApiUrl = Optional.fromNullable(emptyToNull(parsedArgs.get(DynatraceMonitoringOption.NeoLoadDataExchangeApiUrl.getName()).orNull()))
                 .or(() -> getDefaultDataExchangeApiUrl(context));
 
@@ -97,7 +97,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             if(dynatracecustomTimeSeries.isPresent())
             {
                 if(dynatracecustomTimeSeries.get().size()>0) {
-                    if (!validateAgggregationType(dynatracecustomTImeseriesAggregateType))
+                    if (!validateAgggregationType(dynatracecustomTimeseriesAggregateType))
                         return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be define or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
                 }
             }
@@ -111,7 +111,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             final DynatracePluginData pluginData = DynatracePluginData.getInstance(context, dynatraceId, dynatraceApiKey, dynatraceManagedHostname, dataExchangeApiUrl, proxyName, traceMode);
 
             final String virtualUserId = context.getCurrentVirtualUser().getId();
-            // if therer is multiple virtual user handling the action return error
+            // if there is multiple virtual user handling the action return error
             if (pluginData != null && !pluginData.getVirtualUserId().equals(virtualUserId)) {
                 return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "Bad context: ", new DynatraceException("Multiple VU on action"));
             }
@@ -129,7 +129,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             // Retrieve DataExchangeAPIClient from Context, or instantiate new one
             DataExchangeAPIClient dataExchangeAPIClient = getDataExchangeAPIClient(context, requestBuilder, dataExchangeApiUrl, dataExchangeApiKey);
 
-            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, proxyName, dynatraceManagedHostname,dynatracecustomTimeSeries,dynatracecustomTImeseriesAggregateType, startTs, traceMode);
+            dynatraceIntegration = new DynatraceGetTimeSeries(context, dynatraceApiKey, dynatraceId, dynatraceTags, dataExchangeAPIClient, proxyName, dynatraceManagedHostname,dynatracecustomTimeSeries,dynatracecustomTimeseriesAggregateType, startTs, traceMode);
             dynatraceIntegration.processDynatraceData();
 
             //first call send event to dynatrace

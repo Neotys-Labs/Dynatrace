@@ -27,6 +27,7 @@ public class DynatraceGetTimeSeries {
     private static final String DYNATRACE_HOSTS = "entity/infrastructure/hosts";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
 
+    private static final String AVG = "AVG";
     private static final String COUNT = "COUNT";
     private static final String NONE = null;
 
@@ -43,54 +44,52 @@ public class DynatraceGetTimeSeries {
 
     static {
         ///------requesting only infrastructure and services metrics-------------//
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.availability", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.idle", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.iowait", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.steal", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.system", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.user", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.availablespace", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.bytesread", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.byteswritten", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.freespacepercentage", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.queuelength", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.readoperations", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.readtime", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.usedspace", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.writeoperations", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.writetime", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.available", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.availablepercentage", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.pagefaults", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.used", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.bytesreceived", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.bytessent", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.packetsreceived", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.cpu.usage", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.jvm.committedmemory", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.jvm.garbagecollectioncount", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.jvm.garbagecollectiontime", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.jvm.threadcount", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.jvm.usedmemory", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.mem.usage", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.nic.bytesreceived", "AVG");
-        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", "AVG");
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.availability", NONE);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.idle", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.iowait", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.steal", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.system", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.cpu.user", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.availablespace", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.bytesread", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.byteswritten", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.freespacepercentage", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.queuelength", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.readoperations", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.readtime", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.usedspace", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.writeoperations", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.disk.writetime", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.available", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.availablepercentage", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.pagefaults", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.mem.used", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.bytesreceived", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.bytessent", AVG);
+        TIMESERIES_INFRA_MAP.put("com.dynatrace.builtin:host.nic.packetsreceived", AVG);
+        
+        
+        //----monitoring of the entire services ( logic based on process group instance)
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.cpu.usage", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.jvm.committedmemory", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.jvm.garbagecollectioncount", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.jvm.garbagecollectiontime", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.jvm.threadcount", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.jvm.usedmemory", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.mem.usage", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.nic.bytesreceived", AVG);
+        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", AVG);
 
 
-        //----moinitoring of the entire services ( logic based on process group instance)
-        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.cpu.usage", "AVG");
-        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.mem.usage", "AVG");
-        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.nic.bytesreceived", "AVG");
-        TIMESERIES_PGI_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", "AVG");
         //----------------------------------------------------------------------------------
 
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.clientsidefailurerate", "AVG");
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.clientsidefailurerate", AVG);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp4xx", NONE);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.errorcounthttp5xx", NONE);
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.failurerate", "AVG");
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.failurerate", AVG);
         TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.requestspermin", COUNT);
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.responsetime", "AVG");
-        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.serversidefailurerate", "AVG");
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.responsetime", AVG);
+        TIMESERIES_SERVICES_MAP.put("com.dynatrace.builtin:service.serversidefailurerate", AVG);
     }
 
     private final Optional<String> proxyName;
@@ -98,13 +97,13 @@ public class DynatraceGetTimeSeries {
     private final String dynatraceApiKey;
     private final String dynatraceId;
     private final Optional<String> dynatraceManagedHostname;
-    private final Optional<String> dynatraceApplication;
+    private final Optional<String> dynatraceEntityTag;    
     private final Optional<List<String>>  dynatraceCustomTimeseries;
     private final Optional<String> dynatraceAggregationType;
     private static final Optional<Long> diff=Optional.absent();
     private HTTPGenerator httpGenerator;
-    private List<String> dynatraceApplicationServiceIds;
-    private List<String> dynatraceApplicationHostIds;
+    private Set<String> dynatraceServiceEntityIds;
+    private Set<String> dynatraceHostEntityIds;
     private Map<String, String> header = null;
     private boolean isRunning = true;
     private final Context context;
@@ -125,7 +124,7 @@ public class DynatraceGetTimeSeries {
         this.context = context;
 	    this.dynatraceApiKey = dynatraceApiKey;
 	    this.dynatraceId = dynatraceId;
-	    this.dynatraceApplication = getDynatracetag(dynatraceTags);
+	    this.dynatraceEntityTag = getDynatracetag(dynatraceTags);
 	    this.dataExchangeApiClient = dataExchangeAPIClient;
 	    this.proxyName = proxyName;
 	    this.dynatraceManagedHostname = dynatraceManagedHostname;
@@ -137,14 +136,14 @@ public class DynatraceGetTimeSeries {
 
 	    this.isRunning = true;
 	    this.header = new HashMap<>();
-	    this.dynatraceApplicationHostIds = new ArrayList<>();
+	    this.dynatraceHostEntityIds = new HashSet<>();
 
         dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, getDynatracetag(dynatraceTags), header);
-	    this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context,dynatraceContext , proxyName, traceMode);
+	    this.dynatraceServiceEntityIds = DynatraceUtils.getServiceEntityIds(context,dynatraceContext , proxyName, traceMode);
 
 	    initHostsFromProcessGroup();
         initHosts();
-        generateCustomTimeserices();
+        generateCustomTimeseries();
     }
 
     private Optional<String> getDynatracetag(Optional<String> tag)
@@ -160,7 +159,7 @@ public class DynatraceGetTimeSeries {
 
         return result;
     }
-    private void generateCustomTimeserices()
+    private void generateCustomTimeseries()
     {
         if(dynatraceCustomTimeseries.isPresent())
         {
@@ -171,17 +170,17 @@ public class DynatraceGetTimeSeries {
     }
     public void processDynatraceData() throws Exception {
         if (isRunning) {
-            List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processtServices(dynatraceApplicationServiceIds,TIMESERIES_SERVICES_MAP);
-            List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceApplicationHostIds,TIMESERIES_INFRA_MAP);
-            List<com.neotys.rest.dataexchange.model.Entry> smarcapedate=getSmartscapeData();
-            List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(Stream.concat(serviceEntries.stream(), infraEntries.stream()),smarcapedate.stream())
+            List<com.neotys.rest.dataexchange.model.Entry> serviceEntries = processServices(dynatraceServiceEntityIds,TIMESERIES_SERVICES_MAP);
+            List<com.neotys.rest.dataexchange.model.Entry> infraEntries = processInfrastructures(dynatraceHostEntityIds,TIMESERIES_INFRA_MAP);
+            List<com.neotys.rest.dataexchange.model.Entry> smartscapedate=getSmartscapeData();
+            List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(Stream.concat(serviceEntries.stream(), infraEntries.stream()),smartscapedate.stream())
                     .collect(Collectors.toList());
 
             if(CUSTOM_TIMESERIES_SERVICES_MAP.size()>0)
             {
                 //---add the custom metrics-------
-                List<com.neotys.rest.dataexchange.model.Entry> servicecustomEntries = processtServices(dynatraceApplicationServiceIds,CUSTOM_TIMESERIES_SERVICES_MAP);
-                List<com.neotys.rest.dataexchange.model.Entry> infracustomEntries = processInfrastructures(dynatraceApplicationHostIds,CUSTOM_TIMESERIES_SERVICES_MAP);
+                List<com.neotys.rest.dataexchange.model.Entry> servicecustomEntries = processServices(dynatraceServiceEntityIds,CUSTOM_TIMESERIES_SERVICES_MAP);
+                List<com.neotys.rest.dataexchange.model.Entry> infracustomEntries = processInfrastructures(dynatraceHostEntityIds,CUSTOM_TIMESERIES_SERVICES_MAP);
 
                 entryList=Stream.concat(Stream.concat(entryList.stream(),servicecustomEntries.stream()),infracustomEntries.stream()).collect(Collectors.toList());
             }
@@ -197,7 +196,7 @@ public class DynatraceGetTimeSeries {
     {
         List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
 
-        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dynatraceServiceEntityIds.stream().map((serviceid) -> {
             try {
                 return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
             }
@@ -216,7 +215,7 @@ public class DynatraceGetTimeSeries {
     {
         List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
 
-        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dynatraceServiceEntityIds.stream().map((serviceid) -> {
             try {
                 return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
             }
@@ -239,24 +238,24 @@ public class DynatraceGetTimeSeries {
         path.add(dynatraceServiceData.getServiceName());
         path.add(PROCESS);
 
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NUMBER_PROCESS).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
-                .unit(dynatraceServiceData.NUMBER_PROCESS)
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(DynatraceServiceData.NUMBER_PROCESS).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(DynatraceServiceData.NUMBER_PROCESS)
                 .value(dynatraceServiceData.getNumber_ofprocess())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.CPU).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
-                .unit(dynatraceServiceData.CPU_Unit)
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(DynatraceServiceData.CPU).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(DynatraceServiceData.CPU_UNIT)
                 .value(dynatraceServiceData.getCpu())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.Memory).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
-                .unit(dynatraceServiceData.Memory_Unit)
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(DynatraceServiceData.MEMORY).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(DynatraceServiceData.MEMORY_UNIT)
                 .value(dynatraceServiceData.getMemory())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NETWORK_RECEIVED).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
-                .unit(dynatraceServiceData.Network_UNit)
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(DynatraceServiceData.NETWORK_RECEIVED).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(DynatraceServiceData.NETWORK_UNIT)
                 .value(dynatraceServiceData.getNetworkreceived())
                 .build());
-        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(dynatraceServiceData.NETWORK_SENT).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
-                .unit(dynatraceServiceData.Network_UNit)
+        entries.add(new EntryBuilder(  Stream.concat(path.stream(),Arrays.asList(DynatraceServiceData.NETWORK_SENT).stream()).collect(Collectors.toList()),dynatraceServiceData.getDate())
+                .unit(DynatraceServiceData.NETWORK_UNIT)
                 .value(dynatraceServiceData.getNetworksent())
                 .build());
 
@@ -299,13 +298,13 @@ public class DynatraceGetTimeSeries {
         if(metricname.contains("bytessent"))
             data.setNetworksent(sum);
     }
-    private List<com.neotys.rest.dataexchange.model.Entry> processInfrastructures(final List<String> dynatraceApplicationIds,Map<String,String> dynatracemetrics) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processInfrastructures(final Set<String> dynatraceHostEntityIds,Map<String,String> dynatracemetrics) throws Exception {
 
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
-        if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
+        if (dynatraceHostEntityIds != null && !dynatraceHostEntityIds.isEmpty()) {
             for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
-                    final List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode, diff, Optional.absent());
+                    final List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceHostEntityIds,startTS,context,dynatraceContext,proxyName,traceMode, diff, Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));
                 }
             }
@@ -313,12 +312,12 @@ public class DynatraceGetTimeSeries {
         return entries;
     }
 
-    private List<com.neotys.rest.dataexchange.model.Entry> processtServices(final List<String> dynatraceApplicationIds,Map<String,String> dynatracemetrics) throws Exception {
+    private List<com.neotys.rest.dataexchange.model.Entry> processServices(final Set<String> dynatraceServiceEntityIds,Map<String,String> dynatracemetrics) throws Exception {
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
-        if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
+        if (dynatraceServiceEntityIds != null && !dynatraceServiceEntityIds.isEmpty()) {
             for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
-                    final List<DynatraceMetric> dynatraceMetrics = DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode,diff,Optional.absent());
+                    final List<DynatraceMetric> dynatraceMetrics = DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceServiceEntityIds,startTS,context,dynatraceContext,proxyName,traceMode,diff,Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));
                 }
             }
@@ -355,7 +354,7 @@ public class DynatraceGetTimeSeries {
 
     private void initHosts() throws Exception {
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
-        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceApplication,true);
+        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceEntityTag,true);
 
         sendTokenIngetParam(parameters);
 
@@ -371,11 +370,11 @@ public class DynatraceGetTimeSeries {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     final JSONObject jsonApplication = jsonArray.getJSONObject(i);
                     if (jsonApplication.has(ENTITY_ID) && jsonApplication.has(DISPLAY_NAME)) {
-                        dynatraceApplicationHostIds.add(jsonApplication.getString(ENTITY_ID));
+                        dynatraceHostEntityIds.add(jsonApplication.getString(ENTITY_ID));
                     }
                 }
             }
-            if(dynatraceApplicationHostIds.isEmpty()){
+            if(dynatraceHostEntityIds.isEmpty()){
                 context.getLogger().info("No host found.");
             }
 
@@ -388,7 +387,7 @@ public class DynatraceGetTimeSeries {
 
     private void initHostsFromProcessGroup() throws Exception {
         final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
-        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceApplication,true);
+        final Map<String, String> parameters = DynatraceUtils.generateGetTagParameter(dynatraceEntityTag,true);
 
         sendTokenIngetParam(parameters);
 
@@ -402,21 +401,21 @@ public class DynatraceGetTimeSeries {
             final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
             if (jsonObj != null) {
                 for (int i = 0; i < jsonObj.length(); i++) {
-                    final JSONObject jsonApplication = jsonObj.getJSONObject(i);
-                    if (jsonApplication.has(ENTITY_ID) && jsonApplication.has("fromRelationships")) {
-                        final JSONObject jsonFromRelation = jsonApplication.getJSONObject("fromRelationships");
+                    final JSONObject jsonProcessGroup = jsonObj.getJSONObject(i);
+                    if (jsonProcessGroup.has(ENTITY_ID) && jsonProcessGroup.has("fromRelationships")) {
+                        final JSONObject jsonFromRelation = jsonProcessGroup.getJSONObject("fromRelationships");
                         if (jsonFromRelation.has("runsOn")) {
                             final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
                             if (jsonRunOn != null) {
                                 for (int j = 0; j < jsonRunOn.length(); j++) {
-                                    dynatraceApplicationHostIds.add(jsonRunOn.getString(j));
+                                    dynatraceHostEntityIds.add(jsonRunOn.getString(j));
                                 }
                             }
                         }
                     }
                 }
             }
-            if(dynatraceApplicationHostIds.isEmpty()){
+            if(dynatraceHostEntityIds.isEmpty()){
                 context.getLogger().debug("No host found in process group");
             }
         }catch (DynatraceException e){

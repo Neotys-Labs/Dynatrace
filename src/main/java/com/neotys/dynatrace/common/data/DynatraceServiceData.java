@@ -5,13 +5,13 @@ import com.google.common.base.Optional;
 public class DynatraceServiceData {
 
     public static final String NUMBER_PROCESS="Number of Process";
-    public static final String CPU="total cpu usage";
-    public static final String Memory="total memory usage";
-    public static final String NETWORK_SENT="total network sent";
-    public static final String NETWORK_RECEIVED="total network received";
-    public static final String CPU_Unit="%";
-    public static final String Memory_Unit="Byte";
-    public static final String Network_UNit="BytePerSecond (B/s)";
+    public static final String CPU="Total cpu usage";
+    public static final String MEMORY="Total memory usage";
+    public static final String NETWORK_SENT="Total network sent";
+    public static final String NETWORK_RECEIVED="Total network received";
+    public static final String CPU_UNIT="%";
+    public static final String MEMORY_UNIT="Byte";
+    public static final String NETWORK_UNIT="BytePerSecond (B/s)";
 
     private String serviceID;
 

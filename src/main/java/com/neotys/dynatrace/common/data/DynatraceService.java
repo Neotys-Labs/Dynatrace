@@ -1,15 +1,15 @@
 package com.neotys.dynatrace.common.data;
 
-import java.util.List;
+import java.util.Set;
 
 public class DynatraceService {
     String serviceid;
     String displayName;
-    List<String> processPGIlist;
+    Set<String> processPGIlist;
     int number_ofprocess;
 
 
-    public DynatraceService(String serviceid, String displayName, List<String> processPGIlist) {
+    public DynatraceService(String serviceid, String displayName, Set<String> processPGIlist) {
         this.serviceid = serviceid;
         this.displayName = displayName;
         this.processPGIlist = processPGIlist;
@@ -32,11 +32,11 @@ public class DynatraceService {
         this.displayName = displayName;
     }
 
-    public List<String> getProcessPGIlist() {
+    public Set<String> getProcessPGIlist() {
         return processPGIlist;
     }
 
-    public void setProcessPGIlist(List<String> processPGIlist) {
+    public void setProcessPGIlist(Set<String> processPGIlist) {
         this.processPGIlist = processPGIlist;
     }
 

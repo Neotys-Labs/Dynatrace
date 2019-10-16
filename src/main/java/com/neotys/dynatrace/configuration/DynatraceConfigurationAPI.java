@@ -93,47 +93,41 @@ public class DynatraceConfigurationAPI {
 
 
     public void setDynatraceTags(Optional<String> tags) throws Exception {
-        List<String> serviceListId;
-        List<String> dependenListId;
-        AtomicReference<List<String>> processgroupListids=new AtomicReference<>();;
-        AtomicReference<List<String>> hostListid = new AtomicReference<>();;
+//        List<String> serviceListId;
+//        List<String> dependenListId;
+        AtomicReference<Set<String>> processgroupListids=new AtomicReference<>();;
+        AtomicReference<Set<String>> hostListid = new AtomicReference<>();;
         Map<String, String> header = new HashMap<>();
 
         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, tags, header);
-
-        serviceListId=DynatraceUtils.getApplicationEntityIds(context,dynatraceContext,proxyName,traceMode);
-        dependenListId=new ArrayList<>();
-        serviceListId.stream().forEach(serviceid-> {
-            try {
-                dependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-
-        //search for dependencies
-        int size=dependenListId.size();
-        List<String> tmp=new ArrayList<>();
-        tmp.addAll(dependenListId);
-        while(size>0)
-        {
-            List<String> secondleveldependenListId=new ArrayList<>();
-            tmp.stream().forEach(serviceid-> {
-                try {
-                    secondleveldependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-            size=secondleveldependenListId.size();
-            tmp=new ArrayList<>();
-            tmp.addAll(secondleveldependenListId);
-            dependenListId.addAll(secondleveldependenListId);
+        
+        
+//        HashSet<String> taggedservices=new HashSet<String>();
+        HashSet<String> evaluatedservices=new HashSet<String>();
+        Set<String> currentservicesforevaluation;
+        
+        currentservicesforevaluation=DynatraceUtils.getServiceEntityIds(context,dynatraceContext,proxyName,traceMode);
+//        taggedservices.addAll(currentservicesforevaluation);
+        
+        int size=currentservicesforevaluation.size();
+        while (size>0) {
+        	
+            Set<String> newservicesforevaluation=new HashSet<String>();        	
+        	for (String evalservice:currentservicesforevaluation) {
+        		if (!evaluatedservices.contains(evalservice)) {
+                    try {
+                    	newservicesforevaluation.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,evalservice,proxyName,traceMode,false));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    evaluatedservices.add(evalservice);
+        		}	
+        	}
+        	size=newservicesforevaluation.size();
+        	currentservicesforevaluation=newservicesforevaluation;
         }
-        serviceListId=Stream.concat(serviceListId.stream(), dependenListId.stream()).distinct()
-                .collect(Collectors.toList());
-
-        serviceListId.stream().forEach(serviceid->{
+        	
+        evaluatedservices.stream().forEach(serviceid->{
             try {
                 processgroupListids.set(DynatraceUtils.getListProcessGroupIDfromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode,false));
                 DynatraceUtils.updateTagOnserviceID(context,dynatraceContext,proxyName,traceMode,serviceid);

@@ -33,7 +33,7 @@ public class DynatracePGIMetrics {
     private final Context context;
     private long startTS;
     private boolean traceMode;
-    private List<String> dynatraceApplicationServiceIds;
+    private Set<String> dynatraceApplicationServiceIds;
     private String applicationName;
     private final static double COMPARAISON_RATIO=0.10;
 
@@ -59,7 +59,7 @@ public class DynatracePGIMetrics {
         dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header);
 
 
-        this.dynatraceApplicationServiceIds = DynatraceUtils.getApplicationEntityIds(context, dynatraceContext, proxyName, traceMode);
+        this.dynatraceApplicationServiceIds = DynatraceUtils.getServiceEntityIds(context, dynatraceContext, proxyName, traceMode);
         //---get dependencies-----
         List<String> dependenListId=new ArrayList<>();
         dynatraceApplicationServiceIds.stream().forEach(serviceid-> {
@@ -71,7 +71,7 @@ public class DynatracePGIMetrics {
         });
 
         dynatraceApplicationServiceIds= Stream.concat(dynatraceApplicationServiceIds.stream(), dependenListId.stream()).distinct()
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         //--------
         if(dynatraceTags.isPresent())
             applicationName=dynatraceTags.get();

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.neotys.dynatrace.common.DynatraceUtils.*;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
@@ -30,7 +31,7 @@ class DynatraceEventAPI {
 	private final Map<String, String> headers;
 	private final String dynatraceApiKey;
 	private final String dynatraceAccountID;
-	private final List<String> applicationEntityIds;
+	private final Set<String> applicationEntityIds;
 	private final Optional<String> dynatraceManagedHostname;
 	private final Optional<String> proxyName;
 	private final Context context;
@@ -50,7 +51,7 @@ class DynatraceEventAPI {
 		this.traceMode = traceMode;
 		this.headers = new HashMap<>();
 		this.context = context;
-		this.applicationEntityIds = getApplicationEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, getDynatracetag(dynatraceTags), headers), proxyName, this.traceMode);
+		this.applicationEntityIds = getServiceEntityIds(context, new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceAccountID, getDynatracetag(dynatraceTags), headers), proxyName, this.traceMode);
 	}
 
 	private Optional<String> getDynatracetag(Optional<String> tag)
@@ -76,7 +77,7 @@ class DynatraceEventAPI {
 	private void sendMetricToEventAPI(final String message, final long startTime, final long endTime) throws Exception {
 		final String url = getDynatraceApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_EVENTS_API_URL;
 		final Map<String, String> parameters = new HashMap<>();
-		List<String> eventids=new ArrayList<>();
+//		List<String> eventids=new ArrayList<>();
 		parameters.put("Api-Token", dynatraceApiKey);
 
 		final StringBuilder entitiesBuilder = new StringBuilder();

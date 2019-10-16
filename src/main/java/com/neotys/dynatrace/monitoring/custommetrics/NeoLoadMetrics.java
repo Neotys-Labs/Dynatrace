@@ -40,26 +40,26 @@ public class NeoLoadMetrics {
     private static Map<String, DynatraceCustomMetric> initTimeseries() {
         Map<String, DynatraceCustomMetric> map = new HashMap<>();
 
-        map.put(REQUEST_DURATION, of(REQUEST_DURATION, "Request duration", "Second", asList("Request.duration")));
-        map.put(REQUEST_COUNT, of(REQUEST_COUNT, "Request Count", "Request/Second", asList("Request.Count")));
-        map.put(TRANSACTION_AVG_DURATION, of(TRANSACTION_AVG_DURATION, "AverageTransactionDuration", "Second", asList("Transaction.Average.Duration")));
-        map.put(USER_LOAD, of(TRANSACTION_AVG_DURATION, "User Load", "Count", asList("User.Load")));
-        map.put(COUNT_AVG_FAILURE, of(COUNT_AVG_FAILURE, "Number of Failure", "Count", asList("Count.Average.Failure")));
-        map.put(DOWNLOADED_BYTES, of(DOWNLOADED_BYTES, "Downloaded Bytes", "Bytes", asList("DowLoaded.Average.Bytes")));
-        map.put(DOWNLOADED_BYTES_RATE, of(DOWNLOADED_BYTES_RATE, "Downloaded Bytes Rate", "Bytes/Second", asList("Downloaded.Average.Bytes.PerSecond")));
-        map.put(ITERATION_FAILURE, of(ITERATION_FAILURE, "Iteration in Failure", "Count", asList("Iteration.Average.Failure")));
-        map.put(ITERATION_SUCCESS, of(ITERATION_SUCCESS, "Iteration in Success", "Count", asList("Iteration.Average.Success")));
-        map.put(REQUESTS, of(REQUESTS, "Number of request", "Request/Second", asList("Request.Average.Count")));
-        map.put(REQUEST_SUCCESS, of(REQUEST_SUCCESS, "Request in Success", "Count", asList("Request.Average.Success")));
-        map.put(REQUEST_FAILURE, of(REQUEST_FAILURE, "Request in Failure", "Count", asList("Request.Average.Failure")));
-        map.put(REQUEST_RATE, of(REQUEST_RATE, "Request in Success Per second", "Request/Second", asList("Request.Sucess.PerSecond")));
-        map.put(REQUEST_FAILURE_RATE, of(REQUEST_FAILURE_RATE, "Request in Failure Per Second", "Count", asList("Request.Failure.PerSeconds")));
-        map.put(TRANSACTION_FAILURE, of(TRANSACTION_FAILURE, "Transaction in Failure", "Count", asList("Transaction.Average.Failure")));
-        map.put(TRANSACTION_SUCCESS, of(TRANSACTION_SUCCESS, "Transaction in Success", "Count", asList("Iteration.Average.Success")));
-        map.put(TRANSACTION_FAILURE_RATE, of(TRANSACTION_FAILURE_RATE, "Transaction in Failure Per Second", "Transaction/Second", asList("Transaction.Failure.PerSecond")));
-        map.put(TRANSACTION_SUCCESS_RATE, of(TRANSACTION_SUCCESS_RATE, "Transaction in Success Per Second", "Transaction/Second", asList("Iteration.Average.Success")));
-        map.put(TRANSACTIONS, of(TRANSACTIONS, "Number of Transaction", "Count", asList("Transaction.Average.Count")));
-        map.put(FAILURE_RATE, of(FAILURE_RATE, "Failure Rate", "Percentage", asList("Failure.Rate")));
+        map.put(REQUEST_DURATION, of(REQUEST_DURATION, "Request duration", "Second", asList("Neoload.Request.duration")));
+        map.put(REQUEST_COUNT, of(REQUEST_COUNT, "Request Count", "Request/Second", asList("Neoload.Request.Count")));
+        map.put(TRANSACTION_AVG_DURATION, of(TRANSACTION_AVG_DURATION, "AverageTransactionDuration", "Second", asList("Neoload.Transaction.Average.Duration")));
+        map.put(USER_LOAD, of(TRANSACTION_AVG_DURATION, "User Load", "Count", asList("Neoload.User.Load")));
+        map.put(COUNT_AVG_FAILURE, of(COUNT_AVG_FAILURE, "Number of Failure", "Count", asList("Neoload.Count.Average.Failure")));
+        map.put(DOWNLOADED_BYTES, of(DOWNLOADED_BYTES, "Downloaded Bytes", "Bytes", asList("Neoload.Downloaded.Average.Bytes")));
+        map.put(DOWNLOADED_BYTES_RATE, of(DOWNLOADED_BYTES_RATE, "Downloaded Bytes Rate", "Bytes/Second", asList("Neoload.Downloaded.Average.Bytes.PerSecond")));
+        map.put(ITERATION_FAILURE, of(ITERATION_FAILURE, "Iteration in Failure", "Count", asList("Neoload.Iteration.Average.Failure")));
+        map.put(ITERATION_SUCCESS, of(ITERATION_SUCCESS, "Iteration in Success", "Count", asList("Neoload.Iteration.Average.Success")));
+        map.put(REQUESTS, of(REQUESTS, "Number of request", "Request/Second", asList("Neoload.Request.Average.Count")));
+        map.put(REQUEST_SUCCESS, of(REQUEST_SUCCESS, "Request in Success", "Count", asList("Neoload.Request.Average.Success")));
+        map.put(REQUEST_FAILURE, of(REQUEST_FAILURE, "Request in Failure", "Count", asList("Neoload.Request.Average.Failure")));
+        map.put(REQUEST_RATE, of(REQUEST_RATE, "Request in Success Per second", "Request/Second", asList("Neoload.Request.Success.PerSecond")));
+        map.put(REQUEST_FAILURE_RATE, of(REQUEST_FAILURE_RATE, "Request in Failure Per Second", "Count", asList("Neoload.Request.Failure.PerSecond")));
+        map.put(TRANSACTION_FAILURE, of(TRANSACTION_FAILURE, "Transaction in Failure", "Count", asList("Neoload.Transaction.Average.Failure")));
+        map.put(TRANSACTION_SUCCESS, of(TRANSACTION_SUCCESS, "Transaction in Success", "Count", asList("Neoload.Transaction.Average.Success")));
+        map.put(TRANSACTION_FAILURE_RATE, of(TRANSACTION_FAILURE_RATE, "Transaction in Failure Per Second", "Transaction/Second", asList("Neoload.Transaction.Failure.PerSecond")));
+        map.put(TRANSACTION_SUCCESS_RATE, of(TRANSACTION_SUCCESS_RATE, "Transaction in Success Per Second", "Transaction/Second", asList("Neoload.Transaction.Success.PerSecond")));
+        map.put(TRANSACTIONS, of(TRANSACTIONS, "Number of Transaction", "Count", asList("Neoload.Transaction.Average.Count")));
+        map.put(FAILURE_RATE, of(FAILURE_RATE, "Failure Rate", "Percentage", asList("Neoload.Failure.Rate")));
 
         return map;
     }
