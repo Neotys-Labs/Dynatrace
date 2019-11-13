@@ -1,7 +1,7 @@
 package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
-import com.neotys.dynatrace.common.data.DynatraceService;
+//import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.dynatrace.common.tag.DynatraceTaggingUtils;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
@@ -12,10 +12,13 @@ import org.apache.http.HttpStatus;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
-import org.json.JSONException;
+//import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.swing.*;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZoneOffset;
@@ -24,20 +27,31 @@ import java.util.*;
 
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_POST_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_DELETE_METHOD;
+import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_PUT_METHOD;
 import static com.neotys.dynatrace.common.HttpResponseUtils.getJsonArrayResponse;
 import static com.neotys.dynatrace.common.HttpResponseUtils.getJsonResponse;
 
 /**
  * Created by anouvel on 20/12/2017.
  */
+
+// TODO : remove dead code - some methods were moved to topology walker
+
 public class DynatraceUtils {
-    private static final String DYNATRACE_URL = "/api/v1/";
+	// TODO : move constant Strings to 'Constants' class
+	
+	private static final String PARAM_TAG="tag";
+	private static final String PARAM_ENTITY="entity";
+	
+    private static final String DYNATRACE_ENV1URL = "/api/v1/";
+    private static final String DYNATRACE_ENV2URL = "/api/v2/";
     private static final String DYNATRACE_CONFIGURL = "/api/config/v1/";
-    private static final String DYNATRACE_SERVICE = "entity/services";
+    public  static final String DYNATRACE_SERVICE = "entity/services";
 //    private static final String DYNATRACE_APPLICATIONNAME="entity/applications";
-    private static final String DYNATRACE_PROCESS="entity/infrastructure/processes";
-    private static final String DYNATRACE_PROCESSGROUP="entity/infrastructure/process-groups";
-    private static final String DYNATRACE_HOST="entity/infrastructure/hosts";
+    public  static final String DYNATRACE_PROCESS="entity/infrastructure/processes";
+    public  static final String DYNATRACE_PROCESSGROUP="entity/infrastructure/process-groups";
+    public  static final String DYNATRACE_HOST="entity/infrastructure/hosts";
     private static final String DYNATRACE_PROTOCOL = "https://";
     private static final String DYNATRACE_TIMESERIES = "timeseries";
     private static final ImageIcon DYNATRACE_ICON;
@@ -60,57 +74,45 @@ public class DynatraceUtils {
     public static ImageIcon getDynatraceIcon() {
         return DYNATRACE_ICON;
     }
+/*
+	public static void generateHeaders(final Map<String, String> header) {
+		header.put("Accept", "application/json; charset=utf-8");
+		header.put("Content-Type", "application/json");
+	}
+*/
+	public static String cleanUpTags(String tag) {
+		if (tag != null) {
+			return tag.replaceAll(":", "\\\\:");
+		} else
+			return null;
+	}
 
-
-
-    public static void generateHeaders(final Map<String,String> header)
-    {
-        header.put("Accept","application/json; charset=utf-8");
-        header.put("Content-Type","application/json");
-    }
-
-    public static String cleanUpTags(String tag)
-    {
-        if(tag!=null)
-        {
-            return tag.replaceAll(":","\\\\:");
-
-        }
-        else
-            return null;
-    }
-    public static Map<String,String> generateGetTagParameter(Optional<String> tag,boolean usetag)
-    {
-        Map<String,String> parameters=new HashMap<>();
+    public static MultivaluedMap<String,String> generateGetTagsParameters(Optional<String> tags,boolean usetag) {
+    	MultivaluedMap<String,String> parameters=new MultivaluedHashMap<>();
         if(usetag) {
-            if (tag.isPresent())
-            {
-                String parameter = null;
-                /*List<String> listofTags = Arrays.asList(cleanUpTags(tag.get()).split("\\s*,\\s*"));
-                if (listofTags.size() > 0) {
-                    for (String tagvalue : listofTags) {
-                        if (parameter != null)
-                            parameter += DYNATRACE_TAG_NEXTPARAMETER;
-                        else
-                            parameter = "";
-
-                        parameter += tagvalue;
-                    }
-                } else {*/
-                    parameter = cleanUpTags(tag.get());
-               // }
-                parameters.put("tag", parameter);
+            if (tags.isPresent()) {
+            	String tagcsv=tags.get();
+            	String[] tagvalues=tagcsv.split(",");
+            	for (String tag:tagvalues)
+            		addGetParameterTag(parameters,tag);
             }
         }
-
         return parameters;
-
     }
+
+    public static void addGetParameterTag(MultivaluedMap<String,String> params,String tag) {
+    	params.add(PARAM_TAG,cleanUpTags(tag));
+    }
+    
+    public static void addGetParameterEntity(MultivaluedMap<String,String> params,String entity) {
+    	params.add(PARAM_ENTITY,entity);
+    }
+/*    
     public static Set<String> getServiceEntityIds(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE;
-        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE;
+        final MultivaluedMap<String, String> parameters = generateGetTagsParameters(dynatraceContext.getTags(),true);
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
@@ -133,14 +135,13 @@ public class DynatraceUtils {
         } finally {
             http.closeHttpClient();
         }
-
-        if (traceMode) {
+        {
             context.getLogger().info("Found services: " + serviceEntityIds);
         }
 
         return serviceEntityIds;
     }
-
+*/
     private static long getUtcDate(Optional<Long> delta) {
         long diff;
         if(delta.isPresent())
@@ -155,13 +156,17 @@ public class DynatraceUtils {
     }
 
     public static List<DynatraceMetric> getTimeSeriesMetricData(final String timeSeries,
-                                                                final String aggregate, final Set<String> listEntityId, final long startTS, final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode, final Optional<Long> difftimeseries,final Optional<Boolean> noDataExchangeAPI)
+                                                                final String aggregate, final Set<String> listEntityId, final long startTS, final Context context, final DynatraceContext dynatraceContext, final boolean traceMode, final Optional<Long> difftimeseries,final Optional<Boolean> noDataExchangeAPI)
             throws Exception {
-        JSONObject jsonMetricResults;
+    	
+        final List<DynatraceMetric> metrics = new ArrayList<>();
+    	if (listEntityId.isEmpty())
+    		return metrics;
+    	
 
-        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_TIMESERIES + "/" + timeSeries;
-        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+//        final String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_TIMESERIES + "/" + timeSeries;
+//        final MultivaluedMap<String, String> parameters = generateGetTagsParameters(dynatraceContext.getTags(),true);
+        //parameters.add("Api-Token", dynatraceContext.getApiKey());
 
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 
@@ -180,19 +185,22 @@ public class DynatraceUtils {
         }
 
         final String bodyJson = jsonEntitiesBuilder.substring(0, jsonEntitiesBuilder.length() - 1) + "]}";
-        final Optional<Proxy> proxy = getProxy(context, proxyName, url);
-        final HTTPGenerator  http = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url,  dynatraceContext.getHeaders(), parameters, proxy, bodyJson);
 
-        final List<DynatraceMetric> metrics = new ArrayList<>();
-        try {
+        
+//        final Optional<Proxy> proxy = getProxy(context, dynatraceContext.getProxyname(), url);
+//        final HTTPGenerator http = new HTTPGenerator(HTTP_POST_METHOD, url,  dynatraceContext.getHeaders(), parameters, proxy, bodyJson);
+
+//        try {
+            JSONObject jsonMetricResults=executeDynatraceAPIPostObjectRequest(context, dynatraceContext, Api.ENV1, DYNATRACE_TIMESERIES + "/" + timeSeries, bodyJson, traceMode);
+
             if(traceMode){
-                context.getLogger().info("Dynatrace service, get timeseries:\n" + http.getRequest() + "\n" + bodyJson);
+                context.getLogger().info("Dynatrace service, get timeseries:\n" + Api.ENV1+"/"+ DYNATRACE_TIMESERIES + "\n" + bodyJson);
             }
-            final HttpResponse httpResponse = http.execute();
+//            final HttpResponse httpResponse = http.execute();
 
-            final int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (HttpResponseUtils.isSuccessHttpCode(statusCode)) {
-                jsonMetricResults = HttpResponseUtils.getJsonResponse(httpResponse);
+//            final int statusCode = httpResponse.getStatusLine().getStatusCode();
+//            if (HttpResponseUtils.isSuccessHttpCode(statusCode)) {
+//                jsonMetricResults = HttpResponseUtils.getJsonResponse(httpResponse);
                 if (jsonMetricResults == null || !jsonMetricResults.has("result")) {
                     context.getLogger().debug("No timeseries found.");
                     return Collections.emptyList();
@@ -214,6 +222,7 @@ public class DynatraceUtils {
                 if(metrics.isEmpty() && traceMode){
                     context.getLogger().info("No timeseries found.");
                 }
+ /*               
             }
             else if(statusCode != HttpStatus.SC_BAD_REQUEST && statusCode != HttpStatus.SC_NOT_FOUND){
                 final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
@@ -222,18 +231,18 @@ public class DynatraceUtils {
         } finally {
             http.closeHttpClient();
         }
+*/
         return metrics;
     }
 
     private static HashMap<String, String> getEntityDefinition(final JSONObject entity) {
         final HashMap<String, String> result = new HashMap<>();
-        final Iterator keysIterator = entity.keys();
+        final Iterator<?> keysIterator = entity.keys();
         while (keysIterator.hasNext()) {
             final Object key = keysIterator.next();
             result.put((String) key, (String) entity.get((String) key));
         }
         return result;
-
     }
 
 
@@ -292,14 +301,14 @@ public class DynatraceUtils {
 
         }
     }
-
+/*
     public static Set<String> getListProcessGroupIDfromServiceId(final Context context, final DynatraceContext dynatraceContext, String serviceID, final Optional<String> proxyName, final boolean traceMode,final boolean usetags)
             throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
-        final Map<String, String> parameters =generateGetTagParameter(dynatraceContext.getTags(),usetags);
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
+        final MultivaluedMap<String, String> parameters =generateGetTagsParameters(dynatraceContext.getTags(),usetags);
 
 
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
 //        DynatraceService dynatraceService = null;
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
@@ -330,30 +339,31 @@ public class DynatraceUtils {
 
         return processGroupIds;
     }
-
+*/
+/*
     public static DynatraceService getListProcessGroupInstanceFromServiceId(final Context context, final DynatraceContext dynatraceContext, String serviceID, final Optional<String> proxyName, final boolean traceMode)
             throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
-        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),true);
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
+        final MultivaluedMap<String, String> parameters = generateGetTagsParameters(dynatraceContext.getTags(),true);
         String servicename;
 
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
         DynatraceService dynatraceService = null;
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
-        final Set<String> applicationEntityIds = new HashSet<String>();
+        final Set<String> pgInstanceEntityIds = new HashSet<String>();
         try {
             if(traceMode){
-                context.getLogger().info("Dynatrace service, get application entity:\n" + http.getRequest());
+                context.getLogger().info("Dynatrace service, get processGroupInstance entities:\n" + http.getRequest());
             }
             final HttpResponse httpResponse = http.execute();
 
             if (HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
                 final JSONObject jsonObjectResponse = getJsonResponse(httpResponse);
                 if (jsonObjectResponse != null) {
-                    servicename=extractProcessGroupInstanceIdsFromResponse(applicationEntityIds, jsonObjectResponse);
-                    dynatraceService=new DynatraceService(serviceID,servicename,applicationEntityIds);        
+                    servicename=extractProcessGroupInstanceIdsFromResponse(pgInstanceEntityIds, jsonObjectResponse);
+                    dynatraceService=new DynatraceService(serviceID,servicename,pgInstanceEntityIds);        
                 }
             } else {
                 final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
@@ -364,17 +374,18 @@ public class DynatraceUtils {
         }
 
         if (traceMode) {
-            context.getLogger().info("Found applications: " + applicationEntityIds);
+            context.getLogger().info("Found applications: " + pgInstanceEntityIds);
         }
 
         return dynatraceService;
     }
-
+*/
+/*
     public static Set<String> getHostIdFromProcessID(final Context context, final DynatraceContext dynatraceContext, String processId, final Optional<String> proxyName, final boolean traceMode) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESS+"/"+processId;
-        final Map<String, String> parameters = new HashMap<>();
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESS+"/"+processId;
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         Set<String> hostid=new HashSet<String>();
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
@@ -404,11 +415,13 @@ public class DynatraceUtils {
 
         return hostid;
     }
+*/
+/*    
     public static Set<String> getHostIdFromProcessGroupID(final Context context, final DynatraceContext dynatraceContext, String processId, final Optional<String> proxyName, final boolean traceMode) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESSGROUP+"/"+processId;
-        final Map<String, String> parameters = new HashMap<>();
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESSGROUP+"/"+processId;
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         Set<String> hostid=new HashSet<String>();
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
@@ -438,14 +451,15 @@ public class DynatraceUtils {
 
         return hostid;
     }
-
+*/
+/*
     public static Set<String> getListDependentServicesFromServiceID(final Context context, final DynatraceContext dynatraceContext, String serviceid, final Optional<String> proxyName, final boolean traceMode,final boolean usetags) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceid;
-        final Map<String, String> parameters = generateGetTagParameter(dynatraceContext.getTags(),usetags); // ? tag param not defined for this API call
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceid;
+        final MultivaluedMap<String, String> parameters = generateGetTagsParameters(dynatraceContext.getTags(),usetags); // ? tag param not defined for this API call
 
-        parameters.put("Api-Token", dynatraceContext.getApiKey());
+        parameters.add("Api-Token", dynatraceContext.getApiKey());
 
-        DynatraceService dynatraceService = null;
+ //       DynatraceService dynatraceService = null;
         final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
         final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceUrl, dynatraceContext.getHeaders(), parameters, proxy);
         final Set<String> serviceEntityIds = new HashSet<String>();
@@ -474,8 +488,8 @@ public class DynatraceUtils {
 
         return serviceEntityIds;
     }
-
-
+*/
+/*
     private static void extractServiceEntityIdsFromResponse(final Set<String> serviceEntityId, final JSONArray jsonArrayResponse) {
         for (int i = 0; i < jsonArrayResponse.length(); i++) {
             final JSONObject jsonApplication = jsonArrayResponse.getJSONObject(i);
@@ -485,7 +499,8 @@ public class DynatraceUtils {
 
         }
     }
-
+*/
+/*    
     private static void extractProcessGroupIdsFromResponse(final Set<String> processgroupIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
@@ -499,9 +514,10 @@ public class DynatraceUtils {
         {
             //----print the exeption
         }
-
-
     }
+*/
+    
+/*    
     private static void extractServiceIdsFromResponse(final Set<String> serviceIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
@@ -514,7 +530,7 @@ public class DynatraceUtils {
         {
             //----print the exeption
         }
-
+*/
        /* JSONObject toRelationships=jsonObject.getJSONObject("toRelationships");
         try {
             JSONArray toRelationshipscalls = toRelationships.getJSONArray("calls");
@@ -527,9 +543,10 @@ public class DynatraceUtils {
         {
             //----print the exeption
         }*/
-
+/*
     }
-
+*/
+/*    
     private static String extractProcessGroupInstanceIdsFromResponse(final Set<String> processgroupInstanceIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
@@ -543,24 +560,29 @@ public class DynatraceUtils {
         return applicationName;
 
     }
-
-    public static void updateTagOnserviceID(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String serviceID) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
-        updateTagsOnEntity(context,dynatraceContext,proxyName,traceMode,dynatraceUrl);
+*/
+    public static void updateTagOnServiceID(final Context context, final DynatraceContext dynatraceContext, final boolean traceMode,String serviceID) throws Exception {
+//        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
+        updateTagsOnEntity(context,dynatraceContext,traceMode,DYNATRACE_SERVICE+"/"+serviceID);
     }
-    public static void updateTagOnProcessGroupID(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String processgroupid) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESSGROUP+"/"+processgroupid;
-        updateTagsOnEntity(context,dynatraceContext,proxyName,traceMode,dynatraceUrl);
+    public static void updateTagOnPgInstanceID(final Context context, final DynatraceContext dynatraceContext, final boolean traceMode,String pginstanceid) throws Exception {
+//        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESS+"/"+pginstanceid;
+        updateTagsOnEntity(context,dynatraceContext,traceMode,DYNATRACE_PROCESS+"/"+pginstanceid);
     }
-    public static void updateTagOnHostID(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String hostid) throws Exception {
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_HOST+"/"+hostid;
-        updateTagsOnEntity(context,dynatraceContext,proxyName,traceMode,dynatraceUrl);
+    public static void updateTagOnProcessGroupID(final Context context, final DynatraceContext dynatraceContext, final boolean traceMode,String processgroupid) throws Exception {
+//        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_PROCESSGROUP+"/"+processgroupid;
+        updateTagsOnEntity(context,dynatraceContext,traceMode,DYNATRACE_PROCESSGROUP+"/"+processgroupid);
     }
-    private static void updateTagsOnEntity(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String url) throws Exception {
+    public static void updateTagOnHostID(final Context context, final DynatraceContext dynatraceContext, final boolean traceMode,String hostid) throws Exception {
+//        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_HOST+"/"+hostid;
+        updateTagsOnEntity(context,dynatraceContext,traceMode,DYNATRACE_HOST+"/"+hostid);
+    }
+    
+    private static void updateTagsOnEntity(final Context context, final DynatraceContext dynatraceContext, final boolean traceMode,String endpoint) throws Exception {
         String jsonpayloadstart;
         String jsonpayloadend;
         String jsonpayload;
-        final Map<String, String> parameters = new HashMap<>();
+//        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         if(dynatraceContext.getTags().isPresent()) {
 
             jsonpayloadstart="{\n" +
@@ -570,10 +592,14 @@ public class DynatraceUtils {
                     "}";
 
             jsonpayload=jsonpayloadstart+ DynatraceTaggingUtils.convertforUpdateTags(dynatraceContext.getTags()) + jsonpayloadend;
-            parameters.put("Api-Token", dynatraceContext.getApiKey());
+            
+            DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatraceContext, Api.ENV1, endpoint, jsonpayload, traceMode);
+            
+/*            
+            parameters.add("Api-Token", dynatraceContext.getApiKey());
 
-            final Optional<Proxy> proxy = getProxy(context, proxyName, url);
-            final HTTPGenerator httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url,  dynatraceContext.getHeaders(), parameters, proxy,jsonpayload);
+            final Optional<Proxy> proxy = getProxy(context, dynatraceContext.getProxyname(), url);
+            final HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_POST_METHOD, url,  dynatraceContext.getHeaders(), parameters, proxy,jsonpayload);
             try {
                 if(traceMode){
                     context.getLogger().info("Dynatrace update Tags on entity:\n" + httpGenerator.getRequest());
@@ -588,15 +614,15 @@ public class DynatraceUtils {
             } finally {
                 httpGenerator.closeHttpClient();
             }
-
-
+*/
         }
     }
 
+/*
     private static void updateServices(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String serviceID) throws Exception {
         String jsonpayload;
-        final String dynatraceUrl = getDynatraceApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
-        final Map<String, String> parameters = new HashMap<>();
+        final String dynatraceUrl = getDynatraceEnv1ApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_SERVICE+"/"+serviceID;
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         if(dynatraceContext.getTags().isPresent()) {
             jsonpayload="{\n" +
                     "  \"tags\": [\n" +
@@ -605,10 +631,10 @@ public class DynatraceUtils {
                     "}";
 
 
-            parameters.put("Api-Token", dynatraceContext.getApiKey());
+            parameters.add("Api-Token", dynatraceContext.getApiKey());
 
             final Optional<Proxy> proxy = getProxy(context, proxyName, dynatraceUrl);
-            final HTTPGenerator httpGenerator = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, dynatraceUrl,  dynatraceContext.getHeaders(), parameters, proxy,jsonpayload);
+            final HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_POST_METHOD, dynatraceUrl,  dynatraceContext.getHeaders(), parameters, proxy,jsonpayload);
            try {
                 if(traceMode){
                     context.getLogger().info("Dynatrace service, update Tags:\n" + httpGenerator.getRequest());
@@ -627,7 +653,8 @@ public class DynatraceUtils {
 
         }
     }
-
+*/
+/*    
     private static String extractProcessGroupFromResponse(final Set<String> processgroupIds, final JSONObject jsonObject) {
 
         JSONObject fromRelationships=jsonObject.getJSONObject("fromRelationships");
@@ -641,7 +668,8 @@ public class DynatraceUtils {
         return applicationName;
 
     }
-
+*/
+/*    
     private static void extractSerivcesIdsFromResponse(final Set<String> serviceId, final JSONArray jsonArrayResponse,String applicationName) {
         applicationName=applicationName.trim();
         for (int i = 0; i < jsonArrayResponse.length(); i++) {
@@ -658,6 +686,8 @@ public class DynatraceUtils {
             }
         }
     }
+*/
+/*    
     private static void extractHostIdsFromProcesGroupResponse(final Set<String> hostId, final JSONObject jsonObjectResponse) {
         JSONObject fromRelationships=jsonObjectResponse.getJSONObject("fromRelationships");
         JSONArray  processOF=fromRelationships.getJSONArray("runsOn");
@@ -668,6 +698,8 @@ public class DynatraceUtils {
         }
 
     }
+*/
+/*    
     private static void extractHostIdsFromResponse(final Set<String> hostId, final JSONObject jsonObjectResponse) {
         JSONObject fromRelationships=jsonObjectResponse.getJSONObject("fromRelationships");
         JSONArray  processOF=fromRelationships.getJSONArray("isProcessOf");
@@ -678,6 +710,7 @@ public class DynatraceUtils {
         }
 
     }
+*/
     public static Optional<Proxy> getProxy(final Context context, final Optional<String> proxyName, final String url) throws MalformedURLException {
         if (proxyName.isPresent()) {
             return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
@@ -689,11 +722,32 @@ public class DynatraceUtils {
        return Optional.fromNullable(context.getProxyByType(ProxyType.NEOLOAD_WEB, new URL(url)));
     }
 
-    public static String getDynatraceApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
+    
+    public static String getDynatraceAnyApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID, Api api) {
+		switch (api) {
+		case ENV1:
+			return getDynatraceEnv1ApiUrl(dynatraceManagedHostname,dynatraceAccountID);
+		case ENV2:
+			return getDynatraceEnv2ApiUrl(dynatraceManagedHostname,dynatraceAccountID);
+		case CFG:
+		default:
+			return getDynatraceConfigApiUrl(dynatraceManagedHostname,dynatraceAccountID);
+		}
+    }
+    
+    public static String getDynatraceEnv1ApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
         if (dynatraceManagedHostname.isPresent()) {
             return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID + "/api/v1/";
         } else {
-            return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_URL;
+            return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_ENV1URL;
+        }
+    }
+
+    public static String getDynatraceEnv2ApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
+        if (dynatraceManagedHostname.isPresent()) {
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID + "/api/v2/";
+        } else {
+            return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_ENV2URL;
         }
     }
 
@@ -704,4 +758,152 @@ public class DynatraceUtils {
             return DYNATRACE_PROTOCOL + dynatraceAccountID + DYNATRACE_CONFIGURL;
         }
     }
+    
+    public static JSONArray executeDynatraceAPIGetArrayRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
+		final String dynatraceurl=getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+//		params.put("Api-Token", dynatracecontext.getApiKey());	
+		Map<String,String> headers=new HashMap<>();
+		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
+        headers.put("Accept","application/json; charset=utf-8");
+    	
+		final Optional<Proxy> proxy = getProxy(context, dynatracecontext.getProxyname(), dynatraceurl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceurl, headers, params, proxy);
+		
+		try {
+			if (tracemode) {
+				context.getLogger().info("Dynatrace GET request:\n" + http.getRequest());
+			}
+			final HttpResponse httpresponse = http.execute();
+			
+			if (HttpResponseUtils.isSuccessHttpCode(httpresponse.getStatusLine().getStatusCode())) {
+				return getJsonArrayResponse(httpresponse);
+			} else {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpresponse);
+				throw new DynatraceException(
+					httpresponse.getStatusLine().getReasonPhrase() + " - " + dynatraceurl + " - " + stringResponse);
+			}
+		} finally {
+			http.closeHttpClient();
+		}
+    }
+
+    public static JSONObject executeDynatraceAPIGetObjectRequest(Context context, DynatraceContext dynatracecontext, Api api , String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+//		params.put("Api-Token", dynatracecontext.getApiKey());
+		Map<String,String> headers=new HashMap<>();
+		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
+        headers.put("Accept","application/json; charset=utf-8");
+   	
+		final Optional<Proxy> proxy = getProxy(context, dynatracecontext.getProxyname(), dynatraceurl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_GET_METHOD, dynatraceurl, headers, params, proxy);
+		
+		try {
+			if (tracemode) {
+				context.getLogger().info("Dynatrace GET request:\n" + http.getRequest());
+			}
+			final HttpResponse httpresponse = http.execute();
+			
+			if (HttpResponseUtils.isSuccessHttpCode(httpresponse.getStatusLine().getStatusCode())) {
+				return getJsonResponse(httpresponse);
+			} else {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpresponse);
+				throw new DynatraceException(
+					httpresponse.getStatusLine().getReasonPhrase() + " - " + dynatraceurl + " - " + stringResponse);
+			}
+		} finally {
+			http.closeHttpClient();
+		}
+    }
+
+    public static JSONObject executeDynatraceAPIPostObjectRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, String payload, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
+		Map<String,String> headers=new HashMap<>();
+		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
+        headers.put("Accept","application/json; charset=utf-8");
+		headers.put("Content-Type", "application/json");
+   	
+		final Optional<Proxy> proxy = getProxy(context, dynatracecontext.getProxyname(), dynatraceurl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_POST_METHOD, dynatraceurl, headers, params, proxy,payload);
+		
+		try {
+			if (tracemode) {
+				context.getLogger().info("Dynatrace POST request:\n" + http.getRequest());
+			}
+			final HttpResponse httpresponse = http.execute();
+			
+			if (HttpResponseUtils.isSuccessHttpCode(httpresponse.getStatusLine().getStatusCode())) {
+				return getJsonResponse(httpresponse);
+			} else {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpresponse);
+				throw new DynatraceException(
+					httpresponse.getStatusLine().getReasonPhrase() + " - " + dynatraceurl + " - " + stringResponse);
+			}
+		} finally {
+			http.closeHttpClient();
+		}
+    }
+
+    public static void executeDynatraceAPIDeleteRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
+		Map<String,String> headers=new HashMap<>();
+		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
+//      headers.put("Accept","application/json; charset=utf-8");
+//		headers.put("Content-Type", "application/json");
+   	
+		final Optional<Proxy> proxy = getProxy(context, dynatracecontext.getProxyname(), dynatraceurl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_DELETE_METHOD, dynatraceurl, headers, params, proxy);
+		
+		try {
+			if (tracemode) {
+				context.getLogger().info("Dynatrace DELETE request:\n" + http.getRequest());
+			}
+			final HttpResponse httpresponse = http.execute();
+			
+			if (HttpResponseUtils.isSuccessHttpCode(httpresponse.getStatusLine().getStatusCode())) {
+                if(tracemode)
+                    context.getLogger().info("Dynatrace object properly deleted");
+			} else {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpresponse);
+				throw new DynatraceException(
+					httpresponse.getStatusLine().getReasonPhrase() + " - " + dynatraceurl + " - " + stringResponse);
+			}
+		} finally {
+			http.closeHttpClient();
+		}
+    }
+    
+    public static int executeDynatraceAPIPutRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, String payload, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
+		Map<String,String> headers=new HashMap<>();
+		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
+//      headers.put("Accept","application/json; charset=utf-8");
+		headers.put("Content-Type", "application/json");
+   	
+		final Optional<Proxy> proxy = getProxy(context, dynatracecontext.getProxyname(), dynatraceurl);
+		final HTTPGenerator http = new HTTPGenerator(HTTP_PUT_METHOD, dynatraceurl, headers, params, proxy, payload);
+//		final HTTPGenerator http = new HTTPGenerator(HTTP_PUT_METHOD, dynatraceurl, headers, params, proxy);
+		
+		try {
+			if (tracemode) {
+				context.getLogger().info("Dynatrace PUT request:\n" + http.getRequest());
+			}
+			final HttpResponse httpresponse = http.execute();
+			int statuscode=httpresponse.getStatusLine().getStatusCode();
+			if (HttpResponseUtils.isSuccessHttpCode(statuscode)) {
+                if(tracemode)
+                    context.getLogger().info("Dynatrace data properly put");
+                return statuscode;
+			} else {
+				final String stringResponse = HttpResponseUtils.getStringResponse(httpresponse);
+				throw new DynatraceException(
+					httpresponse.getStatusLine().getReasonPhrase() + " - " + dynatraceurl + " - " + stringResponse);
+			}
+		} finally {
+			http.closeHttpClient();
+		}
+    }
+    
 }

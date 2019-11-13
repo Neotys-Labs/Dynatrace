@@ -4,6 +4,8 @@ package com.neotys.dynatrace.monitoring.custommetrics;
 import com.google.common.base.Optional;
 import com.neotys.ascode.swagger.client.api.ResultsApi;
 import com.neotys.ascode.swagger.client.model.TestStatistics;
+import com.neotys.dynatrace.common.Api;
+import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
@@ -24,48 +26,53 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
+
 import static com.neotys.dynatrace.common.HTTPGenerator.*;
 
 
 public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
 
     private static final String DYNATRACE_TIME_SERIES_CREATION = "timeseries/custom";
-    private static final String NL_TIMESERIES_PREFIX = "neoload.";
+    private static final String NL_TIMESERIES_PREFIX = "custom";
     private static final String DYNATRACE_NEW_DATA = "entity/infrastructure/custom/";
     private static final String DYNATRACE_TIME_SERIES = "timeseries";
     private static final String NL_PICTURE_URL = "http://www.neotys.com/wp-content/uploads/2017/07/Neotys-Emblem-Primary.png";
     private static final String NEOLOAD_TYPE = "NeoLoad";
     private static final String API_TOKEN = "Api-Token";
 
-    private final Optional<String> proxyName;
-
+//    private final Optional<String> proxyName;
     private Context context;
-
+    private DynatraceContext dynatracecontext;
     private ResultsApi nlWebResult;
-
-    private String dynatraceApiKey;
-
-    private String dynatraceAccountId;
+//    private String dynatraceApiKey;
+//    private String dynatraceAccountId;
     private String testName;
     private final String testId;
     private String scenarioName;
-    private Optional<String> dynatraceManagedHostName;
+//    private Optional<String> dynatraceManagedHostName;
     private boolean timeSeriesConfigured = false;
     private boolean traceMode;
+    
+    
     public DynatraceReportCustomMetrics(final String dynatraceApiKey,
                                         final String dynatraceAccountId,
                                         final ResultsApi nlWebResult,
                                         final Context context,
                                         final Optional<String> dynatraceManagedHostName,
                                         final Optional<String> proxyName, final boolean traceMode) {
-        this.proxyName = proxyName;
-        this.dynatraceApiKey = dynatraceApiKey;
+    	
+    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostName, dynatraceAccountId, proxyName, Optional.absent(), new HashMap<String,String>());
+    	
+//        this.proxyName = proxyName;
+//        this.dynatraceApiKey = dynatraceApiKey;
         this.context = context;
         this.testId = context.getTestId();
         this.testName = context.getTestName();
         this.nlWebResult = nlWebResult;
-        this.dynatraceManagedHostName = dynatraceManagedHostName;
-        this.dynatraceAccountId = dynatraceAccountId;
+//        this.dynatraceManagedHostName = dynatraceManagedHostName;
+//        this.dynatraceAccountId = dynatraceAccountId;
         this.scenarioName = context.getScenarioName();
         this.traceMode = traceMode;
     }
@@ -88,13 +95,13 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
             NeoLoadMetrics.updateTimeseriesToSend(statsResult);
 
             if (!timeSeriesConfigured) {
-                //Check if metric are created
-                if (!hasCustomMetric(NeoLoadMetrics.getTimeseriesToSend().get(NeoLoadMetrics.REQUEST_COUNT))) {
-                    for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadMetrics.getTimeseriesToSend().values()) {
-                        //create Metric
+                for (DynatraceCustomMetric dynatraceTimeseries : NeoLoadMetrics.getTimeseriesToSend().values()) {
+                    if (hasCustomMetric(dynatraceTimeseries)) {
+                    	dynatraceTimeseries.setCreated(true);
+                    } else {
                         registerCustomMetric(dynatraceTimeseries);
                     }
-                }
+                }            	
                 timeSeriesConfigured = true;
             }
 
@@ -106,34 +113,43 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
             }
         }
     }
-
+/*
     private long getUtcDate() {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         return now.toInstant().toEpochMilli() - 200000;
     }
-
+*/
+/*    
     private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
         if (proxyName.isPresent()) {
             return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
         }
         return Optional.absent();
     }
-
+*/
+    
     @Override
     public void registerCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception {
+/*    	
         final Map<String, String> head = new HashMap<>();
-        final Map<String, String> parameters = new HashMap<>();
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
+        final String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
+        parameters.add(API_TOKEN, dynatraceApiKey);
+*/
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName;
-        parameters.put(API_TOKEN, dynatraceApiKey);
-
         final String bodyJson = "{\"displayName\":\"" + dynatraceCustomMetric.getDisplayName() + "\","
                 + "\"unit\":\"" + dynatraceCustomMetric.getUnit() + "\","
                 + "\"dimensions\": [\"Neoload\"],"
                 + "\"types\":[\"" + dynatraceCustomMetric.getTypes().get(0) + "\"]}";
 
+        
+        DynatraceUtils.executeDynatraceAPIPutRequest(context, dynatracecontext, Api.ENV1, DYNATRACE_TIME_SERIES_CREATION + ":" + timeSeriesName, bodyJson, traceMode);
+        // if no exception is raised, assume success
+        dynatraceCustomMetric.setCreated(true);
+        
+/*        
         final Optional<Proxy> proxy = getProxy(proxyName, url);
-        final HTTPGenerator insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, bodyJson);
+        final HTTPGenerator insightHttp = new HTTPGenerator(HTTP_PUT_METHOD, url, head, parameters, proxy, bodyJson);
 
         try {
             if(traceMode){
@@ -149,19 +165,22 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         } finally {
             insightHttp.closeHttpClient();
         }
+*/        
     }
 
 
     @Override
     public void reportCustomMetrics(final List<DynatraceCustomMetric> dynatraceCustomMetrics) throws Exception {
-        final Map<String, String> head = new HashMap<>();
-        final Map<String, String> parameters = new HashMap<>();
+/*  
+    	final Map<String, String> head = new HashMap<>();
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         HTTPGenerator insightHttp;
 
-        parameters.put(API_TOKEN, dynatraceApiKey);
+        parameters.add(API_TOKEN, dynatraceApiKey);
 
-        String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_NEW_DATA + "NeoLoadData";
-
+        String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_NEW_DATA + "NeoLoadData";
+*/
+    	
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         long time = now.toInstant().toEpochMilli();
 
@@ -197,9 +216,11 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         bodyJson += "]}";
 
         if (hasMetrics) {
-
+        	
+        	DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, Api.ENV1, DYNATRACE_NEW_DATA + "NeoLoadData", bodyJson, traceMode);
+/*
             final Optional<Proxy> proxy = getProxy(proxyName, url);
-            insightHttp = HTTPGenerator.newJsonHttpGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, bodyJson);
+            insightHttp = new HTTPGenerator(HTTP_POST_METHOD, url, head, parameters, proxy, bodyJson);
 
             HttpResponse httpResponse;
             try {
@@ -216,21 +237,30 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
             } finally {
                 insightHttp.closeHttpClient();
             }
+*/            
         }
     }
 
     @Override
     public boolean hasCustomMetric(final DynatraceCustomMetric dynatraceCustomMetric) throws Exception {
-        final String url = DynatraceUtils.getDynatraceApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES;
+/*    	
+        final String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceManagedHostName, dynatraceAccountId) + DYNATRACE_TIME_SERIES;
         final Map<String, String> header = new HashMap<>();
-        final Map<String, String> parameters = new HashMap<>();
+*/
+        final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
-        parameters.put(API_TOKEN, dynatraceApiKey);
-        parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
-        parameters.put("startTimestamp", String.valueOf(getUtcDate()));
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        parameters.put("endTimestamp", String.valueOf(now.toInstant().toEpochMilli()));
+//        parameters.add(API_TOKEN, dynatraceApiKey);
+//        parameters.add("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
+//        parameters.add("startTimestamp", String.valueOf(getUtcDate()));
+//        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+//        parameters.add("endTimestamp", String.valueOf(now.toInstant().toEpochMilli()));
 
+        try {
+        	DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, Api.ENV1, DYNATRACE_TIME_SERIES+"/custom:"+timeSeriesName, parameters, traceMode);
+        } catch (Exception e) {
+        	return false;
+        }
+ /*       
         final Optional<Proxy> proxy = getProxy(proxyName, url);
         HTTPGenerator httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
 
@@ -248,8 +278,10 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         } finally {
             httpGenerator.closeHttpClient();
         }
-
-        return HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode());
+*/
+//      # assume true if no Exception was thrown
+//        return HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode());
+        return true;
     }
 
 

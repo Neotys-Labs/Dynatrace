@@ -56,7 +56,7 @@ public class DynatraceSanityCheckAction implements Action {
     @Override
     public String getDescription() {
         final StringBuilder description = new StringBuilder();
-        description.append("The DynatraceSanityCheck Action will check the architecture from Dynatrace and raise errors if there are majore differences.\n")
+        description.append("The DynatraceSanityCheck Action will check the architecture from Dynatrace and raise errors if there are major differences.\n")
                 .append("The list is available at: https://github.com/Neotys-Labs/Dynatrace\n\n")
                 .append(Arguments.getArgumentDescriptions(DynatraceSanityCheckOption.values()));
 

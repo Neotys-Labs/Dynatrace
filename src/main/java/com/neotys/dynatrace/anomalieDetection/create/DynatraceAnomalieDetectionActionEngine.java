@@ -9,6 +9,7 @@ import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.anomalieDetection.NeoLoadAnomalieDetectionApi;
 import com.neotys.dynatrace.anomalieDetection.data.DynatraceAnomalie;
 import com.neotys.dynatrace.anomalieDetection.data.DynatraceAnomalies;
+import com.neotys.dynatrace.common.Constants;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
@@ -38,8 +39,8 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
     @Override
     public SampleResult execute(Context context, List<ActionParameter> list) {
         final SampleResult sampleResult = new SampleResult();
-        final StringBuilder requestBuilder = new StringBuilder();
-        final StringBuilder responseBuilder = new StringBuilder();
+//        final StringBuilder requestBuilder = new StringBuilder();
+//        final StringBuilder responseBuilder = new StringBuilder();
         final Map<String, Optional<String>> parsedArgs;
         try {
             parsedArgs = parseArguments(list, DynatraceAnomalieDetectionOption.values());
@@ -139,7 +140,7 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
         }
         try
         {
-            listofids=(List<String>)context.getCurrentVirtualUser().get("Dynatrace_Anoamlie");
+            listofids=(List<String>)context.getCurrentVirtualUser().get(Constants.DYNATRACE_ANOMALIES);
             if(listofids==null)
                 listofids=new ArrayList<>();
 
@@ -159,20 +160,20 @@ public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
                     }
                     catch(Exception e)
                     {
-                        context.getLogger().error("Technical while creation Anaomalies : ", e);
+                        context.getLogger().error("Technical error while creation Anomalies : ", e);
                         return null;
                     }
                 }).filter(Objects::nonNull).collect(Collectors.toList());
 
                 listofids = new ArrayList<String>(listofids);
                 listofids.addAll(templistid);
-                context.getCurrentVirtualUser().put("Dynatrace_Anoamlie", listofids);
+                context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
             }
             else {
                 String id = anomalieDetectionApi.createAnomalie(dynatracemetric.get(), operator.get().toUpperCase(), typeOfAnomalie.get().toUpperCase(), threshold.get(), dynatraceTags);
                 if (id != null) {
                     listofids.add(id);
-                    context.getCurrentVirtualUser().put("Dynatrace_Anoamlie", listofids);
+                    context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
                 }
             }
         }

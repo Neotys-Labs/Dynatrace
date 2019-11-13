@@ -53,7 +53,7 @@ public class DynatraceSanityCheckActionEngine implements ActionEngine {
         final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceSanityCheckOption.TraceMode.getName());
         try
         {
-            //#TODO remove applicaiton name ---parse the architecture based on tags
+            //#TODO remove application name ---parse the architecture based on tags
 
             boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
             ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);

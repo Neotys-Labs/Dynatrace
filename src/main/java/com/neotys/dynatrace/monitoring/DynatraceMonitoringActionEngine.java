@@ -98,7 +98,7 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
             {
                 if(dynatracecustomTimeSeries.get().size()>0) {
                     if (!validateAgggregationType(dynatracecustomTimeseriesAggregateType))
-                        return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be define or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
+                        return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "AggregationType needs to be defined or equal to\"MIN\",\"MAX\",\"SUM\",\"AVG\",\"MEDIAN\",\"COUNT\",\"PERCENTILE\" ");
                 }
             }
 
@@ -147,16 +147,15 @@ public final class DynatraceMonitoringActionEngine implements ActionEngine {
         return "http://" + context.getControllerIp() + ":7400/DataExchange/v1/Service.svc/";
     }
 
-    private boolean validateAgggregationType(Optional<String> aggregatetype)
-    {
-        ImmutableList<String> dynatraceAggregagtionTypes=ImmutableList.of("MIN","MAX","SUM","AVG","MEDIAN","COUNT","PERCENTILE");
-        if(aggregatetype.isPresent())
-        {
-            if(dynatraceAggregagtionTypes.contains(aggregatetype.get()))
-                return true;
-        }
-        return false;
-    }
+	private boolean validateAgggregationType(Optional<String> aggregatetype) {
+		ImmutableList<String> dynatraceAggregagtionTypes = ImmutableList.of("MIN", "MAX", "SUM", "AVG", "MEDIAN",
+				"COUNT", "PERCENTILE");
+		if (aggregatetype.isPresent()) {
+			if (dynatraceAggregagtionTypes.contains(aggregatetype.get()))
+				return true;
+		}
+		return false;
+	}
 
     private DataExchangeAPIClient getDataExchangeAPIClient(final Context context, final StringBuilder requestBuilder, final String dataExchangeApiUrl, final Optional<String> dataExchangeApiKey) throws GeneralSecurityException, IOException, ODataException, URISyntaxException, NeotysAPIException {
         DataExchangeAPIClient dataExchangeAPIClient = (DataExchangeAPIClient) context.getCurrentVirtualUser().get(Constants.NL_DATA_EXCHANGE_API_CLIENT);

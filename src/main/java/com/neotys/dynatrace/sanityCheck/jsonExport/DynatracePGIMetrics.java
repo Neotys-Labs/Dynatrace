@@ -9,6 +9,8 @@ import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.data.DynatraceServiceData;
+import com.neotys.dynatrace.common.topology.DynatraceTopologyCache;
+import com.neotys.dynatrace.common.topology.DynatraceTopologyWalker;
 import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.dynatrace.monitoring.timeseries.DynatraceMetric;
 import com.neotys.extensions.action.engine.Context;
@@ -21,19 +23,21 @@ import java.util.stream.Stream;
 
 public class DynatracePGIMetrics {
     private static final Map<String,String> PGI_TIMESERIES_MAP=new HashMap<>();
-    private final Optional<String> proxyName;
-    private final String dynatraceApiKey;
-    private final String dynatraceId;
+//    private final Optional<String> proxyName;
+//    private final String dynatraceApiKey;
+//    private final String dynatraceId;
     private static final long DYNATRACE_SMARTSCAPE_DIFF=300000;
-    private final Optional<String> dynatraceManagedHostname;
+//    private final Optional<String> dynatraceManagedHostname;
     private static final Optional<Long> diff=Optional.of(DYNATRACE_SMARTSCAPE_DIFF);
     private HTTPGenerator httpGenerator;
-    private Map<String, String> header = null;
+//    private Map<String, String> header = null;
     private boolean isRunning = true;
     private final Context context;
+    private final DynatraceContext dynatracecontext;
+    private final DynatraceTopologyWalker dtw;
     private long startTS;
     private boolean traceMode;
-    private Set<String> dynatraceApplicationServiceIds;
+//    private Set<String> dynatraceApplicationServiceIds;
     private String applicationName;
     private final static double COMPARAISON_RATIO=0.10;
 
@@ -46,19 +50,21 @@ public class DynatracePGIMetrics {
         PGI_TIMESERIES_MAP.put("com.dynatrace.builtin:pgi.nic.bytessent", "AVG");
         //----------------------------------------------------------------------------------
     }
-    private DynatraceContext dynatraceContext;
-
+ 
     public DynatracePGIMetrics( String dynatraceApiKey, String dynatraceId, final Optional<String> dynatraceTags, Optional<String> dynatraceManagedHostname,Optional<String> proxyName, Context context,long startTS, boolean traceMode) throws Exception {
-        this.proxyName = proxyName;
-        this.dynatraceApiKey = dynatraceApiKey;
-        this.dynatraceId = dynatraceId;
-        this.dynatraceManagedHostname = dynatraceManagedHostname;
+    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceId,proxyName, dynatraceTags, new HashMap<>());
+    	
+//        this.proxyName = proxyName;
+//        this.dynatraceApiKey = dynatraceApiKey;
+//        this.dynatraceId = dynatraceId;
+//        this.dynatraceManagedHostname = dynatraceManagedHostname;
         this.context = context;
         this.traceMode = traceMode;
         this.startTS=startTS;
-        dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, dynatraceTags, header);
-
-
+        
+        this.dtw=new DynatraceTopologyWalker(context, dynatracecontext, traceMode);
+        dtw.executeDiscovery();
+ /*
         this.dynatraceApplicationServiceIds = DynatraceUtils.getServiceEntityIds(context, dynatraceContext, proxyName, traceMode);
         //---get dependencies-----
         List<String> dependenListId=new ArrayList<>();
@@ -72,6 +78,7 @@ public class DynatracePGIMetrics {
 
         dynatraceApplicationServiceIds= Stream.concat(dynatraceApplicationServiceIds.stream(), dependenListId.stream()).distinct()
                 .collect(Collectors.toSet());
+*/
         //--------
         if(dynatraceTags.isPresent())
             applicationName=dynatraceTags.get();
@@ -162,41 +169,38 @@ public class DynatracePGIMetrics {
         }
     }
 
-    private boolean compareMonitoringData(double oldvalue,double newValue)
-    {
-        double minvalue=oldvalue-oldvalue*COMPARAISON_RATIO;
-        double maxvalue=oldvalue+oldvalue*COMPARAISON_RATIO;
+	private boolean compareMonitoringData(double oldvalue, double newValue) {
+//		double minvalue = oldvalue - oldvalue * COMPARAISON_RATIO;
+		double maxvalue = oldvalue + oldvalue * COMPARAISON_RATIO;
 
-        if(newValue<=maxvalue)
-            return true;
-        else
-            return false;
-    }
+		if (newValue <= maxvalue)
+			return true;
+		else
+			return false;
+	}
 
-    private DynatraceServiceData getDynatraceServiceData(DynatraceServiceData data, List<DynatraceServiceData> serviceDataList)
-    {
+    private DynatraceServiceData getDynatraceServiceData(DynatraceServiceData data, List<DynatraceServiceData> serviceDataList) {
         java.util.Optional<DynatraceServiceData> findservicedata=serviceDataList.stream().filter(dynatraceServiceData ->( dynatraceServiceData.getServiceName().equals(data.getServiceName())||dynatraceServiceData.getServiceID().equals(data.getServiceID()))).findFirst();
         if(findservicedata.isPresent())
             return findservicedata.get();
         else
             return null;
     }
+    
     public DynatraceSmartScapedata unmarshall(String filename) throws FileNotFoundException {
         Gson gson = new Gson();
         JsonReader reader = new JsonReader(new FileReader(filename));
         return (DynatraceSmartScapedata) gson.fromJson(reader, DynatraceSmartScapedata.class);
     }
 
-    public List<DynatraceServiceData> getSmartscapeData()
-    {
+    public List<DynatraceServiceData> getSmartscapeData() {
         List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
+        DynatraceTopologyCache dtcache=dtw.getDiscoveredData();
 
-        dynatraceServiceDataList=dynatraceApplicationServiceIds.stream().map((serviceid) -> {
+        dynatraceServiceDataList=dtcache.getServices().stream().map((serviceid) -> {
             try {
-                return DynatraceUtils.getListProcessGroupInstanceFromServiceId(context, dynatraceContext, serviceid, proxyName, traceMode);
-            }
-            catch (Exception e)
-            {
+        		return new DynatraceService(serviceid,dtcache.lookupServiceName(serviceid),dtw.findPgInstancesForService(serviceid));
+            } catch (Exception e) {
                 return null;
             }
         } ).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).filter(Objects::nonNull).collect(Collectors.toList());
@@ -204,12 +208,11 @@ public class DynatracePGIMetrics {
         return dynatraceServiceDataList;
     }
 
-    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
-    {
+    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService) {
         DynatraceServiceData data=new DynatraceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
         try {
             for (Map.Entry<String, String> m : PGI_TIMESERIES_MAP.entrySet()) {
-                List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatraceContext, proxyName, traceMode, diff,Optional.of(true));
+                List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatracecontext, traceMode, diff,Optional.of(true));
                 double total = dynatraceMetrics.stream().mapToDouble(metric->metric.getValue()).sum();
                 addSumTodata(data,m.getKey(),total);
             }
@@ -222,8 +225,7 @@ public class DynatracePGIMetrics {
         return null;
     }
 
-    private void addSumTodata(DynatraceServiceData data,String metricname,double sum)
-    {
+    private void addSumTodata(DynatraceServiceData data,String metricname,double sum){
 
         if(metricname.contains("cpu"))
             data.setCpu(sum);

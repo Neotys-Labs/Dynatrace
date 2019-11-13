@@ -44,22 +44,15 @@ public class DynatraceConfigurationNewActionEngine implements ActionEngine {
         final Optional<String> dynatraceTags=parsedArgs.get(DynatraceConfigurationOption.DynatraceTags.getName());
         boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
 
-        try
-        {
-
+        try {
             sampleResult.sampleStart();
-            DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
+            DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,dynatraceTags,context,traceMode);
             configurationAPI.generateRequestAttributes("NEW");
-
-            //#TODO remove applicaiton name ---parse the architecture based on tags
             configurationAPI.setDynatraceTags(dynatraceTags);
             configurationAPI.createRequestNamingRules("NEW");
             sampleResult.sampleEnd();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error: ", e);
-
         }
         return sampleResult;
     }

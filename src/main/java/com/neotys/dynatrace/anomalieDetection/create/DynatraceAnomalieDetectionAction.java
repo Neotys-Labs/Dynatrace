@@ -55,7 +55,7 @@ public class DynatraceAnomalieDetectionAction implements Action {
 
     @Override
     public String getDescription() {
-        return "create the rule to detect anomalie based on Thresholds .\n\n" + Arguments.getArgumentDescriptions(DynatraceAnomalieDetectionOption.values());
+        return "create the rule to detect anomalies based on Thresholds .\n\n" + Arguments.getArgumentDescriptions(DynatraceAnomalieDetectionOption.values());
 
     }
 

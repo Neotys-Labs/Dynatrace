@@ -11,11 +11,11 @@ public class DynatraceSmartScapedata {
     private String ApplicationName;
 
     private List<DynatraceServiceData> serviceDataList;
-
+/*
     public DynatraceSmartScapedata(){
 
     }
-
+*/
     public DynatraceSmartScapedata(String applicationName, List<DynatraceServiceData> serviceDataList) {
         ApplicationName = applicationName;
         this.serviceDataList = serviceDataList;

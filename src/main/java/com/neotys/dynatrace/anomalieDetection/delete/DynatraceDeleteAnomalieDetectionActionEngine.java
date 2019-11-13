@@ -3,13 +3,14 @@ package com.neotys.dynatrace.anomalieDetection.delete;
 import com.google.common.base.Optional;
 import com.neotys.action.result.ResultFactory;
 import com.neotys.dynatrace.anomalieDetection.NeoLoadAnomalieDetectionApi;
+import com.neotys.dynatrace.common.Constants;
 import com.neotys.extensions.action.ActionParameter;
 import com.neotys.extensions.action.engine.ActionEngine;
 import com.neotys.extensions.action.engine.Context;
 import com.neotys.extensions.action.engine.Logger;
 import com.neotys.extensions.action.engine.SampleResult;
 
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,8 @@ public class DynatraceDeleteAnomalieDetectionActionEngine implements ActionEngin
     @Override
     public SampleResult execute(Context context, List<ActionParameter> list) {
         final SampleResult sampleResult = new SampleResult();
-        final StringBuilder requestBuilder = new StringBuilder();
-        final StringBuilder responseBuilder = new StringBuilder();
+//        final StringBuilder requestBuilder = new StringBuilder();
+//        final StringBuilder responseBuilder = new StringBuilder();
         List<String> listofids;
         final Map<String, Optional<String>> parsedArgs;
         try {
@@ -48,9 +49,9 @@ public class DynatraceDeleteAnomalieDetectionActionEngine implements ActionEngin
 
         try
         {
-            listofids=(List<String>)context.getCurrentVirtualUser().remove("Dynatrace_Anoamlie");
+            listofids=(List<String>)context.getCurrentVirtualUser().remove(Constants.DYNATRACE_ANOMALIES);
             if(listofids==null)
-                return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "There is no Anamalies created during this test");
+                return ResultFactory.newErrorResult(context, STATUS_CODE_BAD_CONTEXT, "There were no Anamalies created during this test");
 
             NeoLoadAnomalieDetectionApi anomalieDetectionApi=new NeoLoadAnomalieDetectionApi(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
             anomalieDetectionApi.deleteAnomalieDetectionfromIds(listofids);

@@ -62,7 +62,7 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
                 mode="NEW";
 
             sampleResult.sampleStart();
-            DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,context,traceMode);
+            DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,dynatraceTags,context,traceMode);
             configurationAPI.generateRequestAttributes(mode);
 
             //#TODO remove applicaiton name ---parse the architecture based on tags

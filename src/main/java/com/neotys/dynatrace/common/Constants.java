@@ -11,8 +11,9 @@ public final class Constants {
 	public static final String NEOLOAD_CONTEXT_SOFTWARE = DYNATRACE;
 	
 	/*** NeoLoad Current Virtual user context (Keep object in cache cross iterations) ***/
-	public static final String NL_DATA_EXCHANGE_API_CLIENT = "NLDataExchangeAPIClient";
+	public static final String NL_DATA_EXCHANGE_API_CLIENT   = "NLDataExchangeAPIClient";
 	public static final String DYNATRACE_LAST_EXECUTION_TIME = "DynatraceLastExecutionTime";
+	public static final String DYNATRACE_ANOMALIES           = "DynatraceAnomalyList";
 
     public static final String TRACE_MODE = "traceMode";
 }

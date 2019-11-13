@@ -21,6 +21,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.ws.rs.core.MultivaluedMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +46,7 @@ class HTTPGeneratorUtils {
 
 	}
 
-	static void setRequestUrl(final HttpRequestBase request, final String url, final Map<String, String> params)
+	static void setRequestUrl(final HttpRequestBase request, final String url, final MultivaluedMap<String, String> params)
 			throws URISyntaxException, MalformedURLException {
 		final String urlWithParameters = addGetParametersToUrl(url, params);
 		request.setURI(new URL(urlWithParameters).toURI());
@@ -120,13 +122,20 @@ class HTTPGeneratorUtils {
 		}
 	}
 
-	private static String addGetParametersToUrl(final String url, final Map<String, String> params) {
+	private static String addGetParametersToUrl(final String url, final MultivaluedMap<String, String> params) {
 		final StringBuilder urlBuilder = new StringBuilder(url);
 		if (!url.endsWith("?")) {
 			urlBuilder.append("?");
 		}
 		final List<NameValuePair> parameters = new LinkedList<>();
 		if (params != null) {
+			for (String param:params.keySet()){
+				List<String> values=params.get(param);
+				for (String value:values) {
+					parameters.add(new BasicNameValuePair(param,value));					
+				}
+			}
+/* TODO cleanup after code review			
 			for (Map.Entry<String, String> entry : params.entrySet()) {
 				if("tag".equals(entry.getKey())){
 					parameters.addAll(getTags(entry.getValue()));
@@ -134,6 +143,7 @@ class HTTPGeneratorUtils {
 					parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
 				}
 			}
+*/			
 		}
 		final String paramString = URLEncodedUtils.format(parameters, HTTP.UTF_8);
 		urlBuilder.append(paramString);

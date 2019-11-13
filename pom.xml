@@ -53,12 +53,15 @@
             <version>18.0</version>
             <!-- already in NeoLoad: can cause conflicts -->
             <scope>provided</scope>
-        </dependency>
+        </dependency>     
+<!-- 
         <dependency>
             <groupId>com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp-version}</version>
         </dependency>
+-->        
+        
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -76,13 +79,14 @@
             <!-- already in NeoLoad: can cause conflicts -->
             <scope>provided</scope>
         </dependency>
-
+<!--
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
+-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

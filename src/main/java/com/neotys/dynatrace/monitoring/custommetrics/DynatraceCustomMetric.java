@@ -9,7 +9,7 @@ public class DynatraceCustomMetric {
     static DecimalFormat decimalFormat = new DecimalFormat("#.##########");
     private static final String NEOLOAD = "NeoLoad";
 
-    private String name;
+//    private String name;
     private String displayName;
     private String unit;
     private List<String> dimensions;
