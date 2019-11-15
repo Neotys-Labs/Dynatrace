@@ -50,7 +50,7 @@ public class DynatraceConfigurationAPI {
             "}";
 
     public DynatraceConfigurationAPI(String dynatraceApiKey, String dynatraceAccountID, Optional<String> dynatraceManagedHostname, Optional<String> proxyName, Optional<String> tags,Context context, boolean traceMode) {
-    	dynatracecontext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, proxyName,tags, new HashMap<>());
+    	dynatracecontext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, proxyName,tags);
         this.context = context;
         this.traceMode = traceMode;
     }
@@ -101,11 +101,9 @@ public class DynatraceConfigurationAPI {
     }
 
      private boolean isNeoLoadRequestAttributesExists(String type) throws Exception {
-//         Map<String, String> header = new HashMap<>();
-//         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, proxyName, Optional.absent(), header);
          final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
 
-         JSONObject jsonobj=DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, Api.CFG, DTAPI_CFG_EP_REQUEST_ATTRIBUTE, parameters, traceMode);
+         JSONObject jsonobj=DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, DTAPI_CFG_EP_REQUEST_ATTRIBUTE, parameters, traceMode);
          if (jsonobj != null) {
              JSONArray jsonArray=jsonobj.getJSONArray("values");
              return  NeoLoadRequestAttributes.isNeoLoadRequestAttributesExists(jsonArray,type);
@@ -141,7 +139,7 @@ public class DynatraceConfigurationAPI {
         else
             payload=newRequesAttributPayload(parametername,headersuffix,NeoLoadRequestAttributes.NEOLOAD_HTTP_HEADER_NAME);
         
-        DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, Api.CFG, DTAPI_CFG_EP_REQUEST_ATTRIBUTE, payload, traceMode);
+        DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, DTAPI_CFG_EP_REQUEST_ATTRIBUTE, payload, traceMode);
     }
 
 }

@@ -20,26 +20,20 @@ public final class Constants {
     
     /*** Dynatrace API EndPoints ***/
     /*** 	Environment V1 ***/
-    @Deprecated
-    public static final String DTAPI_ENV1_PREFIX               = "/api/v1/";
-    public static final String DTAPI_ENV1_EP_SERVICE           = "entity/services";
-    public static final String DTAPI_ENV1_EP_PROCESS           = "entity/infrastructure/processes";
-    public static final String DTAPI_ENV1_EP_PROCESSGROUP      = "entity/infrastructure/process-groups";
-    public static final String DTAPI_ENV1_EP_HOST              = "entity/infrastructure/hosts";
-    public static final String DTAPI_ENV1_EP_CUSTOMDEVICE      = "entity/infrastructure/custom/";
-    public static final String DTAPI_ENV1_EP_TIMESERIES        = "timeseries";
-    public static final String DTAPI_ENV1_EP_TIMESERIES_CUSTOM = "timeseries/custom:";
-	public static final String DTAPI_ENV1_EP_EVENTS            = "events";
+    public static final String DTAPI_ENV1_EP_SERVICE           = "/api/v1/entity/services";
+    public static final String DTAPI_ENV1_EP_PROCESS           = "/api/v1/entity/infrastructure/processes";
+    public static final String DTAPI_ENV1_EP_PROCESSGROUP      = "/api/v1/entity/infrastructure/process-groups";
+    public static final String DTAPI_ENV1_EP_HOST              = "/api/v1/entity/infrastructure/hosts";
+    public static final String DTAPI_ENV1_EP_CUSTOMDEVICE      = "/api/v1/entity/infrastructure/custom/";
+    public static final String DTAPI_ENV1_EP_TIMESERIES        = "/api/v1/timeseries";
+    public static final String DTAPI_ENV1_EP_TIMESERIES_CUSTOM = "/api/v1/timeseries/custom:";
+	public static final String DTAPI_ENV1_EP_EVENTS            = "/api/v1/events";
     /*** 	Environment V2 ***/
-    @Deprecated
-    public static final String DTAPI_ENV2_PREFIX               = "/api/v2/";
     /*** 	Configuration  ***/
-    @Deprecated
-    public static final String DTAPI_CFG_PREFIX                = "/api/config/v1/";
-    public static final String DTAPI_CFG_EP_ANOMALIE_METRIC    = "anomalyDetection/metricEvents";
-    public static final String DTAPI_CFG_EP_REQUEST_ATTRIBUTE  = "service/requestAttributes";
+    public static final String DTAPI_CFG_EP_ANOMALIE_METRIC    = "/api/config/v1/anomalyDetection/metricEvents";
+    public static final String DTAPI_CFG_EP_REQUEST_ATTRIBUTE  = "/api/config/v1/service/requestAttributes";
+    public static final String DTAPI_CFG_EP_REQUEST_NAMING     = "/api/config/v1/service/requestNaming";
     
-
     /*** Dynatrace API request parameters ***/
 	public static final String PARAM_TAG="tag";
 	public static final String PARAM_ENTITY="entity";

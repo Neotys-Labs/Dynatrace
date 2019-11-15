@@ -1,7 +1,6 @@
 package com.neotys.dynatrace.events;
 
 import com.google.common.base.Optional;
-import com.neotys.dynatrace.common.Api;
 import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.dynatrace.common.topology.DynatraceTopologyWalker;
@@ -10,7 +9,6 @@ import static com.neotys.dynatrace.common.Constants.*;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Set;
 
 class DynatraceEventAPI {
@@ -30,7 +28,7 @@ class DynatraceEventAPI {
 			throws Exception {
 		this.traceMode = traceMode;
 		this.context = context;
-		this.dynatracecontext = new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceID, proxyName, dynatraceTags, new HashMap<>());
+		this.dynatracecontext = new DynatraceContext(dynatraceAPIKEY, dynatraceManagedHostname, dynatraceID, proxyName, dynatraceTags);
 		
 		DynatraceTopologyWalker dtw=new DynatraceTopologyWalker(this.context,this.dynatracecontext,this.traceMode);
 		dtw.executeDiscovery();
@@ -70,7 +68,7 @@ class DynatraceEventAPI {
 				+ "\"NeoLoad_Scenario\":\"" + context.getScenarioName() + "\"}"
 				+ "}";
 
-		DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_EVENTS, bodyJson, traceMode);
+		DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, DTAPI_ENV1_EP_EVENTS, bodyJson, traceMode);
 		
 		// TODO : add events to hosts / processgroups / processes
 		// TODO : add the update of the events by retrieving the eventid ....required the change on the API of DYnatrace. FEATURE in PENDING

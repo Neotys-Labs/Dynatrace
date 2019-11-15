@@ -109,7 +109,7 @@ public class DynatraceGetTimeSeries {
 
 	    this.isRunning = true;
 
-        this.dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, proxyName, /*getDynatracetag(*/dynatraceTags/*)*/, new HashMap<>());
+        this.dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, proxyName, dynatraceTags);
         this.dtw=new DynatraceTopologyWalker(context,dynatraceContext,traceMode);
         dtw.executeDiscovery();
                 

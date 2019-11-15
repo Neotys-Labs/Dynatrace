@@ -4,7 +4,6 @@ package com.neotys.dynatrace.monitoring.custommetrics;
 import com.google.common.base.Optional;
 import com.neotys.ascode.swagger.client.api.ResultsApi;
 import com.neotys.ascode.swagger.client.model.TestStatistics;
-import com.neotys.dynatrace.common.Api;
 import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.extensions.action.engine.Context;
@@ -12,7 +11,6 @@ import com.neotys.extensions.action.engine.Context;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -42,7 +40,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
                                         final Optional<String> dynatraceManagedHostName,
                                         final Optional<String> proxyName, final boolean traceMode) {
     	
-    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostName, dynatraceAccountId, proxyName, Optional.absent(), new HashMap<String,String>());
+    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostName, dynatraceAccountId, proxyName, Optional.absent());
     	
         this.context = context;
         this.testId = context.getTestId();
@@ -98,7 +96,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
                 + "\"types\":[\"" + dynatraceCustomMetric.getTypes().get(0) + "\"]}";
 
         
-        DynatraceUtils.executeDynatraceAPIPutRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_TIMESERIES_CUSTOM + timeSeriesName, bodyJson, traceMode);
+        DynatraceUtils.executeDynatraceAPIPutRequest(context, dynatracecontext, DTAPI_ENV1_EP_TIMESERIES_CUSTOM + timeSeriesName, bodyJson, traceMode);
         // if no exception is raised, assume success
         dynatraceCustomMetric.setCreated(true);        
     }
@@ -140,7 +138,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
 
         if (hasMetrics) {
         	
-        	DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_CUSTOMDEVICE + "/NeoLoadData", bodyJson, traceMode);
+        	DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatracecontext, DTAPI_ENV1_EP_CUSTOMDEVICE + "/NeoLoadData", bodyJson, traceMode);
         }
     }
 
@@ -150,7 +148,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
 
         try {
-        	DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_TIMESERIES_CUSTOM+timeSeriesName, parameters, traceMode);
+        	DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, DTAPI_ENV1_EP_TIMESERIES_CUSTOM+timeSeriesName, parameters, traceMode);
         } catch (Exception e) {
         	return false;
         }

@@ -2,8 +2,6 @@ package com.neotys.dynatrace.common;
 
 import com.google.common.base.Optional;
 
-import java.util.Map;
-
 /**
  * Created by anouvel on 20/12/2017.
  */
@@ -13,22 +11,17 @@ public class DynatraceContext {
 	private final String dynatraceAccountID;
 	private final Optional<String> proxyname;
 	private final Optional<String> tags;
-// TODO remove headers from this object	
-	@Deprecated
-	private final Map<String, String> headers;
 
 	public DynatraceContext(final String apiKey,
 							final Optional<String> dynatraceManagedHostname,
 							final String dynatraceAccountID,
 							final Optional<String> proxyname,
-							final Optional<String> tags,
-							final Map<String, String> headers) {
+							final Optional<String> tags) {
 		this.apiKey = apiKey;
 		this.dynatraceManagedHostname = dynatraceManagedHostname;
 		this.dynatraceAccountID = dynatraceAccountID;
 		this.proxyname = proxyname;
 		this.tags = tags;
-		this.headers = headers;
 	}
 
 	public String getApiKey() {
@@ -49,10 +42,5 @@ public class DynatraceContext {
 
 	public Optional<String> getTags() {
 		return tags;
-	}
-	
-	@Deprecated
-	public Map<String, String> getHeaders() {
-		return headers;
-	}
+	}	
 }

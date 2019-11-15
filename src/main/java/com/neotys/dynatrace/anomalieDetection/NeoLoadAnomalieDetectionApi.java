@@ -5,8 +5,9 @@ import com.neotys.dynatrace.common.*;
 import com.neotys.dynatrace.common.tag.DynatraceTaggingUtils;
 import com.neotys.extensions.action.engine.Context;
 import org.json.JSONObject;
-
 import java.util.*;
+
+import static com.neotys.dynatrace.common.Constants.*;
 
 public class NeoLoadAnomalieDetectionApi {
 
@@ -33,7 +34,7 @@ public class NeoLoadAnomalieDetectionApi {
 
     public NeoLoadAnomalieDetectionApi(String dynatraceApiKey, String dynatraceAccountID, Optional<String> dynatraceManagedHostname, Optional<String> proxyName, Context context, boolean traceMode) {
     	
-    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceAccountID,proxyName,Optional.absent(),new HashMap<String,String>());
+    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceAccountID,proxyName,Optional.absent());
         this.context = context;
         this.traceMode = traceMode;
     }
@@ -44,7 +45,7 @@ public class NeoLoadAnomalieDetectionApi {
         if(tagfilter!=null) {
             String payload=jsonpayload+tagfilter+ENDPAYLOAD;
                     	
-            JSONObject jsonObject= DynatraceUtils.executeDynatraceAPIPostObjectRequest(context,dynatracecontext,Api.CFG,Constants.DTAPI_CFG_EP_ANOMALIE_METRIC,payload,traceMode);
+            JSONObject jsonObject= DynatraceUtils.executeDynatraceAPIPostObjectRequest(context,dynatracecontext,DTAPI_CFG_EP_ANOMALIE_METRIC,payload,traceMode);
             if(jsonObject!=null) {
                 String anomalieid=jsonObject.getString("id");
                 return anomalieid;
@@ -59,7 +60,7 @@ public class NeoLoadAnomalieDetectionApi {
 	public void deleteAnomalieDetectionfromIds(List<String> anomalieIdlist) {
 		anomalieIdlist.stream().forEach(id -> {
 			try {
-		    	DynatraceUtils.executeDynatraceAPIDeleteRequest(context, dynatracecontext, Api.CFG, Constants.DTAPI_CFG_EP_ANOMALIE_METRIC + "/" +id, traceMode);
+		    	DynatraceUtils.executeDynatraceAPIDeleteRequest(context, dynatracecontext, DTAPI_CFG_EP_ANOMALIE_METRIC + "/" +id, traceMode);
 			} catch (Exception e) {
 				context.getLogger().error("Error while deleting anomalie id :" + id, e);
 			}

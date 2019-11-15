@@ -121,10 +121,10 @@ public class DynatraceUtils {
         final String bodyJson = jsonEntitiesBuilder.substring(0, jsonEntitiesBuilder.length() - 1) + "]}";
 
         
-            JSONObject jsonMetricResults=executeDynatraceAPIPostObjectRequest(context, dynatraceContext, Api.ENV1, DTAPI_ENV1_EP_TIMESERIES + "/" + timeSeries, bodyJson, traceMode);
+            JSONObject jsonMetricResults=executeDynatraceAPIPostObjectRequest(context, dynatraceContext, DTAPI_ENV1_EP_TIMESERIES + "/" + timeSeries, bodyJson, traceMode);
 
             if(traceMode){
-                context.getLogger().info("Dynatrace service, get timeseries:\n" + Api.ENV1+"/"+ DTAPI_ENV1_EP_TIMESERIES + "\n" + bodyJson);
+                context.getLogger().info("Dynatrace service, get timeseries:\n" + DTAPI_ENV1_EP_TIMESERIES + "\n" + bodyJson);
             }
                 if (jsonMetricResults == null || !jsonMetricResults.has("result")) {
                     context.getLogger().debug("No timeseries found.");
@@ -241,7 +241,7 @@ public class DynatraceUtils {
 
             jsonpayload=jsonpayloadstart+ DynatraceTaggingUtils.convertforUpdateTags(dynatraceContext.getTags()) + jsonpayloadend;
             
-            DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatraceContext, Api.ENV1, endpoint, jsonpayload, traceMode);
+            DynatraceUtils.executeDynatraceAPIPostObjectRequest(context, dynatraceContext, endpoint, jsonpayload, traceMode);
         }
     }
 
@@ -255,8 +255,17 @@ public class DynatraceUtils {
     public static Optional<Proxy> getNeoLoadWebProxy(final Context context, final String url) throws MalformedURLException {
        return Optional.fromNullable(context.getProxyByType(ProxyType.NEOLOAD_WEB, new URL(url)));
     }
-
     
+    public static String getDynatraceApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID) {
+        if (dynatraceManagedHostname.isPresent()) {
+            return DYNATRACE_PROTOCOL + dynatraceManagedHostname.get() + "/e/" + dynatraceAccountID;
+        } else {
+            return DYNATRACE_PROTOCOL + dynatraceAccountID;
+        }
+    }
+
+/*   
+    @Deprecated
     public static String getDynatraceAnyApiUrl(final Optional<String> dynatraceManagedHostname, final String dynatraceAccountID, Api api) {
 		switch (api) {
 		case ENV1:
@@ -295,9 +304,10 @@ public class DynatraceUtils {
             return DYNATRACE_PROTOCOL + dynatraceAccountID + DTAPI_CFG_PREFIX;
         }
     }
+*/
     
-    public static JSONArray executeDynatraceAPIGetArrayRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
-		final String dynatraceurl=getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+    public static JSONArray executeDynatraceAPIGetArrayRequest(Context context, DynatraceContext dynatracecontext, String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
+		final String dynatraceurl=getDynatraceApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID()) + endpoint;
 		Map<String,String> headers=new HashMap<>();
 		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
         headers.put("Accept","application/json; charset=utf-8");
@@ -323,8 +333,8 @@ public class DynatraceUtils {
 		}
     }
 
-    public static JSONObject executeDynatraceAPIGetObjectRequest(Context context, DynatraceContext dynatracecontext, Api api , String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
-		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+    public static JSONObject executeDynatraceAPIGetObjectRequest(Context context, DynatraceContext dynatracecontext, String endpoint, MultivaluedMap<String,String> params, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID()) + endpoint;
 		Map<String,String> headers=new HashMap<>();
 		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
         headers.put("Accept","application/json; charset=utf-8");
@@ -350,8 +360,8 @@ public class DynatraceUtils {
 		}
     }
 
-    public static JSONObject executeDynatraceAPIPostObjectRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, String payload, boolean tracemode) throws Exception {
-		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+    public static JSONObject executeDynatraceAPIPostObjectRequest(Context context, DynatraceContext dynatracecontext, String endpoint, String payload, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID()) + endpoint;
 		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
 		Map<String,String> headers=new HashMap<>();
 		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
@@ -379,8 +389,8 @@ public class DynatraceUtils {
 		}
     }
 
-    public static void executeDynatraceAPIDeleteRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, boolean tracemode) throws Exception {
-		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+    public static void executeDynatraceAPIDeleteRequest(Context context, DynatraceContext dynatracecontext, String endpoint, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID()) + endpoint;
 		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
 		Map<String,String> headers=new HashMap<>();
 		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());
@@ -407,8 +417,8 @@ public class DynatraceUtils {
 		}
     }
     
-    public static int executeDynatraceAPIPutRequest(Context context, DynatraceContext dynatracecontext, Api api, String endpoint, String payload, boolean tracemode) throws Exception {
-		final String dynatraceurl = getDynatraceAnyApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID(),api) + endpoint;
+    public static int executeDynatraceAPIPutRequest(Context context, DynatraceContext dynatracecontext, String endpoint, String payload, boolean tracemode) throws Exception {
+		final String dynatraceurl = getDynatraceApiUrl(dynatracecontext.getDynatraceManagedHostname(),dynatracecontext.getDynatraceAccountID()) + endpoint;
 		MultivaluedMap<String,String> params=new MultivaluedHashMap<>();
 		Map<String,String> headers=new HashMap<>();
 		headers.put("Authorization","Api-Token "+dynatracecontext.getApiKey());

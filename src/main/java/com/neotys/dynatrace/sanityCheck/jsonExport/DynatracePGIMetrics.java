@@ -7,7 +7,6 @@ import com.google.gson.stream.JsonReader;
 import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceException;
 import com.neotys.dynatrace.common.DynatraceUtils;
-import com.neotys.dynatrace.common.HTTPGenerator;
 import com.neotys.dynatrace.common.data.DynatraceServiceData;
 import com.neotys.dynatrace.common.topology.DynatraceTopologyCache;
 import com.neotys.dynatrace.common.topology.DynatraceTopologyWalker;
@@ -17,16 +16,12 @@ import com.neotys.extensions.action.engine.Context;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DynatracePGIMetrics {
     private static final Map<String,String> PGI_TIMESERIES_MAP=new HashMap<>();
     private static final long DYNATRACE_SMARTSCAPE_DIFF=300000;
     private static final Optional<Long> diff=Optional.of(DYNATRACE_SMARTSCAPE_DIFF);
-    private HTTPGenerator httpGenerator;
-    private boolean isRunning = true;
     private final Context context;
     private final DynatraceContext dynatracecontext;
     private final DynatraceTopologyWalker dtw;
@@ -45,7 +40,7 @@ public class DynatracePGIMetrics {
     }
  
     public DynatracePGIMetrics( String dynatraceApiKey, String dynatraceId, final Optional<String> dynatraceTags, Optional<String> dynatraceManagedHostname,Optional<String> proxyName, Context context,long startTS, boolean traceMode) throws Exception {
-    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceId,proxyName, dynatraceTags, new HashMap<>());
+    	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceId,proxyName, dynatraceTags);
     	
         this.context = context;
         this.traceMode = traceMode;
