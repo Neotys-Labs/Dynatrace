@@ -31,206 +31,205 @@ import static com.neotys.action.argument.Arguments.getArgumentLogString;
 import static com.neotys.action.argument.Arguments.parseArguments;
 
 public class DynatraceAnomalieDetectionActionEngine implements ActionEngine {
-    private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_ANOMALIE_ACTION-01";
-    private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_ANOMALIE_ACTION-02";
-    private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_ANOMALIE_ACTION-03";
-    public static final ImmutableList<String> OPERATOR = ImmutableList.of("ABOVE", "BELOW");
-    public static final ImmutableList<String> TYPE_ANOMALIE = ImmutableList.of("AVAILABILITY", "CUSTOM_ALERT", "ERROR", "PERFORMANCE", "RESOURCE_CONTENTION");
-    @Override
-    public SampleResult execute(Context context, List<ActionParameter> list) {
-        final SampleResult sampleResult = new SampleResult();
-//        final StringBuilder requestBuilder = new StringBuilder();
-//        final StringBuilder responseBuilder = new StringBuilder();
-        final Map<String, Optional<String>> parsedArgs;
-        try {
-            parsedArgs = parseArguments(list, DynatraceAnomalieDetectionOption.values());
-        } catch (final IllegalArgumentException iae) {
-            return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Could not parse arguments: ", iae);
-        }
-        final Logger logger = context.getLogger();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Executing " + this.getClass().getName() + " with parameters: "
-                    + getArgumentLogString(parsedArgs, DynatraceAnomalieDetectionOption.values()));
-        }
+	private static final String STATUS_CODE_INVALID_PARAMETER = "NL-DYNATRACE_ANOMALIE_ACTION-01";
+	private static final String STATUS_CODE_TECHNICAL_ERROR = "NL-DYNATRACE_ANOMALIE_ACTION-02";
+	private static final String STATUS_CODE_BAD_CONTEXT = "NL-DYNATRACE_ANOMALIE_ACTION-03";
+	public static final ImmutableList<String> OPERATOR = ImmutableList.of("ABOVE", "BELOW");
+	public static final ImmutableList<String> TYPE_ANOMALIE = ImmutableList.of("AVAILABILITY", "CUSTOM_ALERT", "ERROR",
+			"PERFORMANCE", "RESOURCE_CONTENTION");
 
-        final String dynatraceId = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceId.getName()).get();
-        final String dynatraceApiKey = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceApiKey.getName()).get();
-        final Optional<String> dynatraceManagedHostname = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceManagedHostname.getName());
-        final Optional<String> proxyName = parsedArgs.get(DynatraceAnomalieDetectionOption.NeoLoadProxy.getName());
-        final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceAnomalieDetectionOption.TraceMode.getName());
-        final Optional<String> dynatraceTags=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTags.getName());
-        final Optional<String> dynatracemetric=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMetricName.getName());;
-        Optional<String> operator=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceOperator.getName());;
-        final Optional<String> threshold=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceMericValue.getName());;
-        Optional<String> typeOfAnomalie=parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTypeofAnomalie.getName());
-        boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
-        final Optional<String> jsonAnomalieDetection = parsedArgs.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetection.getName());
-        final Optional<String> jsonAnomalieDetectionFile=parsedArgs.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile.getName());
+	@Override
+	public SampleResult execute(Context context, List<ActionParameter> list) {
+		final SampleResult sampleResult = new SampleResult();
+		final Map<String, Optional<String>> parsedArgs;
+		try {
+			parsedArgs = parseArguments(list, DynatraceAnomalieDetectionOption.values());
+		} catch (final IllegalArgumentException iae) {
+			return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Could not parse arguments: ",
+					iae);
+		}
+		final Logger logger = context.getLogger();
+		if (logger.isDebugEnabled()) {
+			logger.debug("Executing " + this.getClass().getName() + " with parameters: "
+					+ getArgumentLogString(parsedArgs, DynatraceAnomalieDetectionOption.values()));
+		}
 
-        List<String> listofids;
-        //----------validate the value----------------
+		final String dynatraceId = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceId.getName()).get();
+		final String dynatraceApiKey = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceApiKey.getName()).get();
+		final Optional<String> dynatraceManagedHostname = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.DynatraceManagedHostname.getName());
+		final Optional<String> proxyName = parsedArgs.get(DynatraceAnomalieDetectionOption.NeoLoadProxy.getName());
+		final Optional<String> optionalTraceMode = parsedArgs.get(DynatraceAnomalieDetectionOption.TraceMode.getName());
+		final Optional<String> dynatraceTags = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceTags.getName());
+		final Optional<String> dynatracemetric = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.DynatraceMetricName.getName());
+		;
+		Optional<String> operator = parsedArgs.get(DynatraceAnomalieDetectionOption.DynatraceOperator.getName());
+		;
+		final Optional<String> threshold = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.DynatraceMericValue.getName());
+		;
+		Optional<String> typeOfAnomalie = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.DynatraceTypeofAnomalie.getName());
+		boolean traceMode = optionalTraceMode.isPresent() && Boolean.valueOf(optionalTraceMode.get());
+		final Optional<String> jsonAnomalieDetection = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetection.getName());
+		final Optional<String> jsonAnomalieDetectionFile = parsedArgs
+				.get(DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile.getName());
 
-        if(!jsonAnomalieDetection.isPresent()&&!jsonAnomalieDetectionFile.isPresent()) {
-            if(operator.isPresent()) {
-                //----valid Operator------------------
-                if (!isPartOftheList(operator.get(), OPERATOR))
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Operator: " + operator, null);
-            }
-            else
-            {
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Operator: cannot be null if the json reference is not set" , null);
+		List<String> listofids;
+		// ----------validate the value----------------
 
-            }
+		if (!jsonAnomalieDetection.isPresent() && !jsonAnomalieDetectionFile.isPresent()) {
+			if (operator.isPresent()) {
+				// ----valid Operator------------------
+				if (!isPartOftheList(operator.get(), OPERATOR))
+					return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+							"Invalid value of Operator: " + operator, null);
+			} else {
+				return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+						"Invalid value of Operator: cannot be null if the json reference is not set", null);
 
-            if(threshold.isPresent()) {
-                //----valid value ---------------------
-                if (!isaDigit(threshold.get()))
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Threshold needs to be a digit: " + threshold, null);
-            }
-            else
-            {
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of Threshold: cannot be null if the json reference is not set" , null);
+			}
 
-            }
-            //----valid type of anoamlie------------
-            if(typeOfAnomalie.isPresent()) {
-                if (!isPartOftheList(typeOfAnomalie.get(), TYPE_ANOMALIE))
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of type of anomalie: " + typeOfAnomalie, null);
-            }
-            else
-            {
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of type of anomalie: cannot be null if the json reference is not set" , null);
+			if (threshold.isPresent()) {
+				// ----valid value ---------------------
+				if (!isaDigit(threshold.get()))
+					return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+							"Threshold needs to be a digit: " + threshold, null);
+			} else {
+				return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+						"Invalid value of Threshold: cannot be null if the json reference is not set", null);
 
-            }
-            if(!dynatracemetric.isPresent())
-            {
-                return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid value of dynatracemetricname: cannot be null if the json reference is not set" , null);
+			}
+			// ----valid type of anomaly------------
+			if (typeOfAnomalie.isPresent()) {
+				if (!isPartOftheList(typeOfAnomalie.get(), TYPE_ANOMALIE))
+					return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+							"Invalid value of type of anomalie: " + typeOfAnomalie, null);
+			} else {
+				return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+						"Invalid value of type of anomalie: cannot be null if the json reference is not set", null);
 
-            }
-        }
-        else
-        {
-            if(jsonAnomalieDetection.isPresent())
-            {
-                if (Strings.isNullOrEmpty(jsonAnomalieDetection.get())) {
-                    return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid argument: jsonAnomalieDetection cannot be null "
-                            + DynatraceAnomalieDetectionOption.JsonAnomalieDetection + ".", null);
-                }
-            }
-            else
-            {
-                if(jsonAnomalieDetectionFile.isPresent())
-                {
-                    if (Strings.isNullOrEmpty(jsonAnomalieDetectionFile.get())) {
-                        return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid argument: jsonAnomalieDetectionFile cannot be null "
-                                + DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile + ".", null);
-                    }
-                    else
-                    {
-                        if(!Files.exists( Paths.get(jsonAnomalieDetectionFile.get().trim())))
-                        {
-                            context.getLogger().error(jsonAnomalieDetectionFile.get()+" does not exists");
-                            return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER, "Invalid argument: jsonAnomalieDetectionFile needs to exist "
-                                    + DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile + ".", null);
+			}
+			if (!dynatracemetric.isPresent()) {
+				return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+						"Invalid value of dynatracemetricname: cannot be null if the json reference is not set", null);
 
-                        }
-                    }
-                }
-            }
-        }
-        try
-        {
-            listofids=(List<String>)context.getCurrentVirtualUser().get(Constants.DYNATRACE_ANOMALIES);
-            if(listofids==null)
-                listofids=new ArrayList<>();
+			}
+		} else {
+			if (jsonAnomalieDetection.isPresent()) {
+				if (Strings.isNullOrEmpty(jsonAnomalieDetection.get())) {
+					return ResultFactory.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+							"Invalid argument: jsonAnomalieDetection cannot be null "
+									+ DynatraceAnomalieDetectionOption.JsonAnomalieDetection + ".",
+							null);
+				}
+			} else {
+				if (jsonAnomalieDetectionFile.isPresent()) {
+					if (Strings.isNullOrEmpty(jsonAnomalieDetectionFile.get())) {
+						return ResultFactory
+								.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+										"Invalid argument: jsonAnomalieDetectionFile cannot be null "
+												+ DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile + ".",
+										null);
+					} else {
+						if (!Files.exists(Paths.get(jsonAnomalieDetectionFile.get().trim()))) {
+							context.getLogger().error(jsonAnomalieDetectionFile.get() + " does not exists");
+							return ResultFactory
+									.newErrorResult(context, STATUS_CODE_INVALID_PARAMETER,
+											"Invalid argument: jsonAnomalieDetectionFile needs to exist "
+													+ DynatraceAnomalieDetectionOption.JsonAnomalieDetectionFile + ".",
+											null);
 
-            DynatraceAnomalies dynatraceAnomalies=getDynatraceAnomalie(jsonAnomalieDetectionFile,jsonAnomalieDetection);
-            NeoLoadAnomalieDetectionApi anomalieDetectionApi = new NeoLoadAnomalieDetectionApi(dynatraceApiKey, dynatraceId, dynatraceManagedHostname, proxyName, context, traceMode);
+						}
+					}
+				}
+			}
+		}
+		try {
+			listofids = (List<String>) context.getCurrentVirtualUser().get(Constants.DYNATRACE_ANOMALIES);
+			if (listofids == null)
+				listofids = new ArrayList<>();
 
-            if(dynatraceAnomalies!=null)
-            {
-                List<String> templistid=dynatraceAnomalies.getDynatraceAnomalieList().stream().map(dynatraceAnomalie -> {
-                    try {
-                        String id = anomalieDetectionApi.createAnomalie(dynatraceAnomalie.getDynatraceMetricName(), dynatraceAnomalie.getOperator(), dynatraceAnomalie.getTypeOfAnomalie() ,dynatraceAnomalie.getValue(), dynatraceTags);
-                        if (id != null) {
-                            return id;
-                         }
-                         else
-                             return null;
-                    }
-                    catch(Exception e)
-                    {
-                        context.getLogger().error("Technical error while creation Anomalies : ", e);
-                        return null;
-                    }
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+			DynatraceAnomalies dynatraceAnomalies = getDynatraceAnomalie(jsonAnomalieDetectionFile,
+					jsonAnomalieDetection);
+			NeoLoadAnomalieDetectionApi anomalieDetectionApi = new NeoLoadAnomalieDetectionApi(dynatraceApiKey,
+					dynatraceId, dynatraceManagedHostname, proxyName, context, traceMode);
 
-                listofids = new ArrayList<String>(listofids);
-                listofids.addAll(templistid);
-                context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
-            }
-            else {
-                String id = anomalieDetectionApi.createAnomalie(dynatracemetric.get(), operator.get().toUpperCase(), typeOfAnomalie.get().toUpperCase(), threshold.get(), dynatraceTags);
-                if (id != null) {
-                    listofids.add(id);
-                    context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error: ", e);
-        }
-        return sampleResult;
-    }
+			if (dynatraceAnomalies != null) {
+				List<String> templistid = dynatraceAnomalies.getDynatraceAnomalieList().stream()
+						.map(dynatraceAnomalie -> {
+							try {
+								String id = anomalieDetectionApi.createAnomalie(
+										dynatraceAnomalie.getDynatraceMetricName(), dynatraceAnomalie.getOperator(),
+										dynatraceAnomalie.getTypeOfAnomalie(), dynatraceAnomalie.getValue(),
+										dynatraceTags);
+								if (id != null) {
+									return id;
+								} else
+									return null;
+							} catch (Exception e) {
+								context.getLogger().error("Technical error while creation Anomalies : ", e);
+								return null;
+							}
+						}).filter(Objects::nonNull).collect(Collectors.toList());
 
-    private DynatraceAnomalies getDynatraceAnomalie(Optional<String> jsonAnomalieDetectionFile,Optional<String> jsonAnomalieDetection) throws FileNotFoundException {
-        DynatraceAnomalies dynatraceAnomalies;
-        Gson gson=new Gson();
+				listofids = new ArrayList<String>(listofids);
+				listofids.addAll(templistid);
+				context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
+			} else {
+				String id = anomalieDetectionApi.createAnomalie(dynatracemetric.get(), operator.get().toUpperCase(),
+						typeOfAnomalie.get().toUpperCase(), threshold.get(), dynatraceTags);
+				if (id != null) {
+					listofids.add(id);
+					context.getCurrentVirtualUser().put(Constants.DYNATRACE_ANOMALIES, listofids);
+				}
+			}
+		} catch (Exception e) {
+			return ResultFactory.newErrorResult(context, STATUS_CODE_TECHNICAL_ERROR, "Technical Error: ", e);
+		}
+		return sampleResult;
+	}
 
-        if(jsonAnomalieDetectionFile.isPresent())
-        {
-            JsonReader reader = new JsonReader(new FileReader(jsonAnomalieDetectionFile.get().trim()));
-            return dynatraceAnomalies=gson.fromJson(reader, DynatraceAnomalies.class);
-        }
-        else
-        {
-            if(jsonAnomalieDetection.isPresent())
-            {
-                return  dynatraceAnomalies =gson.fromJson(jsonAnomalieDetection.get(), DynatraceAnomalies.class);
+	private DynatraceAnomalies getDynatraceAnomalie(Optional<String> jsonAnomalieDetectionFile,
+			Optional<String> jsonAnomalieDetection) throws FileNotFoundException {
+		Gson gson = new Gson();
 
-            }
-        }
-        return null;
+		if (jsonAnomalieDetectionFile.isPresent()) {
+			JsonReader reader = new JsonReader(new FileReader(jsonAnomalieDetectionFile.get().trim()));
+			return gson.fromJson(reader, DynatraceAnomalies.class);
+		} else {
+			if (jsonAnomalieDetection.isPresent()) {
+				return gson.fromJson(jsonAnomalieDetection.get(), DynatraceAnomalies.class);
 
-    }
+			}
+		}
+		return null;
 
-    private boolean isaDigit(String numeric)
-    {
-        int test;
-        try
-        {
-            test=Integer.parseInt(numeric);
-            return true;
-        }
-        catch(NumberFormatException e) {
-            return false;
-        }
-        catch(Exception e)
-        {
-            return false;
-        }
+	}
 
-    }
-    private boolean isPartOftheList(String key, ImmutableList<String> list)
-    {
-        if(list.contains(key.toUpperCase()))
-            return true;
-        else
-            return false;
-    }
-    @Override
-    public void stopExecute() {
+	private boolean isaDigit(String numeric) {
+		try {
+			Integer.parseInt(numeric);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		} catch (Exception e) {
+			return false;
+		}
 
-    }
+	}
+
+	private boolean isPartOftheList(String key, ImmutableList<String> list) {
+		if (list.contains(key.toUpperCase()))
+			return true;
+		else
+			return false;
+	}
+
+	@Override
+	public void stopExecute() {
+
+	}
 }

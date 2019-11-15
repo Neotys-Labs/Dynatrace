@@ -22,8 +22,6 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
     @Override
     public SampleResult execute(Context context, List<ActionParameter> list) {
         final SampleResult sampleResult = new SampleResult();
-        final StringBuilder requestBuilder = new StringBuilder();
-        final StringBuilder responseBuilder = new StringBuilder();
         final Map<String, Optional<String>> parsedArgs;
         try {
             parsedArgs = parseArguments(list, DynatraceConfigurationOption.values());
@@ -50,22 +48,19 @@ public class DynatraceConfigurationActionEngine implements ActionEngine {
         {
             String mode;
 
-            if(compatilitymode.isPresent())
-            {
+            if(compatilitymode.isPresent()) {
                 if(compatilitymode.get().equalsIgnoreCase("TRUE"))
                     mode="OLD";
                 else
                     mode="NEW";
-
-            }
-            else
+            } else
                 mode="NEW";
 
             sampleResult.sampleStart();
             DynatraceConfigurationAPI configurationAPI=new DynatraceConfigurationAPI(dynatraceApiKey,dynatraceId,dynatraceManagedHostname,proxyName,dynatraceTags,context,traceMode);
             configurationAPI.generateRequestAttributes(mode);
 
-            //#TODO remove applicaiton name ---parse the architecture based on tags
+            //#TODO remove application name ---parse the architecture based on tags
             configurationAPI.setDynatraceTags(dynatraceTags);
 
             configurationAPI.createRequestNamingRules(mode);

@@ -49,22 +49,6 @@ public class NeoLoadRequestAttributes {
 		}
 		return result;
 	}
-/*
-	public static HashMap<String, String> getNeoLoadRequestAttributeEqualToKey(JSONArray jsonArray, List<String> key) {
-		HashMap<String, String> requestHashMap = new HashMap<>();
-		for (int i = 0; i < jsonArray.length(); i++) {
-			JSONObject obj = jsonArray.getJSONObject(i);
-			String name = obj.getString("name");
-			String id = obj.getString("id");
-
-			key.stream().forEach(requestkey -> {
-				if (name.equals(requestkey))
-					requestHashMap.put(requestkey, id);
-			});
-		}
-		return requestHashMap;
-	}
-*/
 
 	public static Map<String, String> generateHashMap(String type) {
 		HashMap<String, String> hashMap = new HashMap<>();

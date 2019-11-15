@@ -62,6 +62,7 @@ public class DynatraceTaggingUtils {
         else
             return null;
     }
+    
     public static String convertIntoDynatraceTag(Optional<String> dynatraceTag)
     {
         if(dynatraceTag.isPresent())

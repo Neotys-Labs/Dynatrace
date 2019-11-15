@@ -17,6 +17,8 @@ import com.neotys.dynatrace.common.DynatraceContext;
 import com.neotys.dynatrace.common.DynatraceUtils;
 import com.neotys.extensions.action.engine.Context;
 
+import static com.neotys.dynatrace.common.Constants.*;
+
 /*
  * TOPOLOGY WALKER
  * 
@@ -118,7 +120,7 @@ public class DynatraceTopologyWalker {
 		final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatracecontext.getTags(), true);		
 		Set<String> serviceEntityIds = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_SERVICE, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_SERVICE, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			serviceEntityIds = extractServiceEntityIdsFromResponse(jsonArrayResponse);
 		}
@@ -148,7 +150,7 @@ public class DynatraceTopologyWalker {
 			final MultivaluedMap<String, String> parameters = new MultivaluedHashMap<>();
 			final Set<String> serviceEntityIds = new HashSet<String>();
 			
-			final JSONObject jsonObjectResponse = DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_SERVICE + "/" + serviceid, parameters, tracemode);
+			final JSONObject jsonObjectResponse = DynatraceUtils.executeDynatraceAPIGetObjectRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_SERVICE + "/" + serviceid, parameters, tracemode);
 			if (jsonObjectResponse != null) {
 				dynatracetopologycache.addService(serviceid, jsonObjectResponse);
 				svc=jsonObjectResponse;
@@ -198,7 +200,7 @@ public class DynatraceTopologyWalker {
 		final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatracecontext.getTags(), true);		
 		Set<String> pginstanceids = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_PROCESS, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_PROCESS, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			pginstanceids = extractPGInstanceIdsFromResponse(jsonArrayResponse);
 		}
@@ -216,7 +218,7 @@ public class DynatraceTopologyWalker {
 		}
 		Set<String> pginstanceids = new HashSet<String>();
 		
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_PROCESS, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_PROCESS, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			pginstanceids = extractPGInstanceIdsFromResponse(jsonArrayResponse);
 		}
@@ -272,7 +274,7 @@ public class DynatraceTopologyWalker {
 		final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatracecontext.getTags(), true);
 		Set<String> pgroupids = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_PROCESSGROUP, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_PROCESSGROUP, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			pgroupids = extractProcessGroupIdsFromResponse(jsonArrayResponse);
 		}
@@ -290,7 +292,7 @@ public class DynatraceTopologyWalker {
 		}
 		Set<String> pgroupids = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_PROCESSGROUP, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_PROCESSGROUP, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			pgroupids = extractProcessGroupIdsFromResponse(jsonArrayResponse);
 		}
@@ -334,7 +336,7 @@ public class DynatraceTopologyWalker {
 		final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatracecontext.getTags(), true);
 		Set<String> hostids = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_HOST, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_HOST, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			hostids = extractHostIdsFromResponse(jsonArrayResponse);
 		}
@@ -353,7 +355,7 @@ public class DynatraceTopologyWalker {
 		
 		Set<String> hostids = new HashSet<String>();
 
-		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DynatraceUtils.DYNATRACE_HOST, parameters, tracemode);
+		final JSONArray jsonArrayResponse = DynatraceUtils.executeDynatraceAPIGetArrayRequest(context, dynatracecontext, Api.ENV1, DTAPI_ENV1_EP_HOST, parameters, tracemode);
 		if (jsonArrayResponse != null) {
 			hostids = extractHostIdsFromResponse(jsonArrayResponse);
 		}

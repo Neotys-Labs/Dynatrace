@@ -90,6 +90,7 @@ DynatraceAnomalieDetectionOption(final String name, final Option.OptionalRequire
         this.description = description;
         this.argumentValidator = argumentValidator;
     }
+
     @Override
     public String getName() {
         return name;

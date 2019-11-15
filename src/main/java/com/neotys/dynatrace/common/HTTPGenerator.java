@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import com.neotys.extensions.action.engine.Proxy;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -59,24 +58,13 @@ public class HTTPGenerator {
 		return httpGenerator;
 
 	}
-	
-/*
-	public static HTTPGenerator newJsonHttpGenerator(final String httpMethod,
-													 final String url,
-													 final Map<String, String> headers,
-													 final MultivaluedMap<String, String> params,
-													 final Optional<Proxy> proxy,
-													 final String bodyJson)
-			throws Exception {
-		final HTTPGenerator httpGenerator = new HTTPGenerator(httpMethod, url, headers, params, proxy);
-		final StringEntity requestEntity = new StringEntity(bodyJson, "application/json","utf8");
-		addJsonParameters(httpGenerator.request, requestEntity, httpMethod);
-		return httpGenerator;
-	}
-*/
-	
-	public HTTPGenerator(final String httpMethod, final String url, final Map<String, String> headers,
-			final MultivaluedMap<String, String> params, final Optional<Proxy> proxy, final String bodyJson)
+		
+	public HTTPGenerator(final String httpMethod, 
+						 final String url, 
+						 final Map<String, String> headers,
+						 final MultivaluedMap<String, String> params, 
+						 final Optional<Proxy> proxy, 
+						 final String bodyJson)
 			throws Exception {
 		this(httpMethod, url, headers, params, proxy);
 		final StringEntity requestEntity = new StringEntity(bodyJson, "application/json", "utf8");
@@ -99,20 +87,6 @@ public class HTTPGenerator {
 
 	public HttpResponse execute() throws IOException {
 		return httpClient.execute(request);
-	}
-
-	public JSONArray executeAndGetJsonArrayResponse() throws IOException, DynatraceException {
-		final HttpResponse httpResponse = httpClient.execute(request);
-		if (!HttpResponseUtils.isSuccessHttpCode(httpResponse.getStatusLine().getStatusCode())) {
-			final String stringResponse = HttpResponseUtils.getStringResponse(httpResponse);
-			throw new DynatraceException(httpResponse.getStatusLine().getReasonPhrase() + " - "+ request + " - " + stringResponse);
-		}
-		return HttpResponseUtils.getJsonArrayResponse(httpResponse);
-	}
-
-	public int executeAndGetResponseCode() throws IOException {
-		final HttpResponse response = httpClient.execute(request);
-		return response.getStatusLine().getStatusCode();
 	}
 
 	public HttpRequestBase getRequest() {

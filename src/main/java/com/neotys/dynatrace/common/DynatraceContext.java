@@ -14,6 +14,7 @@ public class DynatraceContext {
 	private final Optional<String> proxyname;
 	private final Optional<String> tags;
 // TODO remove headers from this object	
+	@Deprecated
 	private final Map<String, String> headers;
 
 	public DynatraceContext(final String apiKey,
@@ -49,7 +50,8 @@ public class DynatraceContext {
 	public Optional<String> getTags() {
 		return tags;
 	}
-
+	
+	@Deprecated
 	public Map<String, String> getHeaders() {
 		return headers;
 	}

@@ -7,41 +7,23 @@ import com.neotys.dynatrace.common.topology.DynatraceTopologyCache;
 import com.neotys.dynatrace.common.topology.DynatraceTopologyWalker;
 import com.neotys.dynatrace.common.data.DynatraceService;
 import com.neotys.extensions.action.engine.Context;
-import com.neotys.extensions.action.engine.Proxy;
 import com.neotys.rest.dataexchange.client.DataExchangeAPIClient;
 import com.neotys.rest.dataexchange.model.EntryBuilder;
-import com.neotys.rest.dataexchange.util.Entries;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-import javax.swing.text.html.Option;
-import javax.ws.rs.core.MultivaluedMap;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
+import static com.neotys.dynatrace.common.Constants.*;
 
 public class DynatraceGetTimeSeries {
-    private static final String DYNATRACE_API_PROCESS_GROUP = "entity/infrastructure/process-groups";
-    private static final String DYNATRACE_HOSTS = "entity/infrastructure/hosts";
-    private static final String DYNATRACE_TIMESERIES = "timeseries";
-
     private static final String AVG = "AVG";
     private static final String COUNT = "COUNT";
     private static final String NONE = null;
 
-    private static final String ENTITY_ID = "entityId";
-    private static final String DISPLAY_NAME = "displayName";
-    private static final String TAG = "tag";
-    private static final String DYNATRACE = "Dynatrace";
-    private static final String PROCESS = "Process";
-    private static final Map<String, String> TIMESERIES_INFRA_MAP = new HashMap<>();
-    private static final Map<String,String> TIMESERIES_PGI_MAP=new HashMap<>();
+    private static final Map<String, String> TIMESERIES_INFRA_MAP    = new HashMap<>();
+    private static final Map<String,String>  TIMESERIES_PGI_MAP      = new HashMap<>();
     private static final Map<String, String> TIMESERIES_SERVICES_MAP = new HashMap<>();
 
     static {
@@ -95,19 +77,10 @@ public class DynatraceGetTimeSeries {
     }
 
     private  Map<String, String> CUSTOM_TIMESERIES_SERVICES_MAP = new HashMap<>();
-//    private final Optional<String> proxyName;
     private final DataExchangeAPIClient dataExchangeApiClient;
-//    private final String dynatraceApiKey;
-//    private final String dynatraceId;
-//    private final Optional<String> dynatraceManagedHostname;
-//    private final Optional<String> dynatraceEntityTag;    
     private final Optional<List<String>>  dynatraceCustomTimeseries;
     private final Optional<String> dynatraceAggregationType;
     private static final Optional<Long> diff=Optional.absent();
-//    private HTTPGenerator httpGenerator;
-//    private Set<String> dynatraceServiceEntityIds;
-//    private Set<String> dynatraceHostEntityIds;
-//    private Map<String, String> header = null;
     private boolean isRunning = true;
     private final Context context;
     private final DynatraceContext dynatraceContext;
@@ -127,12 +100,7 @@ public class DynatraceGetTimeSeries {
                                   final long startTs,
                                   final boolean traceMode) throws Exception {
         this.context = context;
-//	    this.dynatraceApiKey = dynatraceApiKey;
-//	    this.dynatraceId = dynatraceId;
-//	    this.dynatraceEntityTag = getDynatracetag(dynatraceTags);
 	    this.dataExchangeApiClient = dataExchangeAPIClient;
-//	    this.proxyName = proxyName;
-//	    this.dynatraceManagedHostname = dynatraceManagedHostname;
 	    this.startTS = startTs;
 	    this.traceMode = traceMode;
 
@@ -140,46 +108,23 @@ public class DynatraceGetTimeSeries {
         this.dynatraceAggregationType=dynatraceAggregateType;
 
 	    this.isRunning = true;
-//	    this.header = new HashMap<>();
-//	    this.dynatraceHostEntityIds = new HashSet<>();
 
         this.dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceId, proxyName, /*getDynatracetag(*/dynatraceTags/*)*/, new HashMap<>());
         this.dtw=new DynatraceTopologyWalker(context,dynatraceContext,traceMode);
         dtw.executeDiscovery();
-        
-        
-	    // -- this.dynatraceServiceEntityIds = DynatraceUtils.getServiceEntityIds(context,dynatraceContext , proxyName, traceMode);
-	    // this.dynatraceServiceEntityIds = dtw.getDiscoveredData().getServices();
-
-	    //initHostsFromProcessGroup();
-        //initHosts();
-        
+                
         generateCustomTimeseries();
     }
-/*
-    private Optional<String> getDynatracetag(Optional<String> tag)
-    {
-        Optional<String> result;
-        if(tag.isPresent()) {
-            result = Optional.of(tag.get().replaceAll(":", ":NL"));
-            if(!result.get().contains(":"))
-                result=Optional.of("NL"+tag.get());
-        }
-        else
-            result=Optional.absent();
 
-        return result;
-    }
-*/    
-    private void generateCustomTimeseries()
-    {
-        if(dynatraceCustomTimeseries.isPresent())
-        {
-            if(dynatraceCustomTimeseries.get().size()>0)
-                dynatraceCustomTimeseries.get().stream().filter(key->!TIMESERIES_INFRA_MAP.containsKey(key)).filter(key->!TIMESERIES_SERVICES_MAP.containsKey(key)).forEach(timeseries->CUSTOM_TIMESERIES_SERVICES_MAP.put(timeseries,dynatraceAggregationType.get()));
-        }
-
-    }
+	private void generateCustomTimeseries() {
+		if (dynatraceCustomTimeseries.isPresent()) {
+			if (dynatraceCustomTimeseries.get().size() > 0)
+				dynatraceCustomTimeseries.get().stream().filter(key -> !TIMESERIES_INFRA_MAP.containsKey(key))
+						.filter(key -> !TIMESERIES_SERVICES_MAP.containsKey(key))
+						.forEach(timeseries -> CUSTOM_TIMESERIES_SERVICES_MAP.put(timeseries,
+								dynatraceAggregationType.get()));
+		}
+	}
     
     public void processDynatraceData() throws Exception {
         if (isRunning) {
@@ -189,8 +134,7 @@ public class DynatraceGetTimeSeries {
             List<com.neotys.rest.dataexchange.model.Entry> entryList = Stream.concat(Stream.concat(serviceEntries.stream(), infraEntries.stream()),smartscapedate.stream())
                     .collect(Collectors.toList());
 
-            if(CUSTOM_TIMESERIES_SERVICES_MAP.size()>0)
-            {
+            if(CUSTOM_TIMESERIES_SERVICES_MAP.size()>0) {
                 //---add the custom metrics-------
                 List<com.neotys.rest.dataexchange.model.Entry> servicecustomEntries = processServices(dtw.getDiscoveredData().getServices(),CUSTOM_TIMESERIES_SERVICES_MAP);
                 List<com.neotys.rest.dataexchange.model.Entry> infracustomEntries = processInfrastructures(dtw.getDiscoveredData().getHosts(),CUSTOM_TIMESERIES_SERVICES_MAP);
@@ -204,24 +148,7 @@ public class DynatraceGetTimeSeries {
             }
         }
     }
-/*
-    public List<com.neotys.rest.dataexchange.model.Entry> getCustomTimeSeries() {
-        List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
-        DynatraceTopologyCache dtcache=dtw.getDiscoveredData();
-        Set<String> dynatraceServiceEntityIds=dtcache.getServices();
-        
-        dynatraceServiceDataList=dynatraceServiceEntityIds.stream().map((serviceid) -> {
-        	try { 
-        		return new DynatraceService(serviceid,dtcache.lookupServiceName(serviceid),dtw.findPgInstancesForService(serviceid));
-        	} catch (Exception e) {
-        		return null;
-        	}
-        }).filter(Objects::nonNull).map(dynatraceService -> getServiceMonitoringData(dynatraceService)).collect(Collectors.toList());
 
-        dynatraceServiceDataList=dynatraceServiceDataList.stream().filter(dynatraceServiceData -> dynatraceServiceData != null && dynatraceServiceData.getDate()>0).collect(Collectors.toList());    
-        return dynatraceServiceDataList.stream().map(dynatraceServiceData -> dynatraceServiceDataTOEntry(dynatraceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
-    }
-*/    
     public List<com.neotys.rest.dataexchange.model.Entry> getSmartscapeData() {
         List<DynatraceServiceData> dynatraceServiceDataList=new ArrayList<>();
         DynatraceTopologyCache dtcache=dtw.getDiscoveredData();
@@ -239,8 +166,7 @@ public class DynatraceGetTimeSeries {
         return dynatraceServiceDataList.stream().map(dynatraceServiceData -> dynatraceServiceDataTOEntry(dynatraceServiceData)).flatMap(list->list.stream()).collect(Collectors.toList());
     }
 
-    private List<com.neotys.rest.dataexchange.model.Entry> dynatraceServiceDataTOEntry(DynatraceServiceData dynatraceServiceData)
-    {
+    private List<com.neotys.rest.dataexchange.model.Entry> dynatraceServiceDataTOEntry(DynatraceServiceData dynatraceServiceData) {
         List<com.neotys.rest.dataexchange.model.Entry> entries = new ArrayList<>();
         List<String> path=new ArrayList<>();
         path.add(DYNATRACE);
@@ -271,14 +197,12 @@ public class DynatraceGetTimeSeries {
         return entries;
     }
     
-    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService)
-    {
+    private DynatraceServiceData getServiceMonitoringData(DynatraceService dynatraceService) {
         DynatraceServiceData data=new DynatraceServiceData(dynatraceService.getDisplayName(),dynatraceService.getServiceid(),dynatraceService.getNumber_ofprocess());
         try {
             for (Map.Entry<String, String> m : TIMESERIES_PGI_MAP.entrySet()) {
                 List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceService.getProcessPGIlist(), startTS, context, dynatraceContext, traceMode, diff,Optional.absent());
-                if(dynatraceMetrics.size()>0)
-                {
+                if(dynatraceMetrics.size()>0) {
                     double total = dynatraceMetrics.stream().mapToDouble(metric -> metric.getValue()).sum();
                     addSumTodata(data, m.getKey(), total);
                     data.setDate(dynatraceMetrics.stream().findFirst().get().getTime());
@@ -286,15 +210,13 @@ public class DynatraceGetTimeSeries {
             }
             return data;
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             context.getLogger().error("Technical Error retrieving monitoring ",e);
         }
         return null;
     }
 
-    private void addSumTodata(DynatraceServiceData data,String metricname,double sum)
-    {
+    private void addSumTodata(DynatraceServiceData data,String metricname,double sum) {
 
         if(metricname.contains("cpu"))
             data.setCpu(sum);
@@ -355,92 +277,6 @@ public class DynatraceGetTimeSeries {
                 .value(dynatraceMetric.getValue())
                 .build();
     }
-
-/*    
-    private Optional<Proxy> getProxy(final Optional<String> proxyName, final String url) throws MalformedURLException {
-        if (proxyName.isPresent()) {
-            return Optional.fromNullable(context.getProxyByName(proxyName.get(), new URL(url)));
-        }
-        return Optional.absent();
-    }
-    
-    private void initHosts() throws Exception {
-        final String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_HOSTS;
-        final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatraceEntityTag,true);
-
-        sendTokenIngetParam(parameters);
-
-        final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
-
-        try {
-            if(traceMode){
-                context.getLogger().info("Dynatrace service, get hosts:\n" + httpGenerator.getRequest());
-            }
-            final JSONArray jsonArray = httpGenerator.executeAndGetJsonArrayResponse();
-            if (jsonArray != null) {
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    final JSONObject jsonApplication = jsonArray.getJSONObject(i);
-                    if (jsonApplication.has(ENTITY_ID) && jsonApplication.has(DISPLAY_NAME)) {
-                        dynatraceHostEntityIds.add(jsonApplication.getString(ENTITY_ID));
-                    }
-                }
-            }
-            if(dynatraceHostEntityIds.isEmpty()){
-                context.getLogger().info("No host found.");
-            }
-
-        }catch (DynatraceException e){
-            context.getLogger().error("Failed to init Host", e);
-        } finally{
-            httpGenerator.closeHttpClient();
-        }
-    }
-
-    private void initHostsFromProcessGroup() throws Exception {
-        final String url = DynatraceUtils.getDynatraceEnv1ApiUrl(dynatraceManagedHostname, dynatraceId) + DYNATRACE_API_PROCESS_GROUP;
-        final MultivaluedMap<String, String> parameters = DynatraceUtils.generateGetTagsParameters(dynatraceEntityTag,true);
-
-        sendTokenIngetParam(parameters);
-
-        final Optional<Proxy> proxy = getProxy(proxyName, url);
-        httpGenerator = new HTTPGenerator(HTTP_GET_METHOD, url, header, parameters, proxy);
-
-        try {
-            if(traceMode){
-                context.getLogger().info("Dynatrace service, get hosts from process group:\n" + httpGenerator.getRequest());
-            }
-            final JSONArray jsonObj = httpGenerator.executeAndGetJsonArrayResponse();
-            if (jsonObj != null) {
-                for (int i = 0; i < jsonObj.length(); i++) {
-                    final JSONObject jsonProcessGroup = jsonObj.getJSONObject(i);
-                    if (jsonProcessGroup.has(ENTITY_ID) && jsonProcessGroup.has("fromRelationships")) {
-                        final JSONObject jsonFromRelation = jsonProcessGroup.getJSONObject("fromRelationships");
-                        if (jsonFromRelation.has("runsOn")) {
-                            final JSONArray jsonRunOn = jsonFromRelation.getJSONArray("runsOn");
-                            if (jsonRunOn != null) {
-                                for (int j = 0; j < jsonRunOn.length(); j++) {
-                                    dynatraceHostEntityIds.add(jsonRunOn.getString(j));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if(dynatraceHostEntityIds.isEmpty()){
-                context.getLogger().debug("No host found in process group");
-            }
-        }catch (DynatraceException e){
-            context.getLogger().error("Failed to init host", e);
-        } finally {
-            httpGenerator.closeHttpClient();
-        }
-    }
-
-    private void sendTokenIngetParam(final MultivaluedMap<String, String> param) {
-        param.add("Api-Token", dynatraceApiKey);
-    }
-*/
     
     public void setTestToStop() {
         isRunning = false;

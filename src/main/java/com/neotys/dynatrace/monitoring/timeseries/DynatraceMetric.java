@@ -7,7 +7,6 @@ public class DynatraceMetric {
 	private long time;
 	private String metricName;
 	private String timeSeries;
-//	private String entityId;
 	
 	public String getUnit() {
 		return unit;
@@ -37,6 +36,5 @@ public class DynatraceMetric {
 		this.time = time;
 		this.metricName = metricName;
 		this.timeSeries =strTimeSeries;
-//		entityId =entity;
 	}
 }

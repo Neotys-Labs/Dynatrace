@@ -14,26 +14,17 @@ public class DynatraceServiceData {
     public static final String NETWORK_UNIT="BytePerSecond (B/s)";
 
     private String serviceID;
-
     private String serviceName;
-
     private double number_ofprocess;
-
     private double cpu;
-
     private double memory;
-
     private double networksent;
-
     private double networkreceived;
+    private Optional<Long> date;
 
     public String getServiceID() {
         return serviceID;
     }
-
-
-
-    private Optional<Long> date;
 
     public void setServiceID(String serviceID) {
         this.serviceID = serviceID;

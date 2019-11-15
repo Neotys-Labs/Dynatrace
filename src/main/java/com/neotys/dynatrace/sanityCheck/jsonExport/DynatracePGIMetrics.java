@@ -23,26 +23,19 @@ import java.util.stream.Stream;
 
 public class DynatracePGIMetrics {
     private static final Map<String,String> PGI_TIMESERIES_MAP=new HashMap<>();
-//    private final Optional<String> proxyName;
-//    private final String dynatraceApiKey;
-//    private final String dynatraceId;
     private static final long DYNATRACE_SMARTSCAPE_DIFF=300000;
-//    private final Optional<String> dynatraceManagedHostname;
     private static final Optional<Long> diff=Optional.of(DYNATRACE_SMARTSCAPE_DIFF);
     private HTTPGenerator httpGenerator;
-//    private Map<String, String> header = null;
     private boolean isRunning = true;
     private final Context context;
     private final DynatraceContext dynatracecontext;
     private final DynatraceTopologyWalker dtw;
     private long startTS;
     private boolean traceMode;
-//    private Set<String> dynatraceApplicationServiceIds;
     private String applicationName;
     private final static double COMPARAISON_RATIO=0.10;
 
-    static
-    {
+    static {
         //----moinitoring of the entire services ( logic based on process group instance)
         PGI_TIMESERIES_MAP.put("com.dynatrace.builtin:pgi.cpu.usage", "AVG");
         PGI_TIMESERIES_MAP.put("com.dynatrace.builtin:pgi.mem.usage", "AVG");
@@ -54,32 +47,13 @@ public class DynatracePGIMetrics {
     public DynatracePGIMetrics( String dynatraceApiKey, String dynatraceId, final Optional<String> dynatraceTags, Optional<String> dynatraceManagedHostname,Optional<String> proxyName, Context context,long startTS, boolean traceMode) throws Exception {
     	this.dynatracecontext=new DynatraceContext(dynatraceApiKey,dynatraceManagedHostname,dynatraceId,proxyName, dynatraceTags, new HashMap<>());
     	
-//        this.proxyName = proxyName;
-//        this.dynatraceApiKey = dynatraceApiKey;
-//        this.dynatraceId = dynatraceId;
-//        this.dynatraceManagedHostname = dynatraceManagedHostname;
         this.context = context;
         this.traceMode = traceMode;
         this.startTS=startTS;
         
         this.dtw=new DynatraceTopologyWalker(context, dynatracecontext, traceMode);
         dtw.executeDiscovery();
- /*
-        this.dynatraceApplicationServiceIds = DynatraceUtils.getServiceEntityIds(context, dynatraceContext, proxyName, traceMode);
-        //---get dependencies-----
-        List<String> dependenListId=new ArrayList<>();
-        dynatraceApplicationServiceIds.stream().forEach(serviceid-> {
-            try {
-                dependenListId.addAll(DynatraceUtils.getListDependentServicesFromServiceID(context,dynatraceContext,serviceid,proxyName,traceMode,false));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
 
-        dynatraceApplicationServiceIds= Stream.concat(dynatraceApplicationServiceIds.stream(), dependenListId.stream()).distinct()
-                .collect(Collectors.toSet());
-*/
-        //--------
         if(dynatraceTags.isPresent())
             applicationName=dynatraceTags.get();
         else
@@ -98,74 +72,53 @@ public class DynatracePGIMetrics {
 
     }
 
-    public void sanityCheck(String jsonfile) throws IOException, DynatraceException {
+    public void sanityCheck(String jsonfilename) throws IOException, DynatraceException {
         List<DynatraceServiceData> serviceDataList=getSmartscapeData();
-        File xmlfile=new File(jsonfile);
+        File jsonfile=new File(jsonfilename);
 
 
-        if(xmlfile.exists())
-        {
+        if(jsonfile.exists()) {
             //----compare with baseline------
-            if(jsonfile.contains(".json"))
-            {
-                DynatraceSmartScapedata imported_architecture=unmarshall(jsonfile);
+            if(jsonfilename.contains(".json")) {
+                DynatraceSmartScapedata imported_architecture=unmarshall(jsonfilename);
                 if(imported_architecture.getServiceDataList().size()>serviceDataList.size()) {
                     context.getLogger().error("There is less services running on the application");
                     throw new DynatraceException("There is less services running on the application");
-
-                }else
-                {
+                } else {
                     List<String> listoferrors=new ArrayList<>();
                     imported_architecture.getServiceDataList().stream().forEach(services->{
                         DynatraceServiceData relatedata=getDynatraceServiceData(services,serviceDataList);
-                        if(relatedata!=null)
-                        {
-                            if(services.getNumber_ofprocess()>relatedata.getNumber_ofprocess())
-                            {
+                        if(relatedata!=null) {
+                            if(services.getNumber_ofprocess()>relatedata.getNumber_ofprocess()) {
                                 context.getLogger().error("There are less process running on " + services.getServiceName());
                                 listoferrors.add("There are less process running on " + services.getServiceName());
-                            }
-                            else
-                            {
-                                //------check the ressoruces----------------
-                                if(!compareMonitoringData(services.getCpu(),relatedata.getCpu()))
-                                {
+                            } else {
+                                //------check the resources----------------
+                                if(!compareMonitoringData(services.getCpu(),relatedata.getCpu())) {
                                     context.getLogger().error("The process are consuming more CPU"+services.getServiceName());
                                     listoferrors.add("There are less process running on " + services.getServiceName());
-                                }
-                                else
-                                {
-                                    if(!compareMonitoringData(services.getMemory(),relatedata.getMemory()))
-                                    {
+                                } else {
+                                    if(!compareMonitoringData(services.getMemory(),relatedata.getMemory())) {
                                         context.getLogger().error("The process are consuming more Memory"+services.getServiceName());
                                         listoferrors.add("There are less process running on " + services.getServiceName());
                                     }
-
                                 }
-                                //------------------------------------------
                             }
-                        }
-                        else
-                        {
+                        } else {
                             context.getLogger().error("Service is missing "+services.getServiceName());
                         }
                     });
-                    if(listoferrors.size()==0)
-                    {
-                        //----if no error then store the new reference in the xml file
-                        marshal(jsonfile,serviceDataList);
-                    }
-                    else
-                    {
+                    if(listoferrors.size()==0) {
+                        //----if no error then store the new reference in the json file
+                        marshal(jsonfilename,serviceDataList);
+                    } else {
                         throw new DynatraceException(listoferrors.stream().limit(1).collect(Collectors.joining(",")));
                     }
                 }
             }
-        }
-        else
-        {
-            //---export current data to xml----
-            marshal(jsonfile,serviceDataList);
+        } else {
+            //--- export current data to json ----
+            marshal(jsonfilename,serviceDataList);
         }
     }
 
@@ -217,9 +170,7 @@ public class DynatracePGIMetrics {
                 addSumTodata(data,m.getKey(),total);
             }
             return data;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             context.getLogger().error("Technical Error retrieving monitoring ",e);
         }
         return null;
@@ -239,7 +190,4 @@ public class DynatracePGIMetrics {
         if(metricname.contains("bytessent"))
             data.setNetworksent(sum);
     }
-
-
-
 }

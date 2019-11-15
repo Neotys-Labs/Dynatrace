@@ -135,15 +135,6 @@ class HTTPGeneratorUtils {
 					parameters.add(new BasicNameValuePair(param,value));					
 				}
 			}
-/* TODO cleanup after code review			
-			for (Map.Entry<String, String> entry : params.entrySet()) {
-				if("tag".equals(entry.getKey())){
-					parameters.addAll(getTags(entry.getValue()));
-				}else {
-					parameters.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-				}
-			}
-*/			
 		}
 		final String paramString = URLEncodedUtils.format(parameters, HTTP.UTF_8);
 		urlBuilder.append(paramString);
