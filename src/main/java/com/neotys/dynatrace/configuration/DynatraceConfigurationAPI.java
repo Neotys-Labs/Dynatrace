@@ -163,9 +163,9 @@ public class DynatraceConfigurationAPI {
     public void createRequestNamingRules(String type) throws Exception {
         DynatraceContext dynatraceContext=new DynatraceContext(dynatraceApiKey, dynatraceManagedHostname, dynatraceAccountID, Optional.absent(), this.headers);
 
-        HashMap<String,String> requestAttributesID=getRequestAttributesids(type);
+       // HashMap<String,String> requestAttributesID=getRequestAttributesids(type);
 
-        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode,requestAttributesID,type))
+        if(!NeoLoadRequestNaming.isNeoLoadNamingRuleExists(context,dynatraceContext,proxyName,traceMode,type))
         {
             NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_SERVICE,type);
             NeoLoadRequestNaming.createNeoLoadNamingRule(context, dynatraceContext, proxyName, traceMode,NeoLoadRequestNaming.WEB_REQUEST,type);

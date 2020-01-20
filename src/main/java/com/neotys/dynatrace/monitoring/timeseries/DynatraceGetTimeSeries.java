@@ -153,7 +153,25 @@ public class DynatraceGetTimeSeries {
         if(tag.isPresent()) {
             result = Optional.of(tag.get().replaceAll(":", ":NL"));
             if(!result.get().contains(":"))
-                result=Optional.of("NL"+tag.get());
+                result=Optional.of("NeoLoad-"+tag.get());
+
+            if(result.get().startsWith("["))
+            {
+                String[] tagcontext=result.get().split("]");
+                if(tagcontext.length>1)
+                {
+                    result=Optional.of(tagcontext[1]);
+                }
+            }
+
+            if(result.get().contains(":"))
+            {
+                String[] tagkey=result.get().split(":");
+                if(tagkey.length>1)
+                {
+                    result=Optional.of(tagkey[1]);
+                }
+            }
         }
         else
             result=Optional.absent();

@@ -87,6 +87,39 @@ public class DynatraceTaggingUtilsTest {
             System.out.println("Not working");
     }
 
+    private Optional<String> getDynatracetag(Optional<String> tag)
+    {
+        Optional<String> result;
+        if(tag.isPresent()) {
+            result = Optional.of(tag.get().replaceAll(":", ":NL"));
+            if(!result.get().contains(":"))
+                result=Optional.of("NL"+tag.get());
+            if(result.get().startsWith("["))
+            {
+                String[] tagcontext=result.get().split("]");
+                if(tagcontext.length>1)
+                {
+                    result=Optional.of(tagcontext[1]);
+                }
+            }
+        }
+        else
+            result=Optional.absent();
+
+        return result;
+    }
+    @Test
+    public void validateChangedtag() {
+        Optional<String> tagkubernetes= Optional.of("[Kubernetes]app:carts,environement:dev");
+        Optional<String> tagnonkubernetes= Optional.of("app:carts,environement:dev");
+        Optional<String> tagsimplekubernetes= Optional.of("[Kubernetes]app:carts");
+        Optional<String> tagsimplenonkubernetes= Optional.of("app:carts");
+        Optional<String> tagsimple= Optional.of("app,dev");
+        Optional<String> tag= Optional.of("app");
+
+        Optional<String> change=getDynatracetag(tagsimple);
+        System.out.println(change.get());
+    }
     @Test
     public void validatetag() {
     Optional<String> tagkubernetes= Optional.of("[Kubernetes]app:carts,environement:dev");

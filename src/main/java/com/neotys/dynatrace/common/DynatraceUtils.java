@@ -99,7 +99,7 @@ public class DynatraceUtils {
                 } else {*/
                     parameter = cleanUpTags(tag.get());
                // }
-                parameters.put("tag", parameter);
+                parameters.put("tag", tag.get());
             }
         }
 

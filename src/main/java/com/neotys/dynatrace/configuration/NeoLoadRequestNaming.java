@@ -126,29 +126,23 @@ public class NeoLoadRequestNaming {
         }
     }
 
-    public static String getRequetNamingPatern(HashMap<String,String> requestAttributesID,String type) throws Exception {
-        if(requestAttributesID!=null)
-        {
+    public static String getRequetNamingPatern(String type) throws Exception {
+
             if(type.equalsIgnoreCase(NeoLoadRequestAttributes.NEW))
             {
-                if(requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE) && requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE))
-                    return String.format(requestnaming,requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE),requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE));
-
-                return null;
+                    return String.format(requestnaming,NeoLoadRequestAttributes.NEOLOAD_NEW_SCENARIO_REQUEST_ATTRIBUTE,NeoLoadRequestAttributes.NEOLOAD_NEW_TRANSACTION_REQUEST_ATTRIBUTE);
             }
             else
             {
-                if(requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE) && requestAttributesID.containsKey(NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE))
-                    return String.format(requestnaming,requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE),requestAttributesID.get(NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE));
+                   return String.format(requestnaming,NeoLoadRequestAttributes.NEOLOAD_SCENARIO_REQUEST_ATTRIBUTE,NeoLoadRequestAttributes.NEOLOAD_TRANSACTION_REQUEST_ATTRIBUTE);
 
-                return null;
             }
-        }
-        else return null;
+
 
     }
-    public static boolean isNeoLoadNamingRuleExists(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,HashMap<String,String> requestAttributesID,String requestattributetype) throws Exception {
-        String pattern=getRequetNamingPatern(requestAttributesID,requestattributetype);
+
+    public static boolean isNeoLoadNamingRuleExists(final Context context, final DynatraceContext dynatraceContext, final Optional<String> proxyName, final boolean traceMode,String requestattributetype) throws Exception {
+        String pattern=getRequetNamingPatern(requestattributetype);
 
         final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceContext.getDynatraceManagedHostname(), dynatraceContext.getDynatraceAccountID()) + DYNATRACE_NAMING_URL;
         final Map<String, String> parameters = new HashMap<>();
