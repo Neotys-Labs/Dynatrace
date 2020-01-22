@@ -15,4 +15,9 @@ public final class Constants {
 	public static final String DYNATRACE_LAST_EXECUTION_TIME = "DynatraceLastExecutionTime";
 
     public static final String TRACE_MODE = "traceMode";
+
+
+    public static final String DYNATRACE_SERVICE_SUFFIX="SERVICE";
+	public static final String DYNATRACE_PROCESSGROUP_SUFFIX="PROCESS_GROUP";
+	public static final String DYNATRACE_HOST_SUFFIX="HOST";
 }

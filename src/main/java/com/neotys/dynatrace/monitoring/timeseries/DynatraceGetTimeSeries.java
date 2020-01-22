@@ -20,6 +20,8 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.neotys.dynatrace.common.Constants.DYNATRACE_HOST_SUFFIX;
+import static com.neotys.dynatrace.common.Constants.DYNATRACE_SERVICE_SUFFIX;
 import static com.neotys.dynatrace.common.HTTPGenerator.HTTP_GET_METHOD;
 
 public class DynatraceGetTimeSeries {
@@ -151,7 +153,7 @@ public class DynatraceGetTimeSeries {
     {
         Optional<String> result;
         if(tag.isPresent()) {
-            result = Optional.of(tag.get().replaceAll(":", ":NL"));
+            result = Optional.of(tag.get().replaceAll(":", ":NeoLoad-"));
             if(!result.get().contains(":"))
                 result=Optional.of("NeoLoad-"+tag.get());
 
@@ -323,7 +325,7 @@ public class DynatraceGetTimeSeries {
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
             for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
-                    final List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode, diff, Optional.absent());
+                    final List<DynatraceMetric> dynatraceMetrics = (List<DynatraceMetric>) DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds.stream().filter(s -> s.startsWith(DYNATRACE_HOST_SUFFIX)).collect(Collectors.toList()),startTS,context,dynatraceContext,proxyName,traceMode, diff, Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));
                 }
             }
@@ -336,7 +338,7 @@ public class DynatraceGetTimeSeries {
         if (dynatraceApplicationIds != null && !dynatraceApplicationIds.isEmpty()) {
             for (Entry<String, String> m : dynatracemetrics.entrySet()) {
                 if (isRunning) {
-                    final List<DynatraceMetric> dynatraceMetrics = DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds,startTS,context,dynatraceContext,proxyName,traceMode,diff,Optional.absent());
+                    final List<DynatraceMetric> dynatraceMetrics = DynatraceUtils.getTimeSeriesMetricData(m.getKey(), m.getValue(), dynatraceApplicationIds.stream().filter(s -> s.startsWith(DYNATRACE_SERVICE_SUFFIX)).collect(Collectors.toList()),startTS,context,dynatraceContext,proxyName,traceMode,diff,Optional.absent());
                     entries.addAll(toEntries(dynatraceMetrics));
                 }
             }
@@ -441,6 +443,7 @@ public class DynatraceGetTimeSeries {
             context.getLogger().error("Failed to init host", e);
         } finally {
             httpGenerator.closeHttpClient();
+
         }
     }
 

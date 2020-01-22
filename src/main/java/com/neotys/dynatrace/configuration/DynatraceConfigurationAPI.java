@@ -129,6 +129,7 @@ public class DynatraceConfigurationAPI {
             tmp=new ArrayList<>();
             tmp.addAll(secondleveldependenListId);
             dependenListId.addAll(secondleveldependenListId);
+
         }
         serviceListId=Stream.concat(serviceListId.stream(), dependenListId.stream()).distinct()
                 .collect(Collectors.toList());

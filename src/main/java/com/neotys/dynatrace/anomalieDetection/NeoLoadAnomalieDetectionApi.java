@@ -56,6 +56,37 @@ public class NeoLoadAnomalieDetectionApi {
         DynatraceUtils.generateHeaders(headers);
     }
 
+    private Optional<String> getDynatracetag(Optional<String> tag)
+    {
+        Optional<String> result;
+        if(tag.isPresent()) {
+            result = Optional.of(tag.get().replaceAll(":", ":NeoLoad-"));
+            if(!result.get().contains(":"))
+                result=Optional.of("NeoLoad-"+tag.get());
+
+            if(result.get().startsWith("["))
+            {
+                String[] tagcontext=result.get().split("]");
+                if(tagcontext.length>1)
+                {
+                    result=Optional.of(tagcontext[1]);
+                }
+            }
+
+            if(result.get().contains(":"))
+            {
+                String[] tagkey=result.get().split(":");
+                if(tagkey.length>1)
+                {
+                    result=Optional.of(tagkey[1]);
+                }
+            }
+        }
+        else
+            result=Optional.absent();
+
+        return result;
+    }
     public String createAnomalie(String dynatracemetricname,String operator,String typeofAlert,String value,Optional<String> tags) throws Exception {
         final String url = DynatraceUtils.getDynatraceConfigApiUrl(dynatraceManagedHostname, dynatraceAccountID) + DYNATRACE_ANOMALIE_URL;
         final Map<String, String> parameters = new HashMap<>();
@@ -67,7 +98,7 @@ public class NeoLoadAnomalieDetectionApi {
             final Optional<Proxy> proxy = DynatraceUtils.getProxy(context, proxyName, url);
             String jsonpayload=String.format(JSONPAYLOAD,dynatracemetricname,dynatracemetricname,dynatracemetricname,dynatracemetricname,typeofAlert,operator,value);
             //-----add tags---------------
-            String tagfilter=generateTagFilterString(tags);
+            String tagfilter=generateTagFilterString(getDynatracetag(tags));
             if(tagfilter!=null)
             {
                 String payload=jsonpayload+tagfilter+ENDPAYLOAD;

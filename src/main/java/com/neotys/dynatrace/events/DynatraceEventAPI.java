@@ -57,7 +57,7 @@ class DynatraceEventAPI {
 	{
 		Optional<String> result;
 		if(tag.isPresent()) {
-			result = Optional.of(tag.get().replaceAll(":", ":NL"));
+			result = Optional.of(tag.get().replaceAll(":", ":NeoLoad-"));
 			if(!result.get().contains(":"))
 				result=Optional.of("NeoLoad-"+tag.get());
 
