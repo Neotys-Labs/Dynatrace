@@ -226,6 +226,7 @@ public class DynatraceReportCustomMetrics implements DynatraceMonitoringApi {
         final String timeSeriesName = dynatraceCustomMetric.getDimensions().get(0);
         parameters.put(API_TOKEN, dynatraceApiKey);
         parameters.put("timeseriesId", NL_TIMESERIES_PREFIX + ":" + timeSeriesName);
+        parameters.put("includeData", "true");
         parameters.put("startTimestamp", String.valueOf(getUtcDate()));
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         parameters.put("endTimestamp", String.valueOf(now.toInstant().toEpochMilli()));

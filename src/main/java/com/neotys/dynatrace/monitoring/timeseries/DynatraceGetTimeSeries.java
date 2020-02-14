@@ -332,6 +332,7 @@ public class DynatraceGetTimeSeries {
         }
         jsonEntitiesBuilder
                 .append("\"timeseriesId\" : \"").append(timeSeries).append("\",")
+                .append("\"includeData\" : \"true\",")
                 .append("\"endTimestamp\":\"").append(String.valueOf(now.toInstant().toEpochMilli())).append("\",")
                 .append("\"startTimestamp\":\"").append(String.valueOf(getUtcDate())).append("\",")
                 .append("\"entities\":[");
