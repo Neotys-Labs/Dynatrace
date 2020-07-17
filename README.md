@@ -2,21 +2,36 @@
 
 # Dynatrace	Integration for NeoLoad (experimental)
 
-This is an experimental version, see the [stable version](https://github.com/Neotys-Labs/Dynatrace/)
+All features of this experimental version are available into Neoload except the custom action "DynatraceSanityCheck". See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm). \
+You can download this experimental release and use the custom action "DynatraceSanityCheck".
 
 ## Overview
 
 These Advanced Actions allows you to integrate [NeoLoad](https://www.neotys.com/neoload/overview) with [Dynatrace](https://www.dynatrace.com/) in order to correlate data from one tool to another.
 
+* **DynatraceSanityCheck:**
+  This action works standalone and does not require a setup of all other custom actions.
+  This action is made to run before any test to validate the right deployment of a new release.
+  It's recommend to use this action in automated pipelie. The SanityCheck action will take a picture of the architecture counting :
+  - the numnber of processes running under each service
+  - the total amount of cpu used by the processes
+  - the total amount of memory used by the processes
+  - the total amount of network consumed by the processes
+  The fist time the action will generate a json file with the picture of the architecture.
+  The next time the action will take the json file to compare with a new "picture " of the architecture.
+  If a services is running with less processes, it would be consider like a regression.
+  If the service runs with the same amount of services but is consuming 25%  more CPU, Memory or network ; it would be consider like a regression.
+  This action needs to be used in a dedicated UserPath, and used in a single Virtual user doing one iteration on the sanity check.
+             
 This bundle provides inbound and an outbound integration:  
-* **DynatraceConfiguration:**
+* ~~**DynatraceConfiguration:**~~
   This action will configure Dynatrace for your test by interacting with the [Configuration API](link to dynatrace doc).
   The configuration action requires to use a Dynatrace API key havin the rights to create and change configuration.
   The configuration action is :
   * creating automatically the request attributes rules required for a load test
   * tagging the architecture. NeoLoad will search for the services having a specific tag and tag all the dependencies to the services.
 
-* **DynatraceSetAnomalieDetection:**
+* ~~**DynatraceSetAnomalieDetection:**~~
   NeoLoad creates anomalie detection rules in Dynatrace.
   The dynatrace IA is powerful in production but in environement having no user traffic , it won't be able to define what is baseline behavior.
   NeoLoad will define anomalie detection rules in dynatrace . Dynatrace will open Problems every time a threshold has been reached.
@@ -41,29 +56,16 @@ This bundle provides inbound and an outbound integration:
     ]
   }
   ```
- * **DynatraceDeleteAnomalieDetection:**
+ * ~~**DynatraceDeleteAnomalieDetection:**~~
    NeoLoad deletes all the anomalie detection rules created by the action DynatraceSetAnomalieDetection 
    This action needs to be used in the End Container.  
 
-* **DynatraceEvents:**
+* ~~**DynatraceEvents:**~~
   Links a load testing event to all services used by an application monitored by Dynatrace.
   Data sent: Neoload Project, Test and Scenario Name.
              NeoLoadWeb Frontend Url.
   
-* **DynatraceSanityCheck:**
-  This action is made to run before any test to validate the right deployment of a new release.
-  It's recommend to use this action in automated pipelie. The SanityCheck action will take a picture of the architecture counting :
-  - the numnber of processes running under each service
-  - the total amount of cpu used by the processes
-  - the total amount of memory used by the processes
-  - the total amount of network consumed by the processes
-  The fist time the action will generate a json file with the picture of the architecture.
-  The next time the action will take the json file to compare with a new "picture " of the architecture.
-  If a services is running with less processes, it would be consider like a regression.
-  If the service runs with the same amount of services but is consuming 25%  more CPU, Memory or network ; it would be consider like a regression.
-  This action needs to be used in a dedicated UserPath, and used in a single Virtual user doing one iteration on the sanity check.
-             
-* **DynatraceMonitoring**   
+* ~~**DynatraceMonitoring**~~ 
     * **Dynatrace &rarr; NeoLoad**: Retrieves infrastructure and service metrics from Dynatrace and inserts them in NeoLoad External Data so that
       you can correlate NeoLoad and Dynatrace metrics within NeoLoad.
       * Infrastructure metrics: 
