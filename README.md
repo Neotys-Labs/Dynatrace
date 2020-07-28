@@ -4,7 +4,7 @@
 
 All features of this experimental version are natively available into Neoload 7.5 and up except the custom action "DynatraceSanityCheck".
 
-See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm). \
+See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm).
 
 You can download this experimental release and use the custom action "DynatraceSanityCheck".
 
