@@ -2,7 +2,9 @@
 
 # ~~Dynatrace	Integration for NeoLoad~~
 
-This integration is not supported anymore because all the features are available into Neoload. See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm).
+This integration is not supported anymore because all the features are natively available into Neoload 7.5 and above.
+
+See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm).
 
 No more updates will be published on this repository.
 The [experimental version](https://github.com/Neotys-Labs/Dynatrace/tree/develop) still propose a "Sanity Check" to validate the right deployment of a new release, for example. This is the only feature that is not included in Neoload.
