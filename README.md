@@ -1,8 +1,19 @@
 <p align="center"><img src="/screenshots/dynatrace_logo.png" width="40%" alt="Dynatrace Logo" /></p>
 
-# Dynatrace	Integration for NeoLoad
+# ~~Dynatrace	Integration for NeoLoad~~
 
-This is the stable version, see the [experimental version](https://github.com/Neotys-Labs/Dynatrace/tree/develop) for a wider integration.
+This integration is not supported anymore because all the features are natively available into Neoload 7.5 and above.
+
+See [Neoload documentation](https://www.neotys.com/documents/doc/neoload/latest/en/html/#5900.htm).
+
+No more updates will be published on this repository.
+The [experimental version](https://github.com/Neotys-Labs/Dynatrace/tree/develop) still propose a "Sanity Check" to validate the right deployment of a new release, for example. This is the only feature that is not included in Neoload.
+
+| Property | Value |
+| -----| -------------- |
+| Maturity | Deprecated |
+| Author   | Neotys Partner Team |
+| License  | [BSD Simplified](https://www.neotys.com/documents/legal/bsd-neotys.txt) |
 
 ## Overview
 
@@ -42,16 +53,6 @@ This bundle provides inbound and an outbound integration:
           ```    
      * Other experimental features in the ['develop' branch](https://github.com/Neotys-Labs/Dynatrace/blob/develop/README.md): DynatraceConfiguration, DynatraceSetAnomalieDetection, DynatraceDeleteAnomalieDetection, DynatraceSanityCheck.
      
-| Property | Value |
-| -----| -------------- |
-| Maturity | Stable |
-| Author   | Neotys Partner Team |
-| License  | [BSD Simplified](https://www.neotys.com/documents/legal/bsd-neotys.txt) |
-| NeoLoad  | 6.3+ (Enterprise or Professional Edition w/ Integration & Advanced Usage and NeoLoad Web option required)|
-| Requirements | NeoLoad Web |
-| Bundled in NeoLoad | No
-| Download Binaries | <ul><li>[latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest) is only compatible with NeoLoad from version 6.7</li><li> Use this [release](https://github.com/Neotys-Labs/Dynatrace/releases/tag/Neotys-Labs%2FDynatrace.git-2.0.10) for previous NeoLoad versions</li></ul>|
-
 ## Installation
 
 1. Download the [latest release](https://github.com/Neotys-Labs/Dynatrace/releases/latest) for NeoLoad from version 6.7 or this [release](https://github.com/Neotys-Labs/Dynatrace/releases/tag/Neotys-Labs%2FDynatrace.git-2.0.10) for previous NeoLoad versions.
